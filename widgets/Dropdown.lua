@@ -10,7 +10,7 @@ end
 ---		{text = 'some text2', value = 11},
 ---		{text = 'some text3', value = 12},
 --- }
-function StdUi:Dropdown(parent, name, width, height, options, value)
+function StdUi:Dropdown(parent, width, height, options, value)
 	local dropdown = self:Button(parent, width, height, '');
 	dropdown.text:SetJustifyH('LEFT');
 	

@@ -77,6 +77,10 @@ function StdUi:ApplyDisabledBackdrop(frame)
 	end);
 end
 
+function StdUi:StripTextures(frame)
+
+end
+
 function StdUi:MakeDraggable(frame, handle)
 	frame:SetMovable(true);
 	frame:EnableMouse(true);
