@@ -3,7 +3,7 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
-local ScrollingTable = LibStub('ScrollingTable');
+local ScrollingTable = LibStub('ScrollingTable', true);
 
 function StdUi:StyleScrollBar(scrollBar)
 
