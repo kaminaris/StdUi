@@ -78,6 +78,10 @@ function StdUi:ScrollFrame(parent, width, height)
 	return panel, scrollFrame, scrollChild, scrollBar;
 end
 
+if not ScrollingTable then
+	return;
+end
+
 function StdUi:ScrollTable(parent, columns, visibleRows, rowHeight)
 	local scrollingTable = ScrollingTable:CreateST(columns, visibleRows, rowHeight, nil, parent);
 	self:ApplyBackdrop(scrollingTable.frame, 'panel');
