@@ -3,15 +3,16 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
-local ScrollingTable = LibStub('ScrollingTable');
+local ScrollingTable = LibStub('ScrollingTable', true);
 
 function StdUi:StyleScrollBar(scrollBar)
 
 	local buttonUp, buttonDown = scrollBar:GetChildren();
 
-	buttonUp:StripTextures();
+	StdUi:StripTextures(buttonUp);
+	StdUi:StripTextures(buttonDown);
+
 	buttonUp:SetWidth(scrollBar:GetWidth() - 2);
-	buttonDown:StripTextures();
 	buttonDown:SetWidth(scrollBar:GetWidth() - 2);
 
 	local upTex = self:Texture(buttonUp, 12, 12, 'Interface\\Buttons\\SquareButtonTextures');
@@ -30,7 +31,7 @@ function StdUi:StyleScrollBar(scrollBar)
 
 	local thumbSize = scrollBar:GetWidth() - 2;
 
-	scrollBar:StripTextures();
+	StdUi:StripTextures(scrollBar);
 	scrollBar:SetThumbTexture(self.config.backdrop.texture);
 	scrollBar:GetThumbTexture():SetVertexColor(
 		self.config.backdrop.button.r,
@@ -76,6 +77,10 @@ function StdUi:ScrollFrame(parent, width, height)
 	panel.scrollBar = scrollBar;
 
 	return panel, scrollFrame, scrollChild, scrollBar;
+end
+
+if not ScrollingTable then
+	return;
 end
 
 function StdUi:ScrollTable(parent, columns, visibleRows, rowHeight)

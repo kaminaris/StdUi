@@ -3,7 +3,7 @@ local MAJOR, MINOR = 'StdUi', 1;
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
 
 if not StdUi then
-	return;
+	return ;
 end
 
 function StdUi:SetObjSize(obj, width, height)
@@ -18,7 +18,7 @@ end
 
 function StdUi:ApplyBackdrop(frame, type, border, insets)
 	local backdrop = {
-		bgFile = self.config.backdrop.texture,
+		bgFile   = self.config.backdrop.texture,
 		edgeFile = self.config.backdrop.texture,
 		edgeSize = 1,
 	};
@@ -32,19 +32,19 @@ function StdUi:ApplyBackdrop(frame, type, border, insets)
 
 	if self.config.backdrop[type] then
 		frame:SetBackdropColor(
-			self.config.backdrop[type].r,
-			self.config.backdrop[type].g,
-			self.config.backdrop[type].b,
-			self.config.backdrop[type].a
+				self.config.backdrop[type].r,
+				self.config.backdrop[type].g,
+				self.config.backdrop[type].b,
+				self.config.backdrop[type].a
 		);
 	end
 
 	if self.config.backdrop[border] then
 		frame:SetBackdropBorderColor(
-			self.config.backdrop[border].r,
-			self.config.backdrop[border].g,
-			self.config.backdrop[border].b,
-			self.config.backdrop[border].a
+				self.config.backdrop[border].r,
+				self.config.backdrop[border].g,
+				self.config.backdrop[border].b,
+				self.config.backdrop[border].a
 		);
 	end
 end
@@ -75,6 +75,16 @@ function StdUi:ApplyDisabledBackdrop(frame)
 			StdUi:SetTextColor(self.text, 'color');
 		end
 	end);
+end
+
+function StdUi:StripTextures(frame)
+	for i = 1, frame:GetNumRegions() do
+		local region = select(i, frame:GetRegions());
+
+		if region and region:GetObjectType() == 'Texture' then
+			region:SetTexture(nil);
+		end
+	end
 end
 
 function StdUi:MakeDraggable(frame, handle)

@@ -6,7 +6,7 @@ end
 
 function StdUi:Checkbox(parent, text, tooltip, width, height)
 	local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate'); --, 'ChatConfigCheckButtonTemplate'
-	checkbox:StripTextures();
+	StdUi:StripTextures(checkbox);
 	checkbox:SetCheckedTexture('Interface\\Buttons\\UI-CheckBox-Check');
 	checkbox:GetCheckedTexture():SetInside(nil, -4, -4);
 
