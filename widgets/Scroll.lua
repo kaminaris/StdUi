@@ -3,7 +3,6 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
-local ScrollingTable = LibStub('ScrollingTable', true);
 
 function StdUi:StyleScrollBar(scrollBar)
 
@@ -79,15 +78,4 @@ function StdUi:ScrollFrame(parent, width, height)
 	panel.scrollBar = scrollBar;
 
 	return panel, scrollFrame, scrollChild, scrollBar;
-end
-
-if not ScrollingTable then
-	return;
-end
-
-function StdUi:ScrollTable(parent, columns, visibleRows, rowHeight)
-	local scrollingTable = ScrollingTable:CreateST(columns, visibleRows, rowHeight, nil, parent);
-
-
-	return scrollingTable;
 end

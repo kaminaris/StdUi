@@ -107,7 +107,7 @@ do
 			local row = self.rows[i];
 
 			if not row then
-				row = CreateFrame('Button', self.frame:GetName() .. 'Row' .. i, self.frame);
+				row = CreateFrame('Button', nil, self.frame);
 				self.rows[i] = row;
 				if i > 1 then
 					row:SetPoint('TOPLEFT', self.rows[i - 1], 'BOTTOMLEFT', 0, 0);
@@ -126,8 +126,8 @@ do
 			for j = 1, #self.cols do
 				local col = row.cols[j];
 				if not col then
-					col = CreateFrame('Button', row:GetName() .. 'col' .. j, row);
-					col.text = row:CreateFontString(col:GetName() .. 'text', 'OVERLAY', 'GameFontHighlightSmall');
+					col = CreateFrame('Button', nil, row);
+					col.text = row:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall');
 					row.cols[j] = col;
 					local align = self.cols[j].align or 'LEFT';
 					col.text:SetJustifyH(align);
@@ -184,7 +184,7 @@ do
 
 		local row = self.head
 		if not row then
-			row = CreateFrame('Frame', self.frame:GetName() .. 'Head', self.frame);
+			row = CreateFrame('Frame', nil, self.frame);
 			row:SetPoint('BOTTOMLEFT', self.frame, 'TOPLEFT', 4, 0);
 			row:SetPoint('BOTTOMRIGHT', self.frame, 'TOPRIGHT', -4, 0);
 			row:SetHeight(self.rowHeight);
@@ -192,9 +192,8 @@ do
 			self.head = row;
 		end
 		for i = 1, #cols do
-			local colFrameName = row:GetName() .. 'Col' .. i;
-			local col = getglobal(colFrameName);
-			if not col then
+			local col = row.cols[i];
+			if not row.cols[i] then
 				col = CreateFrame('Button', colFrameName, row);
 				col:RegisterForClicks('AnyUp');     -- LS: right clicking on header
 
@@ -205,10 +204,12 @@ do
 						end);
 					end
 				end
-			end
-			row.cols[i] = col;
 
-			local fs = col:GetFontString() or col:CreateFontString(col:GetName() .. 'fs', 'OVERLAY', 'GameFontHighlightSmall');
+				row.cols[i] = col;
+			end
+
+			local fs = col:GetFontString() or col:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall');
+
 			fs:SetAllPoints(col);
 			fs:SetPoint('LEFT', col, 'LEFT', lrpadding, 0);
 			fs:SetPoint('RIGHT', col, 'RIGHT', -lrpadding, 0);
@@ -232,10 +233,12 @@ do
 			if (color) then
 				local colibg = 'col' .. i .. 'bg';
 				local bg = self.frame[colibg];
+
 				if not bg then
 					bg = self.frame:CreateTexture(nil, 'OVERLAY');
 					self.frame[colibg] = bg;
 				end
+
 				bg:SetPoint('BOTTOM', self.frame, 'BOTTOM', 0, 4);
 				bg:SetPoint('TOPLEFT', col, 'BOTTOMLEFT', 0, -4);
 				bg:SetPoint('TOPRIGHT', col, 'BOTTOMRIGHT', 0, -4);
@@ -396,7 +399,7 @@ do
 	--- @description Set a display filter for the table.
 	--- @usage st:SetFilter( function (self, ...) return true end )
 	--- @see http://www.wowace.com/addons/lib-st/pages/filtering-the-scrolling-table/
-	local function SetFilter (self, Filter)
+	local function SetFilter(self, Filter)
 		self.Filter = Filter;
 		self:SortData();
 	end
@@ -413,11 +416,11 @@ do
 		return result;
 	end
 
-	function GetDefaultHighlightBlank(self)
+	local function GetDefaultHighlightBlank(self)
 		return self.defaulthighlightblank;
 	end
 
-	function SetDefaultHighlightBlank(self, red, green, blue, alpha)
+	local function SetDefaultHighlightBlank(self, red, green, blue, alpha)
 		if not self.defaulthighlightblank then
 			self.defaulthighlightblank = defaulthighlightblank;
 		end
@@ -436,11 +439,11 @@ do
 		end
 	end
 
-	function GetDefaultHighlight(self)
+	local function GetDefaultHighlight(self)
 		return self.defaulthighlight;
 	end
 
-	function SetDefaultHighlight(self, red, green, blue, alpha)
+	local function SetDefaultHighlight(self, red, green, blue, alpha)
 		if not self.defaulthighlight then
 			self.defaulthighlight = defaulthighlight;
 		end
@@ -497,7 +500,7 @@ do
 	--- @description Cell update function used to paint each cell.  Can be overridden in column data or table data.
 	--- @usage used internally.
 	--- @see http://www.wowace.com/addons/lib-st/pages/docell-update/
-	local function DoCellUpdate (rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+	local function DoCellUpdate(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
 		if fShow then
 			local rowdata = table:GetRow(realrow);
 			local celldata = table:GetCell(rowdata, column);
@@ -516,12 +519,12 @@ do
 				cellFrame.text:SetText(cellvalue);
 			end
 
-			local color = nil;
+			local color;
 			if type(celldata) == 'table' then
 				color = celldata.color;
 			end
 
-			local colorargs = nil;
+			local colorargs;
 			if not color then
 				color = cols[column].color;
 				if not color then
@@ -546,7 +549,7 @@ do
 			end
 			cellFrame.text:SetTextColor(color.r, color.g, color.b, color.a);
 
-			local highlight = nil;
+			local highlight;
 			if type(celldata) == 'table' then
 				highlight = celldata.highlight;
 			end
@@ -568,8 +571,7 @@ do
 	--- @description Sets the data for the scrolling table
 	--- @usage st:SetData(datatable)
 	--- @see http://www.wowace.com/addons/lib-st/pages/set-data/
-	local function SetData (self, data, isMinimalDataformat)
-		self.isMinimalDataformat = isMinimalDataformat;
+	local function SetData(self, data)
 		self.data = data;
 		self:SortData();
 	end
@@ -587,16 +589,12 @@ do
 	--- @description Returns the cell data of the given row from the given row and column index
 	--- @usage used internally.
 	local function GetCell(self, row, col)
-		local rowdata = row;
+		local rowData = row;
 		if type(row) == 'number' then
-			rowdata = self:GetRow(row);
+			rowData = self:GetRow(row);
 		end
 
-		if self.isMinimalDataformat then
-			return rowdata[col];
-		else
-			return rowdata.cols[col];
-		end
+		return rowData[col];
 	end
 
 	--- API for a ScrollingTable table
@@ -606,6 +604,130 @@ do
 	--- @thanks sapu94
 	local function IsRowVisible(self, realrow)
 		return (realrow > self.offset and realrow <= (self.displayRows + self.offset));
+	end
+
+	---@param Frame frame
+	function xFauxScrollFrame_GetChildFrames(frame)
+		local scrollBar, ScrollChildFrame = frame:GetChildren();
+		local buttonUp, buttonDown = scrollBar:GetChildren();
+		if not frame.ScrollChildFrame then
+			frame.ScrollChildFrame = ScrollChildFrame;
+		end
+		if not frame.ScrollBar then
+			frame.ScrollBar = scrollBar;
+		end
+
+		if not frame.ScrollUpButton then
+			frame.ScrollUpButton = buttonUp;
+		end
+
+		if not frame.ScrollUpButton then
+			frame.ScrollDownButton = buttonDown;
+		end
+
+		return scrollBar, ScrollChildFrame, buttonUp, buttonDown;
+	end
+
+	function xFauxScrollFrame_OnVerticalScroll(self, value, itemHeight, updateFunction)
+		local scrollBar = self:GetChildren();
+
+		scrollBar:SetValue(value);
+		self.offset = floor((value / itemHeight) + 0.5);
+		if (updateFunction) then
+			updateFunction(self);
+		end
+	end
+
+	--function xFauxScrollFrame_OnValueChanged(self, offset)
+	--	local scrollbar = self.ScrollBar;
+	--	scrollbar:SetValue(offset);
+	--
+	--	local min, max = scrollbar:GetMinMaxValues();
+	--	if ( offset == 0 ) then
+	--		(scrollbar.ScrollUpButton or _G[scrollbar:GetName().."ScrollUpButton"]):Disable();
+	--	else
+	--		(scrollbar.ScrollUpButton or _G[scrollbar:GetName().."ScrollUpButton"]):Enable();
+	--	end
+	--	if ((scrollbar:GetValue() - max) == 0) then
+	--		(scrollbar.ScrollDownButton or _G[scrollbar:GetName().."ScrollDownButton"]):Disable();
+	--	else
+	--		(scrollbar.ScrollDownButton or _G[scrollbar:GetName().."ScrollDownButton"]):Enable();
+	--	end
+	--end
+
+	local function xFauxScrollFrame_Update(frame, numItems, numToDisplay, buttonHeight, button, smallWidth, bigWidth,
+										   highlightFrame, smallHighlightWidth, bigHighlightWidth, alwaysShowScrollBar)
+
+		local scrollBar, scrollChildFrame, scrollUpButton, scrollDownButton = xFauxScrollFrame_GetChildFrames(frame);
+
+		local showScrollBar;
+		if (numItems > numToDisplay or alwaysShowScrollBar) then
+			frame:Show();
+			showScrollBar = 1;
+		else
+			scrollBar:SetValue(0);
+			frame:Hide();
+		end
+
+		if (frame:IsShown()) then
+			local scrollFrameHeight = 0;
+			local scrollChildHeight = 0;
+
+			if (numItems > 0) then
+				scrollFrameHeight = (numItems - numToDisplay) * buttonHeight;
+				scrollChildHeight = numItems * buttonHeight;
+				if (scrollFrameHeight < 0) then
+					scrollFrameHeight = 0;
+				end
+				scrollChildFrame:Show();
+			else
+				scrollChildFrame:Hide();
+			end
+
+			local maxRange = (numItems - numToDisplay) * buttonHeight;
+			if (maxRange < 0) then
+				maxRange = 0;
+			end
+
+			scrollBar:SetMinMaxValues(0, maxRange);
+			scrollBar:SetValueStep(buttonHeight);
+			scrollBar:SetStepsPerPage(numToDisplay - 1);
+			scrollChildFrame:SetHeight(scrollChildHeight);
+
+			-- Arrow button handling
+			if (scrollBar:GetValue() == 0) then
+				scrollUpButton:Disable();
+			else
+				scrollUpButton:Enable();
+			end
+
+			if ((scrollBar:GetValue() - scrollFrameHeight) == 0) then
+				scrollDownButton:Disable();
+			else
+				scrollDownButton:Enable();
+			end
+
+			-- Shrink because scrollbar is shown
+			if (highlightFrame) then
+				highlightFrame:SetWidth(smallHighlightWidth);
+			end
+			if (button) then
+				for i = 1, numToDisplay do
+					_G[button .. i]:SetWidth(smallWidth);
+				end
+			end
+		else
+			-- Widen because scrollbar is hidden
+			if (highlightFrame) then
+				highlightFrame:SetWidth(bigHighlightWidth);
+			end
+			if (button) then
+				for i = 1, numToDisplay do
+					_G[button .. i]:SetWidth(bigWidth);
+				end
+			end
+		end
+		return showScrollBar;
 	end
 
 	function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
@@ -655,7 +777,7 @@ do
 		scrollTable.cols = cols;
 
 		scrollTable.DefaultEvents = {
-			['OnEnter'] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
+			OnEnter = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
 				if row and realrow then
 					local rowdata = table:GetRow(realrow);
 					local celldata = table:GetCell(rowdata, column);
@@ -670,24 +792,23 @@ do
 
 				return true;
 			end,
-			['OnLeave'] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
+
+			OnLeave = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
 				if row and realrow then
-					local rowdata = table:GetRow(realrow);
-					local celldata = table:GetCell(rowdata, column);
 					if realrow ~= table.selected or not table.fSelect then
 						table:SetHighLightColor(rowFrame, table:GetDefaultHighlightBlank());
 					end
 				end
 				return true;
 			end,
-			['OnClick'] = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, button, ...)
+
+			OnClick = function(rowFrame, cellFrame, data, cols, row, realrow, column, table, button, ...)
 				-- LS: added 'button' argument
 				if button == 'LeftButton' then
 					-- LS: only handle on LeftButton click (right passes thru)
 					if not (row or realrow) then
 						for i, col in ipairs(scrollTable.cols) do
 							if i ~= column then
-								-- clear out all other sort marks
 								cols[i].sort = nil;
 							end
 						end
@@ -752,7 +873,7 @@ do
 		]]--
 
 		scrollTable.Refresh = function(self)
-			FauxScrollFrame_Update(scrollFrame, #scrollTable.filtered, scrollTable.displayRows, scrollTable.rowHeight);
+			xFauxScrollFrame_Update(scrollFrame, #scrollTable.filtered, scrollTable.displayRows, scrollTable.rowHeight);
 
 			local o = FauxScrollFrame_GetOffset(scrollFrame);
 			scrollTable.offset = o;
@@ -793,8 +914,9 @@ do
 		end
 
 		scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
-			-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you reference the st if you decide to hook the refresh
-			FauxScrollFrame_OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
+			-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you
+			-- reference the st if you decide to hook the refresh
+			xFauxScrollFrame_OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
 				scrollTable:Refresh()
 			end);
 		end);
