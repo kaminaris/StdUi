@@ -9,7 +9,7 @@ StdUi.config = {};
 function StdUi:ResetConfig()
 	self.config = {
 		font      = {
-			familly       = 'Fonts\\FRIZQT__.TTF',
+			familly       = 'Fonts\\ARIALN.ttf',
 			size          = 12,
 			effect        = 'OUTLINE',
 			strata        = 'OVERLAY',

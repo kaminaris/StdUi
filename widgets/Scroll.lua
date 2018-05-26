@@ -38,7 +38,9 @@ function StdUi:StyleScrollBar(scrollBar)
 		self.config.backdrop.button.g,
 		self.config.backdrop.button.b
 	);
-	scrollBar:GetThumbTexture():Size(thumbSize, thumbSize);
+
+	scrollBar:GetThumbTexture():SetWidth(thumbSize);
+	scrollBar:GetThumbTexture():SetHeight(thumbSize);
 end
 
 function StdUi:ScrollFrame(parent, width, height)
@@ -85,7 +87,7 @@ end
 
 function StdUi:ScrollTable(parent, columns, visibleRows, rowHeight)
 	local scrollingTable = ScrollingTable:CreateST(columns, visibleRows, rowHeight, nil, parent);
-	self:ApplyBackdrop(scrollingTable.frame, 'panel');
+
 
 	return scrollingTable;
 end
