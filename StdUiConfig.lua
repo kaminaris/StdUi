@@ -30,7 +30,8 @@ function StdUi:ResetConfig()
 		},
 
 		highlight = {
-			color = { r = 1, g = 0.9, b = 0, a = 0.4 }
+			color = { r = 1, g = 0.9, b = 0, a = 0.4 },
+			blank = { r = 0, g = 0, b = 0, a = 0 }
 		},
 
 		dialog    = {
