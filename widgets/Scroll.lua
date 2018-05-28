@@ -4,42 +4,65 @@ if not StdUi then
 	return;
 end
 
-function StdUi:StyleScrollBar(scrollBar)
+function StdUi:ArrowTexture(parent, direction)
+	local texture = self:Texture(parent, 16, 8, [[Interface\Buttons\Arrow-Up-Down]]);
 
+	if direction == 'UP' then
+		texture:SetTexCoord(0, 1, 0.5, 1);
+	else
+		texture:SetTexCoord(0, 1, 1, 0.5);
+	end
+
+	return texture;
+end
+
+function StdUi:StyleScrollBar(scrollBar)
 	local buttonUp, buttonDown = scrollBar:GetChildren();
+
+	scrollBar.background = StdUi:Panel(scrollBar);
+	scrollBar.background:SetFrameLevel(scrollBar:GetFrameLevel() - 1);
+	scrollBar.background:SetWidth(scrollBar:GetWidth());
+	StdUi:GlueTop(scrollBar.background, scrollBar, 0, 1);
+	StdUi:GlueBottom(scrollBar.background, scrollBar, 0, -1);
 
 	StdUi:StripTextures(buttonUp);
 	StdUi:StripTextures(buttonDown);
 
-	buttonUp:SetWidth(scrollBar:GetWidth() - 2);
-	buttonDown:SetWidth(scrollBar:GetWidth() - 2);
+	self:ApplyBackdrop(buttonUp, 'button');
+	self:ApplyBackdrop(buttonDown, 'button');
 
-	local upTex = self:Texture(buttonUp, 12, 12, 'Interface\\Buttons\\SquareButtonTextures');
-	upTex:SetTexCoord(0.45312500, 0.64062500, 0.01562500, 0.20312500);
-	upTex:SetAllPoints();
+	buttonUp:SetWidth(scrollBar:GetWidth());
+	buttonDown:SetWidth(scrollBar:GetWidth());
 
-	local downText = self:Texture(buttonDown, 12, 12, 'Interface\\Buttons\\SquareButtonTextures');
-	downText:SetTexCoord(0.45312500, 0.64062500, 0.20312500, 0.01562500);
-	downText:SetAllPoints();
+	local upTex = self:ArrowTexture(buttonUp, 'UP');
+	upTex:SetPoint('CENTER');
 
-	--buttonUp:SetNormalTexture(upTex);
-	self:ApplyBackdrop(buttonUp, 'button', 'button');
+	local upTexDisabled = self:ArrowTexture(buttonUp, 'UP');
+	upTexDisabled:SetPoint('CENTER');
+	upTexDisabled:SetDesaturated(0);
 
-	--buttonDown:SetNormalTexture(downText);
-	self:ApplyBackdrop(buttonDown, 'button', 'button');
+	buttonUp:SetNormalTexture(upTex);
+	buttonUp:SetDisabledTexture(upTexDisabled);
 
-	local thumbSize = scrollBar:GetWidth() - 2;
+	local downTex = self:ArrowTexture(buttonDown, 'DOWN');
+	downTex:SetPoint('CENTER');
+
+	local downTexDisabled = self:ArrowTexture(buttonDown, 'DOWN');
+	downTexDisabled:SetPoint('CENTER');
+	downTexDisabled:SetDesaturated(0);
+
+	buttonDown:SetNormalTexture(downTex);
+	buttonDown:SetDisabledTexture(downTexDisabled);
+
+
+	local thumbSize = scrollBar:GetWidth();
+	scrollBar:GetThumbTexture():SetWidth(thumbSize);
 
 	StdUi:StripTextures(scrollBar);
-	scrollBar:SetThumbTexture(self.config.backdrop.texture);
-	scrollBar:GetThumbTexture():SetVertexColor(
-		self.config.backdrop.button.r,
-		self.config.backdrop.button.g,
-		self.config.backdrop.button.b
-	);
 
-	scrollBar:GetThumbTexture():SetWidth(thumbSize);
-	scrollBar:GetThumbTexture():SetHeight(thumbSize);
+	scrollBar.thumb = StdUi:Panel(scrollBar);
+	scrollBar.thumb:SetAllPoints(scrollBar:GetThumbTexture());
+	StdUi:ApplyBackdrop(scrollBar.thumb, 'button');
 end
 
 function StdUi:ScrollFrame(parent, width, height)
@@ -48,6 +71,7 @@ function StdUi:ScrollFrame(parent, width, height)
 	local scrollBarWidth = 16;
 
 	local scrollFrame = CreateFrame('ScrollFrame', nil, panel, 'UIPanelScrollFrameTemplate');
+
 	scrollFrame.panel = panel;
 	scrollFrame:SetSize(width - scrollBarWidth, height - 4); -- scrollbar width and margins
 	self:GlueAcross(scrollFrame, panel, 0, -2, -scrollBarWidth, 2);
@@ -55,14 +79,10 @@ function StdUi:ScrollFrame(parent, width, height)
 	local scrollBar = scrollFrame:GetChildren();
 	scrollBar:SetWidth(scrollBarWidth);
 
-	local scrollBarBackdrop = self:Panel(panel, scrollBarWidth, nil);
-	self:ApplyBackdrop(scrollBarBackdrop, 'slider', 'slider');
-
-	scrollBarBackdrop:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -1, -1);
-	scrollBarBackdrop:SetPoint('BOTTOMRIGHT', panel, 'BOTTOMRIGHT', -1, 1);
-
 	scrollBar:ClearAllPoints();
-	self:GlueAcross(scrollBar, scrollBarBackdrop, 0, -scrollBarWidth, 0, scrollBarWidth);
+
+	scrollBar:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', 0, -scrollBarWidth);
+	scrollBar:SetPoint('BOTTOMRIGHT', panel, 'BOTTOMRIGHT', 0, scrollBarWidth);
 	self:StyleScrollBar(scrollBar);
 
 	local scrollChild = CreateFrame('Frame', nil, scrollFrame);

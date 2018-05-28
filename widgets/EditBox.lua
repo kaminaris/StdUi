@@ -56,7 +56,6 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 
 	editBox:SetScript('OnTextChanged', function(self)
 		if strlen(self:GetText()) > 0 then
-			print('hide');
 			self.placeholder.icon:Hide();
 			self.placeholder.label:Hide();
 		else
