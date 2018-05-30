@@ -18,7 +18,7 @@ function StdUi:Dropdown(parent, width, height, options, value)
 	dropTex:SetTexCoord(0.45312500, 0.64062500, 0.20312500, 0.01562500);
 	self:GlueRight(dropTex, dropdown, -2, 0, true);
 
-	local optsFrame = self:FauxScrollFrame(dropdown, dropdown:GetWidth(), 200, 20);
+	local optsFrame = self:FauxScrollFrame(dropdown, dropdown:GetWidth(), 200, 10, 20);
 	self:GlueBelow(optsFrame, dropdown, 0, 0, 'LEFT');
 	dropdown:SetFrameLevel(optsFrame:GetFrameLevel() + 1);
 	optsFrame:Hide();
