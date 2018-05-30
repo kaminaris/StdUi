@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local SquarewButtonCoords = {
+local SquareButtonCoords = {
 	["UP"] = {     0.45312500,    0.64062500,     0.01562500,     0.20312500};
 	["DOWN"] = {   0.45312500,    0.64062500,     0.20312500,     0.01562500};
 	["LEFT"] = {   0.23437500,    0.42187500,     0.01562500,     0.20312500};
@@ -18,16 +18,24 @@ function StdUi:SquareButton(parent, width, height, icon)
 
 	self:ApplyBackdrop(button);
 
-	button.icon = self:Texture(button, 16, 16, 'Interface\\Buttons\\SquareButtonTextures');
+	button.icon = self:Texture(button, 12, 12, [[Interface\Buttons\SquareButtonTextures]]);
 	button.icon:SetPoint('CENTER', 0, 0);
+
+	button.iconDisabled = self:Texture(button, 16, 16, [[Interface\Buttons\SquareButtonTextures]]);
+	button.iconDisabled:SetDesaturated(true);
+	button.iconDisabled:SetPoint('CENTER', 0, 0);
 
 	local hTex = self:HighlightButtonTexture(button);
 	button:SetHighlightTexture(hTex);
 	button.highlightTexture = hTex;
 
-	local coords = SquarewButtonCoords[icon];
+	button:SetNormalTexture(button.icon);
+	button:SetDisabledTexture(button.iconDisabled);
+
+	local coords = SquareButtonCoords[icon];
 	if coords then
 		button.icon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
+		button.iconDisabled:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
 	end
 
 	return button;
@@ -96,8 +104,38 @@ function StdUi:Button(parent, width, height, text)
 	return button;
 end
 
+--- Creates button list that reuses frames and is based on array data
+--- @param parent Frame
+--- @param buttonCreate function
+--- @param buttonUpdate function
+--- @param data table
+--- @param lineHeight number
+function StdUi:ButtonList(parent, buttonCreate, buttonUpdate, data, lineHeight)
+	local buttonList = parent.items;
+	if not buttonList then
+		parent.items = {};
+		buttonList = parent.items;
+	end
 
+	for i = 1, #buttonList do
+		buttonList[i]:Hide();
+	end
 
+	for i = 1, #data do
+		local itemFrame = buttonList[i];
+
+		if not itemFrame then
+			itemFrame = buttonCreate(parent, i);
+			buttonList[i] = itemFrame;
+		end
+
+		buttonUpdate(parent, i, itemFrame, data[i]);
+		itemFrame:Show();
+
+		StdUi:GlueTop(itemFrame, parent, 0, (i - 1) * -lineHeight);
+	end
+
+end
 
 function StdUi:ActionButton(parent)
 	-- NYI

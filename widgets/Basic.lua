@@ -42,3 +42,16 @@ function StdUi:Texture(parent, width, height, texture)
 
 	return tex;
 end
+
+--- @return Texture
+function StdUi:ArrowTexture(parent, direction)
+	local texture = self:Texture(parent, 16, 8, [[Interface\Buttons\Arrow-Up-Down]]);
+
+	if direction == 'UP' then
+		texture:SetTexCoord(0, 1, 0.5, 1);
+	else
+		texture:SetTexCoord(0, 1, 1, 0.5);
+	end
+
+	return texture;
+end

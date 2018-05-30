@@ -8,10 +8,7 @@ function StdUi:Checkbox(parent, text, tooltip, width, height)
 	local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate'); --, 'ChatConfigCheckButtonTemplate'
 	StdUi:StripTextures(checkbox);
 	checkbox:SetCheckedTexture('Interface\\Buttons\\UI-CheckBox-Check');
-	checkbox:GetCheckedTexture():SetInside(nil, -4, -4);
-
-	checkbox:SetTemplate('Default');
-	checkbox:Size(16);
+	checkbox:SetSize(16, 16);
 
 	self:ApplyBackdrop(checkbox);
 	self:SetObjSize(checkbox, width, height);

@@ -18,8 +18,9 @@ function StdUi:Dropdown(parent, width, height, options, value)
 	dropTex:SetTexCoord(0.45312500, 0.64062500, 0.20312500, 0.01562500);
 	self:GlueRight(dropTex, dropdown, -2, 0, true);
 
-	local optsFrame = self:ScrollFrame(dropdown, dropdown:GetWidth(), 200);
+	local optsFrame = self:FauxScrollFrame(dropdown, dropdown:GetWidth(), 200, 20);
 	self:GlueBelow(optsFrame, dropdown, 0, 0, 'LEFT');
+	dropdown:SetFrameLevel(optsFrame:GetFrameLevel() + 1);
 	optsFrame:Hide();
 
 	dropdown:SetScript('OnClick', function(self)
@@ -39,33 +40,25 @@ function StdUi:Dropdown(parent, width, height, options, value)
 		self.optsFrame:SetHeight(math.min(optionsHeight + 4, 200));
 		self.optsFrame.scrollChild:SetHeight(optionsHeight);
 
-		local optionFrames = self.optsFrame.scrollChild.optionFrames;
-		if not optionFrames then
-			self.optsFrame.scrollChild.optionFrames = {};
-			optionFrames = self.optsFrame.scrollChild.optionFrames;
-		end
+		local buttonCreate = function(parent, i)
+			local optionButton = StdUi:HighlightButton(parent, parent:GetWidth(), 20, '');
 
-		local optWidth = self.optsFrame.scrollChild:GetWidth();
-		for i = 1, #options do
-			local opt = options[i];
-			local optionButton = optionFrames[i];
+			optionButton:SetScript('OnClick', function(self)
+				self.dropdown:SetValue(self.value, self:GetText());
+				self.dropdown.optsFrame:Hide();
+			end);
 
-			if not optionButton then
-				optionButton = StdUi:HighlightButton(self.optsFrame.scrollChild, optWidth, 20, '');
-				optionFrames[i] = optionButton;
+			return optionButton;
+		end;
 
-				optionButton:SetScript('OnClick', function(self)
-					self.dropdown:SetValue(self.value, self:GetText());
-					self.dropdown.optsFrame:Hide();
-				end);
-			end
+		local buttonUpdate = function(parent, i, itemFrame, data)
+			DevTools_Dump(data);
+			itemFrame:SetText(data.text);
+			itemFrame.dropdown = dropdown;
+			itemFrame.value = data.value;
+		end;
 
-			optionButton:SetText(opt.text);
-			optionButton.dropdown = self;
-			optionButton.value = opt.value;
-
-			StdUi:GlueTop(optionButton, self.optsFrame.scrollChild, 0, (i - 1) * -20);
-		end
+		StdUi:ButtonList(self.optsFrame.scrollChild, buttonCreate, buttonUpdate, options, 20);
 	end
 
 	function dropdown:SetValue(value, text)

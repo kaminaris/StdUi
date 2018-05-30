@@ -6,92 +6,6 @@ end
 
 local lrpadding = 2.5;
 
-
-function xFauxScrollFrame_OnVerticalScroll(self, value, itemHeight, updateFunction)
-	local scrollBar = self:GetChildren();
-
-	scrollBar:SetValue(value);
-	self.offset = floor((value / itemHeight) + 0.5);
-	if (updateFunction) then
-		updateFunction(self);
-	end
-end
-
----@param Frame frame
-function xFauxScrollFrame_GetChildFrames(frame)
-	local scrollBar, ScrollChildFrame = frame:GetChildren();
-	local buttonUp, buttonDown = scrollBar:GetChildren();
-	if not frame.ScrollChildFrame then
-		frame.ScrollChildFrame = ScrollChildFrame;
-	end
-	if not frame.ScrollBar then
-		frame.ScrollBar = scrollBar;
-	end
-
-	if not frame.ScrollUpButton then
-		frame.ScrollUpButton = buttonUp;
-	end
-
-	if not frame.ScrollUpButton then
-		frame.ScrollDownButton = buttonDown;
-	end
-
-	return scrollBar, ScrollChildFrame, buttonUp, buttonDown;
-end
-
-local function xFauxScrollFrame_Update(frame, numItems, numToDisplay, buttonHeight)
-	local scrollBar, scrollChildFrame, scrollUpButton, scrollDownButton = xFauxScrollFrame_GetChildFrames(frame);
-
-	local showScrollBar;
-	if (numItems > numToDisplay) then
-		frame:Show();
-		showScrollBar = 1;
-	else
-		scrollBar:SetValue(0);
-		frame:Hide();
-	end
-
-	if (frame:IsShown()) then
-		local scrollFrameHeight = 0;
-		local scrollChildHeight = 0;
-
-		if (numItems > 0) then
-			scrollFrameHeight = (numItems - numToDisplay) * buttonHeight;
-			scrollChildHeight = numItems * buttonHeight;
-			if (scrollFrameHeight < 0) then
-				scrollFrameHeight = 0;
-			end
-			scrollChildFrame:Show();
-		else
-			scrollChildFrame:Hide();
-		end
-
-		local maxRange = (numItems - numToDisplay) * buttonHeight;
-		if (maxRange < 0) then
-			maxRange = 0;
-		end
-
-		scrollBar:SetMinMaxValues(0, maxRange);
-		scrollBar:SetValueStep(buttonHeight);
-		scrollBar:SetStepsPerPage(numToDisplay - 1);
-		scrollChildFrame:SetHeight(scrollChildHeight);
-
-		-- Arrow button handling
-		if (scrollBar:GetValue() == 0) then
-			scrollUpButton:Disable();
-		else
-			scrollUpButton:Enable();
-		end
-
-		if ((scrollBar:GetValue() - scrollFrameHeight) == 0) then
-			scrollDownButton:Disable();
-		else
-			scrollDownButton:Enable();
-		end
-	end
-	return showScrollBar;
-end
-
 --- Public methods of ScrollTable
 local methods = {
 
@@ -580,9 +494,9 @@ local methods = {
 
 	Refresh = function(self)
 		local scrollFrame = self.scrollFrame;
-		xFauxScrollFrame_Update(scrollFrame, #self.filtered, self.displayRows, self.rowHeight);
+		StdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.displayRows, self.rowHeight);
 
-		local o = FauxScrollFrame_GetOffset(scrollFrame);
+		local o = StdUi.FauxScrollFrameMethods.GetOffset(scrollFrame);
 		self.offset = o;
 
 		for i = 1, self.displayRows do
@@ -790,8 +704,7 @@ local headerEvents = {
 function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 	local scrollTable = {};
 
-	local mainFrame = CreateFrame('Frame', nil, parent or UIParent);
-	self:ApplyBackdrop(mainFrame, 'panel');
+	local mainFrame, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
 
 	scrollTable.showing = true;
 	scrollTable.frame = mainFrame;
@@ -811,26 +724,16 @@ function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 	scrollTable:SetDefaultHighlight(highlight.r, highlight.g, highlight.b, highlight.a); -- highlight color
 	scrollTable:SetDefaultHighlightBlank(); -- non highlight color
 
-	-- build scroll frame
-	local scrollFrame = CreateFrame('ScrollFrame', nil, mainFrame, 'FauxScrollFrameTemplate');
-	scrollFrame:Show();
 	scrollFrame:SetScript('OnHide', function(self, ...)
 		self:Show();
 	end);
-	StdUi:StyleScrollBar(scrollFrame:GetChildren());
 
 	scrollTable.scrollFrame = scrollFrame;
-	StdUi:GlueAcross(scrollFrame, mainFrame, 0, -4, -26, 3);
-
-	local scrollTrough = CreateFrame('Frame', nil, scrollFrame);
-
-	scrollTrough:SetWidth(17);
-	StdUi:GlueAcross(scrollTrough, mainFrame, -4, -3, -4, 4);
 
 	scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
 		-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you
 		-- reference the st if you decide to hook the refresh
-		xFauxScrollFrame_OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
+		StdUi.FauxScrollFrameMethods.OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
 			scrollTable:Refresh();
 		end);
 	end);
