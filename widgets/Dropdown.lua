@@ -52,7 +52,6 @@ function StdUi:Dropdown(parent, width, height, options, value)
 		end;
 
 		local buttonUpdate = function(parent, i, itemFrame, data)
-			DevTools_Dump(data);
 			itemFrame:SetText(data.text);
 			itemFrame.dropdown = dropdown;
 			itemFrame.value = data.value;

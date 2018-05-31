@@ -700,7 +700,6 @@ local headerEvents = {
 	end
 };
 
-
 function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 	local scrollTable = {};
 
