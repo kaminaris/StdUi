@@ -136,8 +136,8 @@ local methods = {
 					row:SetPoint('TOPLEFT', self.rows[i - 1], 'BOTTOMLEFT', 0, 0);
 					row:SetPoint('TOPRIGHT', self.rows[i - 1], 'BOTTOMRIGHT', 0, 0);
 				else
-					row:SetPoint('TOPLEFT', self.frame, 'TOPLEFT', 4, -5);
-					row:SetPoint('TOPRIGHT', self.frame, 'TOPRIGHT', -4, -5);
+					row:SetPoint('TOPLEFT', self.scrollFrame, 'TOPLEFT', 4, -5);
+					row:SetPoint('TOPRIGHT', self.scrollFrame, 'TOPRIGHT', -4, -5);
 				end
 				row:SetHeight(rowHeight);
 			end
@@ -705,8 +705,11 @@ function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 
 	local mainFrame, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
 
-	scrollTable.showing = true;
 	scrollTable.frame = mainFrame;
+	scrollTable.scrollFrame = scrollFrame;
+	scrollTable.scrollChild = scrollBar;
+
+	scrollTable.showing = true;
 	scrollTable.displayRows = numRows or 12;
 	scrollTable.rowHeight = rowHeight or 15;
 	scrollTable.cols = cols;

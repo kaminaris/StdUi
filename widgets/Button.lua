@@ -134,7 +134,6 @@ function StdUi:ButtonList(parent, buttonCreate, buttonUpdate, data, lineHeight)
 
 		StdUi:GlueTop(itemFrame, parent, 0, (i - 1) * -lineHeight);
 	end
-
 end
 
 function StdUi:ActionButton(parent)
