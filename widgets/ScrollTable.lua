@@ -136,8 +136,8 @@ local methods = {
 					row:SetPoint('TOPLEFT', self.rows[i - 1], 'BOTTOMLEFT', 0, 0);
 					row:SetPoint('TOPRIGHT', self.rows[i - 1], 'BOTTOMRIGHT', 0, 0);
 				else
-					row:SetPoint('TOPLEFT', self.scrollFrame, 'TOPLEFT', 4, -5);
-					row:SetPoint('TOPRIGHT', self.scrollFrame, 'TOPRIGHT', -4, -5);
+					row:SetPoint('TOPLEFT', self.scrollFrame, 'TOPLEFT', 1, -1);
+					row:SetPoint('TOPRIGHT', self.scrollFrame, 'TOPRIGHT', -1, -1);
 				end
 				row:SetHeight(rowHeight);
 			end

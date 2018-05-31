@@ -254,8 +254,9 @@ function StdUi:ScrollFrame(parent, width, height)
 	scrollBar.ScrollFrame = scrollFrame;
 
 	scrollFrame.panel = panel;
-	scrollFrame:SetSize(width - scrollBarWidth - 4, height - 4); -- scrollbar width and margins
-	self:GlueAcross(scrollFrame, panel, 0, -2, -scrollBarWidth, 2);
+	scrollFrame:ClearAllPoints();
+	scrollFrame:SetSize(width - scrollBarWidth - 5, height - 4); -- scrollbar width and margins
+	self:GlueAcross(scrollFrame, panel, 2, -2, -scrollBarWidth - 2, 2);
 
 	scrollBar:SetWidth(scrollBarWidth);
 	scrollBar:ClearAllPoints();
@@ -285,13 +286,20 @@ end
 --- of items
 function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight)
 	local panel, scrollFrame, scrollChild, scrollBar = self:ScrollFrame(parent, width, height);
+
 	scrollFrame.lineHeight = lineHeight;
+	scrollFrame.displayCount = displayCount;
 
 	scrollFrame:SetScript('OnVerticalScroll', function(frame, value)
 		StdUi.FauxScrollFrameMethods.OnVerticalScroll(frame, value, lineHeight, function ()
-			StdUi.FauxScrollFrameMethods.Update(frame, #scrollChild.items, displayCount, lineHeight);
+			StdUi.FauxScrollFrameMethods.Update(frame, scrollChild.itemCount or #scrollChild.items, displayCount, lineHeight);
 		end);
 	end);
+
+	function panel:UpdateItemsCount(newCount)
+		self.scrollChild.itemCount = newCount;
+		StdUi.FauxScrollFrameMethods.Update(self.scrollFrame, newCount, displayCount, lineHeight);
+	end
 
 	return panel, scrollFrame, scrollChild, scrollBar;
 end

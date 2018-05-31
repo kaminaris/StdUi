@@ -4,9 +4,15 @@ if not StdUi then
 	return;
 end
 
-function StdUi:Panel(parent, width, height, inherits)
+function StdUi:Frame(parent, width, height, inherits)
 	local frame = CreateFrame('Frame', nil, parent, inherits);
 	self:SetObjSize(frame, width, height);
+
+	return frame;
+end
+
+function StdUi:Panel(parent, width, height, inherits)
+	local frame = self:Frame(parent, width, height, inherits);
 	self:ApplyBackdrop(frame, 'panel');
 
 	return frame;
