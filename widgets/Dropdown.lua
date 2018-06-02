@@ -73,6 +73,10 @@ function StdUi:Dropdown(parent, width, height, options, value)
 		end
 	end
 
+	function dropdown:GetValue()
+		return self.value;
+	end
+
 	function dropdown:FindValueText(value)
 		for i = 1, #self.options do
 			local opt = self.options[i];
