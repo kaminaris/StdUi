@@ -6,6 +6,7 @@ end
 
 function StdUi:Checkbox(parent, text, tooltip, width, height)
 	local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate'); --, 'ChatConfigCheckButtonTemplate'
+	self:InitWidget(checkbox);
 	StdUi:StripTextures(checkbox);
 	checkbox:SetCheckedTexture('Interface\\Buttons\\UI-CheckBox-Check');
 	checkbox:SetSize(16, 16);
@@ -15,7 +16,7 @@ function StdUi:Checkbox(parent, text, tooltip, width, height)
 
 	checkbox.text:SetFontObject(nil);
 	checkbox.text:SetText(text);
-	checkbox.text:SetFont(self.config.font.familly, size or self.config.font.size, self.config.font.effect);
+	checkbox.text:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
 	checkbox.text:SetTextColor(
 		self.config.font.color.r,
 		self.config.font.color.g,

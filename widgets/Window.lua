@@ -8,9 +8,13 @@ end
 function StdUi:Window(parent, title, width, height)
 	parent = parent or UIParent;
 	local frame = self:PanelWithTitle(parent, width, height, title);
+	frame.titlePanel.isWidget = false;
 	self:MakeDraggable(frame, frame.titlePanel);
+	self:LayoutConfig(frame, 20);
 
-	local closeBtn = self:Button(frame, 15, 15, 'X');
+	local closeBtn = self:Button(frame, 16, 16, 'X');
+	closeBtn.text:SetFontSize(12);
+	closeBtn.isWidget = false;
 	self:GlueTop(closeBtn, frame, -10, -10, 'RIGHT');
 
 	closeBtn:SetScript('OnClick', function(self)

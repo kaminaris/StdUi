@@ -6,22 +6,28 @@ end
 
 function StdUi:SetTextColor(fontString, colorType)
 	colorType = colorType or 'color';
-
-	fontString:SetTextColor(
-		self.config.font[colorType].r,
-		self.config.font[colorType].g,
-		self.config.font[colorType].b,
-		self.config.font[colorType].a
-	);
+	if fontString.SetTextColor then
+		fontString:SetTextColor(
+			self.config.font[colorType].r,
+			self.config.font[colorType].g,
+			self.config.font[colorType].b,
+			self.config.font[colorType].a
+		);
+	end
 end
 
 --- @return FontString
 function StdUi:FontString(parent, text, inherit)
+	local this = self;
 	local fs = parent:CreateFontString(nil, self.config.font.strata, inherit);
 	fs:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
 	fs:SetText(text);
 	fs:SetJustifyH('LEFT');
 	fs:SetJustifyV('MIDDLE');
+
+	function fs:SetFontSize(newSize)
+		self:SetFont(this.config.font.familly, newSize, this.config.font.effect);
+	end
 
 	return fs;
 end

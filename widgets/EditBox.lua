@@ -6,7 +6,10 @@ end
 
 --- @return EditBox
 function StdUi:SimpleEditBox(parent, width, height, text)
+	local this = self;
 	local editBox = CreateFrame('EditBox', nil, parent);
+	self:InitWidget(editBox);
+
 	editBox:SetTextInsets(3, 3, 3, 3);
 	editBox:SetMaxLetters(256);
 	editBox:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
@@ -17,7 +20,7 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 	end);
 
 	function editBox:SetFontSize(newSize)
-		self:SetFont(StdUi.config.font.familly, newSize, StdUi.config.font.effect);
+		self:SetFont(this.config.font.familly, newSize, this.config.font.effect);
 	end
 
 	if text then
@@ -25,7 +28,6 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 	end
 
 	self:ApplyDisabledBackdrop(editBox);
-
 	self:ApplyBackdrop(editBox);
 	self:SetObjSize(editBox, width, height);
 
@@ -37,10 +39,10 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 
 	local icon = self:Texture(editBox, 20, 20, [[Interface\Common\UI-Searchbox-Icon]]);
 	icon:SetVertexColor(
-			self.config.font.colorDisabled.r,
-			self.config.font.colorDisabled.g,
-			self.config.font.colorDisabled.b,
-			self.config.font.colorDisabled.a
+		self.config.font.colorDisabled.r,
+		self.config.font.colorDisabled.g,
+		self.config.font.colorDisabled.b,
+		self.config.font.colorDisabled.a
 	);
 	local label = self:Label(editBox, placeholderText);
 	label:SetFont(self.config.font.familly, self.config.font.size, 'NONE');

@@ -10,8 +10,8 @@ function StdUi:ResetConfig()
 	self.config = {
 		font      = {
 			familly       = 'Fonts\\ARIALN.ttf',
-			size          = 12,
-			effect        = 'OUTLINE',
+			size          = 14,
+			effect        = 'NONE',
 			strata        = 'OVERLAY',
 			color         = { r = 1, g = 1, b = 1, a = 1 },
 			colorDisabled = { r = 0.55, g = 0.55, b = 0.55, a = 1 },

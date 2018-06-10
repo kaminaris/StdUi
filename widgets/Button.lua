@@ -14,6 +14,7 @@ local SquareButtonCoords = {
 
 function StdUi:SquareButton(parent, width, height, icon)
 	local button = CreateFrame('Button', nil, parent);
+	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 
 	self:ApplyBackdrop(button);
@@ -41,16 +42,6 @@ function StdUi:SquareButton(parent, width, height, icon)
 	return button;
 end
 
-function StdUi:PanelButton(parent, width, height, text)
-	local button = CreateFrame('Button', nil, parent, 'UIPanelButtonTemplate');
-	self:SetObjSize(button, width, height);
-	if text then
-		button:SetText(text);
-	end
-
-	return button;
-end
-
 function StdUi:ButtonLabel(parent, text)
 	local label = self:Label(parent, text);
 	label:SetJustifyH('CENTER');
@@ -63,10 +54,10 @@ end
 function StdUi:HighlightButtonTexture(button)
 	local hTex = self:Texture(button, nil, nil, nil);
 	hTex:SetColorTexture(
-			self.config.highlight.color.r,
-			self.config.highlight.color.g,
-			self.config.highlight.color.b,
-			self.config.highlight.color.a
+		self.config.highlight.color.r,
+		self.config.highlight.color.g,
+		self.config.highlight.color.b,
+		self.config.highlight.color.a
 	);
 	hTex:SetAllPoints();
 
@@ -76,7 +67,8 @@ end
 --- Creates a button with only a highlight
 --- @return Button
 function StdUi:HighlightButton(parent, width, height, text)
-	local button = CreateFrame('Button', nil, parent)
+	local button = CreateFrame('Button', nil, parent);
+	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 	button.text = self:ButtonLabel(button, text);
 
@@ -90,16 +82,9 @@ end
 
 --- @return Button
 function StdUi:Button(parent, width, height, text)
-	local button = CreateFrame('Button', nil, parent)
-	self:SetObjSize(button, width, height);
-	button.text = self:ButtonLabel(button, text);
+	local button = self:HighlightButton(parent, width, height, text)
 
 	self:ApplyBackdrop(button);
-
-	local hTex = self:HighlightButtonTexture(button);
-	button:SetHighlightTexture(hTex);
-	button.highlightTexture = hTex;
-
 	self:ApplyDisabledBackdrop(button);
 	return button;
 end
@@ -134,8 +119,4 @@ function StdUi:ButtonList(parent, buttonCreate, buttonUpdate, data, lineHeight)
 
 		StdUi:GlueTop(itemFrame, parent, 0, (i - 1) * -lineHeight);
 	end
-end
-
-function StdUi:ActionButton(parent)
-	-- NYI
 end

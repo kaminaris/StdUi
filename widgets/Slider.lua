@@ -11,8 +11,6 @@ function StdUi:StyleScrollBar(scrollBar)
 	scrollBar.background:SetFrameLevel(scrollBar:GetFrameLevel() - 1);
 	scrollBar.background:SetWidth(scrollBar:GetWidth());
 	StdUi:GlueAcross(scrollBar.background, scrollBar, 0, 1, 0, -1);
-	--StdUi:GlueTop(scrollBar.background, scrollBar, 0, 1);
-	--StdUi:GlueBottom(scrollBar.background, scrollBar, 0, -1);
 
 	StdUi:StripTextures(buttonUp);
 	StdUi:StripTextures(buttonDown);
@@ -55,6 +53,7 @@ end
 
 function StdUi:ScrollBar(parent)
 	local scrollBar = CreateFrame('Slider', nil, parent, 'MinimalScrollBarTemplate');
+	self:InitWidget(scrollBar);
 	self:StyleScrollBar(scrollBar);
 
 	local buttonUp, buttonDown = scrollBar:GetChildren();

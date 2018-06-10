@@ -6,6 +6,7 @@ end
 
 function StdUi:Frame(parent, width, height, inherits)
 	local frame = CreateFrame('Frame', nil, parent, inherits);
+	self:InitWidget(frame);
 	self:SetObjSize(frame, width, height);
 
 	return frame;
