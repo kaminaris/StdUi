@@ -14,7 +14,7 @@ function StdUi:Dropdown(parent, width, height, options, value)
 	local dropdown = self:Button(parent, width, height, '');
 	dropdown.text:SetJustifyH('LEFT');
 	
-	local dropTex = self:Texture(dropdown, 15, 15, 'Interface\\Buttons\\SquareButtonTextures');
+	local dropTex = self:Texture(dropdown, 15, 15, [[Interface\Buttons\SquareButtonTextures]]);
 	dropTex:SetTexCoord(0.45312500, 0.64062500, 0.20312500, 0.01562500);
 	self:GlueRight(dropTex, dropdown, -2, 0, true);
 

@@ -28,6 +28,14 @@ function StdUi:NewInstance()
 	return instance;
 end
 
+function StdUi:RegisterWidget(name, func)
+	if not self[name] then
+		self[name] = func;
+		return true;
+	end
+	return false;
+end
+
 function StdUi:InitWidget(widget)
 	widget.isWidget = true;
 

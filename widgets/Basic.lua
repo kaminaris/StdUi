@@ -32,8 +32,11 @@ end
 function StdUi:PanelWithTitle(parent, width, height, text, titleWidth, titleHeight)
 	local frame = self:Panel(parent, width, height);
 
-	frame.titlePanel = self:PanelWithLabel(frame, titleWidth or 100, titleHeight or 20, nil, text);
-	self:GlueTop(frame.titlePanel, frame, 0, 10);
+	titleWidth = titleWidth or 100;
+	titleHeight = titleHeight or 20;
+
+	frame.titlePanel = self:PanelWithLabel(frame, titleWidth, titleHeight, nil, text);
+	self:GlueTop(frame.titlePanel, frame, 0, titleHeight / 2);
 
 	return frame;
 end
