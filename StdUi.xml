@@ -19,4 +19,7 @@
 	<Script file="widgets\Slider.lua"/>
 	<Script file="widgets\Tooltip.lua"/>
 	<Script file="widgets\Table.lua"/>
+	<Script file="widgets\ProgressBar.lua"/>
+	<Script file="widgets\ColorPicker.lua"/>
+	<Script file="widgets\Tab.lua"/>
 </Ui>

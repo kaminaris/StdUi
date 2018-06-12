@@ -29,6 +29,10 @@ function StdUi:ResetConfig()
 			borderDisabled = { r = 0.40, g = 0.40, b = 0.40, a = 1 }
 		},
 
+		progressBar = {
+			color = { r = 1, g = 0.9, b = 0, a = 0.5 },
+		},
+
 		highlight = {
 			color = { r = 1, g = 0.9, b = 0, a = 0.4 },
 			blank = { r = 0, g = 0, b = 0, a = 0 }
