@@ -37,7 +37,7 @@ end
 function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	local editBox = self:SimpleEditBox(parent, width, height, '');
 
-	local icon = self:Texture(editBox, 20, 20, [[Interface\Common\UI-Searchbox-Icon]]);
+	local icon = self:Texture(editBox, 14, 14, [[Interface\Common\UI-Searchbox-Icon]]);
 	icon:SetVertexColor(
 		self.config.font.colorDisabled.r,
 		self.config.font.colorDisabled.g,
@@ -49,7 +49,7 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	StdUi:SetTextColor(label, 'colorDisabled');
 
 	self:GlueLeft(icon, editBox, 5, 0, true);
-	self:GlueRight(label, icon, 5, 0);
+	self:GlueRight(label, icon, 2, 0);
 
 	editBox.placeholder = {
 		icon = icon,
@@ -75,6 +75,17 @@ function StdUi:EditBox(parent, width, height, text, validator)
 
 	local editBox = self:SimpleEditBox(parent, width, height, text);
 
+	function editBox:GetValue()
+		return self.value;
+	end;
+
+	function editBox:SetValue(value)
+		self.value = value;
+		self:SetText(value);
+		self:Validate();
+		self.button:Hide();
+	end;
+
 	function editBox:IsValid()
 		return self.isValid;
 	end;
@@ -83,13 +94,19 @@ function StdUi:EditBox(parent, width, height, text, validator)
 		self.isValidated = true;
 		self.isValid = validator(self);
 
-		if self.OnValueChanged then
-			self.OnValueChanged(self);
+		if self.isValid then
+			if self.button then
+				self.button:Hide();
+			end
+
+			if self.OnValueChanged then
+				self.OnValueChanged(self);
+			end
 		end
 		self.isValidated = false;
 	end;
 
-	local button = self:Button(editBox, 40, height - 4, 'OK');
+	local button = self:Button(editBox, 40, height - 4, OKAY);
 	button:SetPoint('RIGHT', -2, 0);
 	button:Hide();
 	button.editBox = editBox;
@@ -105,11 +122,12 @@ function StdUi:EditBox(parent, width, height, text, validator)
 
 	editBox:SetScript('OnTextChanged', function(self, isUserInput)
 		local value = StdUi.Util.stripColors(self:GetText());
-		if tostring(value) ~= tostring(self.lastValue) then
-			self.lastValue = value;
+		if tostring(value) ~= tostring(self.value) then
 			if not self.isValidated and self.button and isUserInput then
 				self.button:Show();
 			end
+		else
+			self.button:Hide();
 		end
 	end);
 
@@ -121,17 +139,6 @@ function StdUi:NumericBox(parent, width, height, text, validator)
 
 	local editBox = self:EditBox(parent, width, height, text, validator);
 	editBox:SetNumeric(true);
-
-	function editBox:GetValue()
-		return self.value;
-	end;
-
-	function editBox:SetValue(value)
-		self.value = value;
-		self:SetText(value);
-		self:Validate();
-		self.button:Hide();
-	end;
 
 	function editBox:SetMaxValue(value)
 		self.maxValue = value;
@@ -151,10 +158,6 @@ function StdUi:MoneyBox(parent, width, height, text, validator)
 
 	local editBox = self:EditBox(parent, width, height, text, validator);
 	editBox:SetMaxLetters(20);
-
-	function editBox:GetValue()
-		return self.value;
-	end;
 
 	local formatMoney = StdUi.Util.formatMoney;
 	function editBox:SetValue(value)

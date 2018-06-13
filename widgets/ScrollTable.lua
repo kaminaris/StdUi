@@ -449,7 +449,7 @@ local methods = {
 			local val = rowData[idx];
 
 			if type(format) == 'function' then
-				cellFrame.text:SetText(format(data, cols, realRow, column, table));
+				cellFrame.text:SetText(format(val, rowData, cols[column]));
 			elseif (format == 'money') then
 				val = StdUi.Util.formatMoney(val);
 				cellFrame.text:SetText(val);

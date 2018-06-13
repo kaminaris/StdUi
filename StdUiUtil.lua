@@ -21,10 +21,7 @@ StdUi.Util = {};
 
 --- @param self EditBox
 StdUi.Util.editBoxValidator = function(self)
-	self.value = total;
-	if self.button then
-		self.button:Hide();
-	end
+	self.value = self:GetText();
 
 	StdUi:MarkAsValid(self, true);
 	return true;
@@ -43,9 +40,7 @@ StdUi.Util.moneyBoxValidator = function(self)
 
 	self:SetText(StdUi.Util.formatMoney(total));
 	self.value = total;
-	if self.button then
-		self.button:Hide();
-	end
+
 	StdUi:MarkAsValid(self, true);
 	return true;
 end
@@ -73,9 +68,7 @@ StdUi.Util.numericBoxValidator = function(self)
 	end
 
 	self.value = value;
-	if self.button then
-		self.button:Hide();
-	end
+
 	StdUi:MarkAsValid(self, true);
 
 	return true;
