@@ -73,7 +73,7 @@ function StdUi:Confirm(title, message, buttons, dialogId)
 	if buttons and not window.buttons then
 		window.buttons = {};
 
-		local btnCount = StdUi.Util.tableCount(buttons);
+		local btnCount = self.Util.tableCount(buttons);
 
 		local btnMargin = self.config.dialog.button.margin;
 		local btnWidth = self.config.dialog.button.width;

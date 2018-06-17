@@ -6,6 +6,7 @@
 	<Script file="StdUiPosition.lua"/>
 	<Script file="StdUiUtil.lua"/>
 	<Script file="StdUiLayout.lua"/>
+	<Script file="StdUiGrid.lua"/>
 	<!--Widgets-->
 	<Script file="widgets\Basic.lua"/>
 	<Script file="widgets\Window.lua"/>

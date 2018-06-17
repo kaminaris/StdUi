@@ -11,6 +11,7 @@ end
 ---		{text = 'some text3', value = 12},
 --- }
 function StdUi:Dropdown(parent, width, height, options, value)
+	local this = self;
 	local dropdown = self:Button(parent, width, height, '');
 	dropdown.text:SetJustifyH('LEFT');
 	
@@ -28,6 +29,7 @@ function StdUi:Dropdown(parent, width, height, options, value)
 			self.optsFrame:Hide();
 		else
 			self.optsFrame:Show();
+			self.optsFrame:Update();
 		end
 	end);
 
@@ -37,11 +39,15 @@ function StdUi:Dropdown(parent, width, height, options, value)
 
 	function dropdown:SetOptions(options)
 		local optionsHeight = #options * 20;
+		local scrollChild = self.optsFrame.scrollChild;
+
 		self.optsFrame:SetHeight(math.min(optionsHeight + 4, 200));
-		self.optsFrame.scrollChild:SetHeight(optionsHeight);
+		scrollChild:SetHeight(optionsHeight);
 
 		local buttonCreate = function(parent, i)
 			local optionButton = StdUi:HighlightButton(parent, parent:GetWidth(), 20, '');
+			optionButton:SetFrameLevel(parent:GetFrameLevel() + 2);
+			optionButton.text:SetJustifyH('LEFT');
 
 			optionButton:SetScript('OnClick', function(self)
 				self.dropdown:SetValue(self.value, self:GetText());
@@ -51,13 +57,18 @@ function StdUi:Dropdown(parent, width, height, options, value)
 			return optionButton;
 		end;
 
-		local buttonUpdate = function(parent, i, itemFrame, data)
+		local buttonUpdate = function(parent, itemFrame, data)
 			itemFrame:SetText(data.text);
 			itemFrame.dropdown = dropdown;
 			itemFrame.value = data.value;
 		end;
 
-		StdUi:ButtonList(self.optsFrame.scrollChild, buttonCreate, buttonUpdate, options, 20);
+		if not scrollChild.items then
+			scrollChild.items = {};
+		end
+
+		this:ObjectList(scrollChild, scrollChild.items, buttonCreate, buttonUpdate, options);
+		self.optsFrame:UpdateItemsCount(#options);
 	end
 
 	function dropdown:SetValue(value, text)

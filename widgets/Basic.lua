@@ -22,7 +22,7 @@ end
 function StdUi:PanelWithLabel(parent, width, height, inherits, text)
 	local frame = self:Panel(parent, width, height, inherits);
 
-	frame.label = StdUi:Label(frame, text);
+	frame.label = self:Label(frame, text);
 	frame.label:SetAllPoints();
 	frame.label:SetJustifyH('MIDDLE');
 

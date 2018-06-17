@@ -189,7 +189,7 @@ StdUi.FauxScrollFrameMethods = {
 			showScrollBar = 1;
 		else
 			scrollBar:SetValue(0);
-			frame:Hide();
+			--frame:Hide(); --TODO: Need to rethink it, so far its left commented out because it breaks dropdown
 		end
 
 		if (frame:IsShown()) then
@@ -230,6 +230,7 @@ StdUi.FauxScrollFrameMethods = {
 				scrollDownButton:Enable();
 			end
 		end
+
 		return showScrollBar;
 	end,
 }
@@ -295,6 +296,10 @@ function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight)
 			StdUi.FauxScrollFrameMethods.Update(frame, scrollChild.itemCount or #scrollChild.items, displayCount, lineHeight);
 		end);
 	end);
+
+	function panel:Update()
+		StdUi.FauxScrollFrameMethods.Update(self.scrollFrame, scrollChild.itemCount or #scrollChild.items, displayCount, lineHeight);
+	end
 
 	function panel:UpdateItemsCount(newCount)
 		self.scrollChild.itemCount = newCount;

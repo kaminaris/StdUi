@@ -52,6 +52,7 @@ function StdUi:StyleScrollBar(scrollBar)
 end
 
 function StdUi:ScrollBar(parent)
+	--TODO: Redo this without template
 	local scrollBar = CreateFrame('Slider', nil, parent, 'MinimalScrollBarTemplate');
 	self:InitWidget(scrollBar);
 	self:StyleScrollBar(scrollBar);
@@ -71,4 +72,38 @@ function StdUi:ScrollBar(parent)
 	end
 
 	return scrollBar;
+end
+
+function StdUi:Slider(parent, width, height, value, vertical, min, max)
+	local slider = CreateFrame('Slider', nil, parent);
+	self:InitWidget(slider);
+	self:ApplyBackdrop(slider, 'panel');
+	self:SetObjSize(slider, width, height);
+
+	local thumbWidth = vertical and width or 10;
+	local thumbHeight = vertical and 10 or height;
+
+	slider.ThumbTexture = self:Texture(slider, thumbWidth, thumbHeight, self.config.backdrop.texture);
+	slider.ThumbTexture:SetVertexColor(
+		self.config.backdrop.slider.r,
+		self.config.backdrop.slider.g,
+		self.config.backdrop.slider.b,
+		self.config.backdrop.slider.a
+	);
+	slider:SetThumbTexture(slider.ThumbTexture);
+
+	slider.thumb = StdUi:Frame(slider);
+	slider.thumb:SetAllPoints(slider:GetThumbTexture());
+	StdUi:ApplyBackdrop(slider.thumb, 'button');
+
+	if vertical then
+		slider:SetOrientation('VERTICAL');
+	else
+		slider:SetOrientation('HORIZONTAL');
+	end
+
+	slider:SetMinMaxValues(min or 0, max or 100);
+	slider:SetValue(value or min or 0);
+
+	return slider;
 end

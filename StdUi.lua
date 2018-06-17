@@ -6,6 +6,8 @@ if not StdUi then
 	return ;
 end
 
+StdUiInstances = {StdUi};
+
 local function clone(t) -- deep-copy a table
 	local meta = getmetatable(t);
 
@@ -25,6 +27,7 @@ end
 function StdUi:NewInstance()
 	local instance = clone(self);
 	instance:ResetConfig();
+	tinsert(StdUiInstances, instance);
 	return instance;
 end
 
@@ -38,10 +41,6 @@ end
 
 function StdUi:InitWidget(widget)
 	widget.isWidget = true;
-
-	function widget:SetFullWidth(flag)
-		widget.fullWidth = flag;
-	end
 
 	function widget:GetChildrenWidgets()
 		local children = {widget:GetChildren()};
@@ -105,29 +104,38 @@ function StdUi:ClearBackdrop(frame)
 	frame:SetBackdrop(nil);
 end
 
-function StdUi:ApplyDisabledBackdrop(frame)
-	hooksecurefunc(frame, 'Disable', function(self)
-		StdUi:ApplyBackdrop(self, 'buttonDisabled', 'borderDisabled');
-		StdUi:SetTextColor(self, 'colorDisabled');
-		if self.label then
-			StdUi:SetTextColor(self.label, 'colorDisabled');
+function StdUi:ApplyDisabledBackdrop(frame, enabled)
+	if enabled then
+		self:ApplyBackdrop(frame, 'button', 'border');
+		self:SetTextColor(frame, 'color');
+		if frame.label then
+			self:SetTextColor(frame.label, 'color');
 		end
 
-		if self.text then
-			StdUi:SetTextColor(self.text, 'colorDisabled');
+		if frame.text then
+			self:SetTextColor(frame.text, 'color');
 		end
+	else
+		self:ApplyBackdrop(frame, 'buttonDisabled', 'borderDisabled');
+		self:SetTextColor(frame, 'colorDisabled');
+		if frame.label then
+			self:SetTextColor(frame.label, 'colorDisabled');
+		end
+
+		if frame.text then
+			self:SetTextColor(frame.text, 'colorDisabled');
+		end
+	end
+end
+
+function StdUi:HookDisabledBackdrop(frame)
+	local this = self;
+	hooksecurefunc(frame, 'Disable', function(self)
+		this:ApplyDisabledBackdrop(self, false);
 	end);
 
 	hooksecurefunc(frame, 'Enable', function(self)
-		StdUi:ApplyBackdrop(self, 'button', 'border');
-		StdUi:SetTextColor(self, 'color');
-		if self.label then
-			StdUi:SetTextColor(self.label, 'color');
-		end
-
-		if self.text then
-			StdUi:SetTextColor(self.text, 'color');
-		end
+		this:ApplyDisabledBackdrop(self, true);
 	end);
 end
 

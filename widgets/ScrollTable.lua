@@ -150,7 +150,7 @@ local methods = {
 				local cell = row.cols[j];
 				if not cell then
 					cell = CreateFrame('Button', nil, row);
-					cell.text = row:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall');
+					cell.text = StdUi:FontString(cell, '');
 
 					row.cols[j] = cell;
 

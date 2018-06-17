@@ -11,8 +11,10 @@ StdUi.frameTooltips = {}
 function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 	--- @type GameTooltip
 	local tip;
-	if tooltipName and StdUi.tooltips[tooltipName] then
-		tip = StdUi.tooltips[tooltipName];
+	local this = self;
+
+	if tooltipName and self.tooltips[tooltipName] then
+		tip = self.tooltips[tooltipName];
 	else
 		tip = CreateFrame('GameTooltip', tooltipName, UIParent, 'GameTooltipTemplate');
 		tip:SetOwner(owner or UIParent, anchor or 'ANCHOR_NONE');
@@ -25,10 +27,10 @@ function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 			tip:SetPoint(anchor);
 			if type(text) == 'string' then
 				tip:SetText(text,
-						StdUi.config.font.color.r,
-						StdUi.config.font.color.g,
-						StdUi.config.font.color.b,
-						StdUi.config.font.color.a
+					this.config.font.color.r,
+					this.config.font.color.g,
+					this.config.font.color.b,
+					this.config.font.color.a
 				);
 			elseif type(text) == 'function' then
 				text(tip);
@@ -47,8 +49,10 @@ end
 function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 	--- @type GameTooltip
 	local tip;
-	if tooltipName and StdUi.frameTooltips[tooltipName] then
-		tip = StdUi.frameTooltips[tooltipName];
+	local this = self;
+
+	if tooltipName and self.frameTooltips[tooltipName] then
+		tip = self.frameTooltips[tooltipName];
 	else
 		tip = self:Panel(UIParent, 10, 10);
 		tip.owner = owner;
@@ -63,7 +67,7 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 
 		function tip:SetText(text, r, g, b)
 			if r and g and b then
-				text = StdUi.Util.WrapTextInColor(text, r, g, b, 1);
+				text = this.Util.WrapTextInColor(text, r, g, b, 1);
 			end
 			tip.text:SetText(text);
 
@@ -82,7 +86,7 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 				txt = txt .. '\n'
 			end
 			if r and g and b then
-				text = StdUi.Util.WrapTextInColor(text, r, g, b, 1);
+				text = this.Util.WrapTextInColor(text, r, g, b, 1);
 			end
 			self:SetText(txt .. text);
 		end
@@ -93,7 +97,7 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 
 		hooksecurefunc(tip, 'Show', function(self)
 			self:RecalculateSize();
-			StdUi:GlueOpposite(self, self.owner, 0, 0, self.anchor);
+			this:GlueOpposite(self, self.owner, 0, 0, self.anchor);
 		end);
 	end
 

@@ -85,38 +85,11 @@ function StdUi:Button(parent, width, height, text)
 	local button = self:HighlightButton(parent, width, height, text)
 
 	self:ApplyBackdrop(button);
-	self:ApplyDisabledBackdrop(button);
+	self:HookDisabledBackdrop(button);
 	return button;
 end
 
---- Creates button list that reuses frames and is based on array data
---- @param parent Frame
---- @param buttonCreate function
---- @param buttonUpdate function
---- @param data table
---- @param lineHeight number
-function StdUi:ButtonList(parent, buttonCreate, buttonUpdate, data, lineHeight)
-	local buttonList = parent.items;
-	if not buttonList then
-		parent.items = {};
-		buttonList = parent.items;
-	end
-
-	for i = 1, #buttonList do
-		buttonList[i]:Hide();
-	end
-
-	for i = 1, #data do
-		local itemFrame = buttonList[i];
-
-		if not itemFrame then
-			itemFrame = buttonCreate(parent, i);
-			buttonList[i] = itemFrame;
-		end
-
-		buttonUpdate(parent, i, itemFrame, data[i]);
-		itemFrame:Show();
-
-		StdUi:GlueTop(itemFrame, parent, 0, (i - 1) * -lineHeight);
-	end
+function StdUi:ButtonAutoWidth(button, padding)
+	padding = padding or 5;
+	button:SetWidth(button.text:GetWidth() + padding * 2);
 end

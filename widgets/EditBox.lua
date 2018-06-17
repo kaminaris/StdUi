@@ -27,7 +27,7 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 		editBox:SetText(text);
 	end
 
-	self:ApplyDisabledBackdrop(editBox);
+	self:HookDisabledBackdrop(editBox);
 	self:ApplyBackdrop(editBox);
 	self:SetObjSize(editBox, width, height);
 
@@ -99,8 +99,9 @@ function StdUi:EditBox(parent, width, height, text, validator)
 				self.button:Hide();
 			end
 
-			if self.OnValueChanged then
-				self.OnValueChanged(self);
+			if self.OnValueChanged and tostring(self.lastValue) ~= tostring(self.value) then
+				self:OnValueChanged();
+				self.lastValue = self.value;
 			end
 		end
 		self.isValidated = false;
@@ -149,6 +150,12 @@ function StdUi:NumericBox(parent, width, height, text, validator)
 		self.minValue = value;
 		self:Validate();
 	end;
+
+	function editBox:SetMinMaxValue(min, max)
+		self.minValue = min;
+		self.maxValue = max;
+		self:Validate();
+	end
 
 	return editBox;
 end

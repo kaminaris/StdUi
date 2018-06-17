@@ -55,7 +55,7 @@ function StdUi:AddLabel(parent, object, text, labelPosition, labelWidth)
 		self:GlueRight(label, object, 4, 0);
 	else -- labelPosition == 'LEFT'
 		label:SetWidth(labelWidth or label:GetStringWidth())
-		self:GlueLeft(label, object, 4, 0);
+		self:GlueLeft(label, object, -4, 0);
 	end
 
 	object.label = label;
