@@ -6,12 +6,12 @@ end
 
 StdUi.ScrollBarEvents = {
 	UpButtonOnClick = function(self)
-		local scrollBar = self:GetParent();
+		local scrollBar = self.scrollBar;
 		local scrollStep = scrollBar.ScrollFrame.scrollStep or (scrollBar.ScrollFrame:GetHeight() / 2);
 		scrollBar:SetValue(scrollBar:GetValue() - scrollStep);
 	end,
 	DownButtonOnClick = function(self)
-		local scrollBar = self:GetParent();
+		local scrollBar = self.scrollBar;
 		local scrollStep = scrollBar.ScrollFrame.scrollStep or (scrollBar.ScrollFrame:GetHeight() / 2);
 		scrollBar:SetValue(scrollBar:GetValue() + scrollStep);
 	end,
@@ -107,27 +107,6 @@ StdUi.ScrollFrameEvents = {
 				scrollDownButton:Disable();
 			end
 		end
-
-		-- Hide/show scrollframe borders
-		local top = self.Top;
-		local bottom = self.Bottom;
-		local middle = self.Middle;
-		if ( top and bottom and self.scrollBarHideable ) then
-			if ( self:GetVerticalScrollRange() == 0 ) then
-				top:Hide();
-				bottom:Hide();
-			else
-				top:Show();
-				bottom:Show();
-			end
-		end
-		if ( middle and self.scrollBarHideable ) then
-			if ( self:GetVerticalScrollRange() == 0 ) then
-				middle:Hide();
-			else
-				middle:Show();
-			end
-		end
 	end,
 
 	OnVerticalScroll = function(self, offset)
@@ -145,23 +124,15 @@ StdUi.FauxScrollFrameMethods = {
 		local scrollBar = frame.ScrollBar;
 		local ScrollChildFrame = frame.scrollChild;
 
-		local buttonUp, buttonDown = scrollBar:GetChildren();
 		if not frame.ScrollChildFrame then
 			frame.ScrollChildFrame = ScrollChildFrame;
 		end
+
 		if not frame.ScrollBar then
 			frame.ScrollBar = scrollBar;
 		end
 
-		if not frame.ScrollUpButton then
-			frame.ScrollUpButton = buttonUp;
-		end
-
-		if not frame.ScrollUpButton then
-			frame.ScrollDownButton = buttonDown;
-		end
-
-		return scrollBar, ScrollChildFrame, buttonUp, buttonDown;
+		return scrollBar, ScrollChildFrame, scrollBar.ScrollUpButton, scrollBar.ScrollDownButton;
 	end,
 
 	GetOffset = function(frame)
@@ -235,18 +206,16 @@ StdUi.FauxScrollFrameMethods = {
 	end,
 }
 
-function StdUi:ScrollFrame(parent, width, height)
+function StdUi:ScrollFrame(parent, width, height, scrollChild)
 	local panel = self:Panel(parent, width, height);
-
 	local scrollBarWidth = 16;
 
 	local scrollFrame = CreateFrame('ScrollFrame', nil, panel);
-	scrollFrame:SetScript('OnLoad', StdUi.ScrollFrameEvents.OnLoad);
 	scrollFrame:SetScript('OnScrollRangeChanged', StdUi.ScrollFrameEvents.OnScrollRangeChanged);
 	scrollFrame:SetScript('OnVerticalScroll', StdUi.ScrollFrameEvents.OnVerticalScroll);
 	scrollFrame:SetScript('OnMouseWheel', StdUi.ScrollFrameEvents.OnMouseWheel);
 
-	local scrollBar = self:ScrollBar(panel); -- but it is not a parent
+	local scrollBar = self:ScrollBar(panel, scrollBarWidth);
 	scrollBar:SetScript('OnValueChanged', StdUi.ScrollBarEvents.OnValueChanged);
 	scrollBar.ScrollDownButton:SetScript('OnClick', StdUi.ScrollBarEvents.DownButtonOnClick);
 	scrollBar.ScrollUpButton:SetScript('OnClick', StdUi.ScrollBarEvents.UpButtonOnClick);
@@ -254,20 +223,24 @@ function StdUi:ScrollFrame(parent, width, height)
 	scrollFrame.ScrollBar = scrollBar;
 	scrollBar.ScrollFrame = scrollFrame;
 
+	--scrollFrame:SetScript('OnLoad', StdUi.ScrollFrameEvents.OnLoad);-- LOL, no wonder it wasnt working
+	StdUi.ScrollFrameEvents.OnLoad(scrollFrame);
+
 	scrollFrame.panel = panel;
 	scrollFrame:ClearAllPoints();
 	scrollFrame:SetSize(width - scrollBarWidth - 5, height - 4); -- scrollbar width and margins
 	self:GlueAcross(scrollFrame, panel, 2, -2, -scrollBarWidth - 2, 2);
 
-	scrollBar:SetWidth(scrollBarWidth);
-	scrollBar:ClearAllPoints();
-	scrollBar:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -2, -scrollBarWidth - 2);
-	scrollBar:SetPoint('BOTTOMRIGHT', panel, 'BOTTOMRIGHT', -2 , scrollBarWidth + 2);
-	self:StyleScrollBar(scrollBar);
+	scrollBar.panel:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -2, - 2);
+	scrollBar.panel:SetPoint('BOTTOMRIGHT', panel, 'BOTTOMRIGHT', -2, 2);
 
-	local scrollChild = CreateFrame('Frame', nil, scrollFrame);
-	scrollChild:SetWidth(scrollFrame:GetWidth());
-	scrollChild:SetHeight(scrollFrame:GetHeight());
+	if not scrollChild then
+		scrollChild = CreateFrame('Frame', nil, scrollFrame);
+		scrollChild:SetWidth(scrollFrame:GetWidth());
+		scrollChild:SetHeight(scrollFrame:GetHeight());
+	else
+		scrollChild:SetParent(scrollFrame);
+	end
 
 	scrollFrame:SetScrollChild(scrollChild);
 	scrollFrame:EnableMouse(true);
@@ -286,24 +259,25 @@ end
 --- Works pretty much the same as scroll frame however it does not have smooth scroll and only display a certain amount
 --- of items
 function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight)
+	local this = self;
 	local panel, scrollFrame, scrollChild, scrollBar = self:ScrollFrame(parent, width, height);
 
 	scrollFrame.lineHeight = lineHeight;
 	scrollFrame.displayCount = displayCount;
 
 	scrollFrame:SetScript('OnVerticalScroll', function(frame, value)
-		StdUi.FauxScrollFrameMethods.OnVerticalScroll(frame, value, lineHeight, function ()
-			StdUi.FauxScrollFrameMethods.Update(frame, scrollChild.itemCount or #scrollChild.items, displayCount, lineHeight);
+		this.FauxScrollFrameMethods.OnVerticalScroll(frame, value, lineHeight, function ()
+			this.FauxScrollFrameMethods.Update(frame, panel.itemCount or #scrollChild.items, displayCount, lineHeight);
 		end);
 	end);
 
 	function panel:Update()
-		StdUi.FauxScrollFrameMethods.Update(self.scrollFrame, scrollChild.itemCount or #scrollChild.items, displayCount, lineHeight);
+		this.FauxScrollFrameMethods.Update(self.scrollFrame, panel.itemCount or #scrollChild.items, displayCount, lineHeight);
 	end
 
 	function panel:UpdateItemsCount(newCount)
-		self.scrollChild.itemCount = newCount;
-		StdUi.FauxScrollFrameMethods.Update(self.scrollFrame, newCount, displayCount, lineHeight);
+		self.itemCount = newCount;
+		this.FauxScrollFrameMethods.Update(self.scrollFrame, newCount, displayCount, lineHeight);
 	end
 
 	return panel, scrollFrame, scrollChild, scrollBar;

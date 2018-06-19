@@ -11,7 +11,6 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 	self:InitWidget(editBox);
 
 	editBox:SetTextInsets(3, 3, 3, 3);
-	editBox:SetMaxLetters(256);
 	editBox:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
 	editBox:SetAutoFocus(false);
 
@@ -178,24 +177,48 @@ function StdUi:MoneyBox(parent, width, height, text, validator)
 	return editBox;
 end
 
-function StdUi:EditBoxWithLabel(parent, width, height, text, label, labelPosition, labelWidth)
-	local editBox = self:EditBox(parent, width, height, text);
-	self:AddLabel(parent, editBox, label, labelPosition, labelWidth);
+function StdUi:MultiLineBox(parent, width, height, text)
+	local editBox = CreateFrame('EditBox');
+	local panel, scrollFrame = self:ScrollFrame(parent, width, height, editBox);
+	self:ApplyBackdrop(panel, 'button');
 
-	return editBox;
-end
+	editBox:SetWidth(scrollFrame:GetWidth());
+	--editBox:SetHeight(scrollFrame:GetHeight());
 
+	editBox:SetTextInsets(3, 3, 3, 3);
+	editBox:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
+	editBox:SetAutoFocus(false);
+	editBox:SetScript('OnEscapePressed', editBox.ClearFocus);
+	editBox:SetMultiLine(true);
+	editBox:EnableMouse(true);
+	editBox:SetAutoFocus(false);
+	editBox:SetCountInvisibleLetters(false);
+	--editBox:SetAllPoints();
 
-function StdUi:NumericBoxWithLabel(parent, width, height, text, label, labelPosition, labelWidth)
-	local editBox = self:NumericBox(parent, width, height, text);
-	self:AddLabel(parent, editBox, label, labelPosition, labelWidth);
+	editBox.scrollFrame = scrollFrame;
+	editBox.panel = panel;
 
-	return editBox;
-end
+	editBox:SetScript('OnCursorChanged', function (self, _, y, _, cursorHeight)
+		local sf, y = self.scrollFrame, -y;
+		local offset = sf:GetVerticalScroll();
 
-function StdUi:MoneyBoxWithLabel(parent, width, height, text, label, labelPosition, labelWidth)
-	local editBox = self:MoneyBox(parent, width, height, text);
-	self:AddLabel(parent, editBox, label, labelPosition, labelWidth);
+		if y < offset then
+			sf:SetVerticalScroll(y);
+		else
+			y = y + cursorHeight - sf:GetHeight() + 6; --text insets
+			if y > offset then
+				sf:SetVerticalScroll(math.ceil(y));
+			end
+		end
+	end)
+
+	scrollFrame:HookScript('OnVerticalScroll', function(self, offset)
+		self.scrollChild:SetHitRectInsets(0, 0, offset, self.scrollChild:GetHeight() - offset - self:GetHeight());
+	end);
+
+	if text then
+		editBox:SetText(text);
+	end
 
 	return editBox;
 end

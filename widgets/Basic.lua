@@ -29,14 +29,15 @@ function StdUi:PanelWithLabel(parent, width, height, inherits, text)
 	return frame;
 end
 
-function StdUi:PanelWithTitle(parent, width, height, text, titleWidth, titleHeight)
+function StdUi:PanelWithTitle(parent, width, height, text)
 	local frame = self:Panel(parent, width, height);
 
-	titleWidth = titleWidth or 100;
-	titleHeight = titleHeight or 20;
+	frame.titlePanel = self:PanelWithLabel(frame, 100, 20, nil, text);
+	frame.titlePanel:SetPoint('TOP', 0, -10);
+	frame.titlePanel:SetPoint('LEFT', 30, 0);
+	frame.titlePanel:SetPoint('RIGHT', -30, 0);
 
-	frame.titlePanel = self:PanelWithLabel(frame, titleWidth, titleHeight, nil, text);
-	self:GlueTop(frame.titlePanel, frame, 0, titleHeight / 2);
+	frame.titlePanel.label:SetFont(self.config.font.familly, self.config.font.titleSize, self.config.font.effect);
 
 	return frame;
 end
