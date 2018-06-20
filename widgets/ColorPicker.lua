@@ -3,8 +3,8 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi or StdUi.ColorPickerFrame then
 	return ;
 end
-
-function StdUi:ColorPicker(parent)
+--- alphaSliderTexture = [[Interface\AddOns\YourAddon\Libs\StdUi\media\Checkers.tga]]
+function StdUi:ColorPicker(parent, alphaSliderTexture)
 	local wheelWidth = 128;
 	local thumbWidth = 10;
 	local barWidth = 16;
@@ -41,8 +41,7 @@ function StdUi:ColorPicker(parent)
 	self:SetObjSize(cpf.alphaSlider, barWidth, wheelWidth + thumbWidth); -- hack
 	self:GlueRight(cpf.alphaSlider, cpf.valueTexture, 10, 0);
 
-	cpf.alphaTexture = self:Texture(cpf.alphaSlider, nil, nil,
-			[[Interface\AddOns\AuctionFaster\Libs\StdUi\media\Checkers.tga]]);
+	cpf.alphaTexture = self:Texture(cpf.alphaSlider, nil, nil, alphaSliderTexture);
 	self:GlueAcross(cpf.alphaTexture, cpf.alphaSlider, 0, -thumbWidth / 2, 0, thumbWidth / 2); -- hack
 	--cpf.alphaTexture:SetColorTexture(1, 1, 1, 1);
 	--cpf.alphaTexture:SetGradientAlpha('VERTICAL', 0, 0, 0, 1, 1, 1, 1, 1);
@@ -174,10 +173,12 @@ function StdUi:ColorPicker(parent)
 end
 
 -- placeholder
-local colorPickerFrame;
-function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback)
+StdUi.colorPickerFrame = nil;
+function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback, alphaSliderTexture)
+	local colorPickerFrame = self.colorPickerFrame;
 	if not colorPickerFrame then
-		colorPickerFrame = self:ColorPicker(UIParent);
+		colorPickerFrame = self:ColorPicker(UIParent, alphaSliderTexture);
+		self.colorPickerFrame = colorPickerFrame;
 	end
 
 	colorPickerFrame.okButton:SetScript('OnClick', function (self)
@@ -202,9 +203,9 @@ function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback)
 	colorPickerFrame:Show();
 end
 
-function StdUi:ColorInput(parent, label, color)
+function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
 	local this = self;
-	local button = self:Button(parent, 24, 24);
+	local button = self:Button(parent, width or 24, height or 24);
 	button:SetHighlightTexture(nil);
 	button.color = {};
 
@@ -248,6 +249,10 @@ function StdUi:ColorInput(parent, label, color)
 			end
 		);
 	end);
+
+	if r then
+		button:SetColor(r, g, b, a);
+	end
 
 	return button;
 end

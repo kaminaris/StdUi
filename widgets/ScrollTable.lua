@@ -368,7 +368,7 @@ local methods = {
 	end,
 
 	-------------------------------------------------------------
-	--- Highlight Methods
+	--- Selection Methods
 	-------------------------------------------------------------
 
 	--- Turn on or off selection on a table according to flag. Will not refresh the table display.
@@ -434,7 +434,7 @@ local methods = {
 	end,
 
 	-------------------------------------------------------------
-	--- Drawing Methods
+	--- Update Internal Methods
 	-------------------------------------------------------------
 
 	--- Cell update function used to paint each cell.  Can be overridden in column data or table data.

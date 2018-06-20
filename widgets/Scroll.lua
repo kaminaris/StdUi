@@ -258,9 +258,9 @@ end
 
 --- Works pretty much the same as scroll frame however it does not have smooth scroll and only display a certain amount
 --- of items
-function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight)
+function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight, scrollChild)
 	local this = self;
-	local panel, scrollFrame, scrollChild, scrollBar = self:ScrollFrame(parent, width, height);
+	local panel, scrollFrame, scrollChild, scrollBar = self:ScrollFrame(parent, width, height, scrollChild);
 
 	scrollFrame.lineHeight = lineHeight;
 	scrollFrame.displayCount = displayCount;

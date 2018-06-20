@@ -66,6 +66,18 @@ function StdUi:SetObjSize(obj, width, height)
 	end
 end
 
+function StdUi:SetTextColor(fontString, colorType)
+	colorType = colorType or 'color';
+	if fontString.SetTextColor then
+		fontString:SetTextColor(
+			self.config.font[colorType].r,
+			self.config.font[colorType].g,
+			self.config.font[colorType].b,
+			self.config.font[colorType].a
+		);
+	end
+end
+
 function StdUi:ApplyBackdrop(frame, type, border, insets)
 	local config = frame.config or self.config;
 	local backdrop = {

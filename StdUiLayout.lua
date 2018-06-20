@@ -13,7 +13,7 @@ function StdUi:SetMargins(widget, top, right, bottom, left)
 	};
 end
 
-function StdUi:LayoutConfig(parent, top, right, bottom, left, margins)
+function StdUi:LayoutConfig(parent, top, right, bottom, left, gutter)
 	parent.layoutConfig = {
 		padding = {
 			top = top or 10,
@@ -21,7 +21,7 @@ function StdUi:LayoutConfig(parent, top, right, bottom, left, margins)
 			bottom = bottom or 10,
 			left = left or 10
 		},
-		childrenMargin = margins or 10
+		gutter = gutter or 10
 	}
 end
 
@@ -29,6 +29,9 @@ end
 function StdUi:AutoPosition(parent)
 	local children = parent:GetChildrenWidgets();
 	--assert(not parent.layoutConfig, 'To do auto position parent must have layoutConfig member!');
+
+
+	local row = 1;
 
 	for i = 1, #children do
 		local child = children[i];
