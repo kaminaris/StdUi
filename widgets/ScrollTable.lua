@@ -15,30 +15,30 @@ local methods = {
 
 	--- Used to show the scrolling table when hidden.
 	--- @usage st:Show()
-	Show = function(self)
-		self.frame:Show();
-		self.scrollFrame:Show();
-		self.showing = true;
-	end,
+	--Show = function(self)
+	--	self.frame:Show();
+	--	self.scrollFrame:Show();
+	--	self.showing = true;
+	--end,
 
 	--- Used to hide the scrolling table when shown.
 	--- @usage st:Hide()
-	Hide = function(self)
-		self.frame:Hide();
-		self.showing = false;
-	end,
+	--Hide = function(self)
+	--	self.frame:Hide();
+	--	self.showing = false;
+	--end,
 
-	SetHeight = function(self)
-		self.frame:SetHeight((self.displayRows * self.rowHeight) + 10);
+	SetAutoHeight = function(self)
+		self:SetHeight((self.displayRows * self.rowHeight) + 10);
 		self:Refresh();
 	end,
 
-	SetWidth = function(self)
+	SetAutoWidth = function(self)
 		local width = 13;
 		for num, col in pairs(self.cols) do
 			width = width + col.width;
 		end
-		self.frame:SetWidth(width + 20);
+		self:SetWidth(width + 20);
 		self:Refresh();
 	end,
 
@@ -52,46 +52,46 @@ local methods = {
 		local table = self; -- reference saved for closure
 		self.cols = cols;
 
-		local row = self.head
-		if not row then
-			row = CreateFrame('Frame', nil, self.frame); --  StdUi:Panel(self.frame); --
-			row:SetPoint('BOTTOMLEFT', self.frame, 'TOPLEFT', 4, 0);
-			row:SetPoint('BOTTOMRIGHT', self.frame, 'TOPRIGHT', -4, 0);
-			row:SetHeight(self.rowHeight);
-			row.cols = {};
-			self.head = row;
+		local columnHeadFrame = self.head
+		if not columnHeadFrame then
+			columnHeadFrame = CreateFrame('Frame', nil, self); --  StdUi:Panel(self.frame); --
+			columnHeadFrame:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 4, 0);
+			columnHeadFrame:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', -4, 0);
+			columnHeadFrame:SetHeight(self.rowHeight);
+			columnHeadFrame.cols = {};
+			self.head = columnHeadFrame;
 		end
 
 		for i = 1, #cols do
-			local columnHeader = row.cols[i];
-			if not row.cols[i] then
-				columnHeader = StdUi:HighlightButton(row);
-				columnHeader:SetPushedTextOffset(0, 0);
+			local columnFrame = columnHeadFrame.cols[i];
+			if not columnHeadFrame.cols[i] then
+				columnFrame = StdUi:HighlightButton(columnHeadFrame);
+				columnFrame:SetPushedTextOffset(0, 0);
 
-				columnHeader.arrow = StdUi:Texture(columnHeader, 8, 8, [[Interface\Buttons\UI-SortArrow]]);
-				columnHeader.arrow:Hide();
+				columnFrame.arrow = StdUi:Texture(columnFrame, 8, 8, [[Interface\Buttons\UI-SortArrow]]);
+				columnFrame.arrow:Hide();
 
 				if self.headerEvents then
 					for event, handler in pairs(self.headerEvents) do
-						columnHeader:SetScript(event, function(cellFrame, ...)
-							table:FireHeaderEvent(columnHeader, event, handler, row, cellFrame, table.data, table.cols, nil, nil, i, table, ...);
+						columnFrame:SetScript(event, function(cellFrame, ...)
+							table:FireHeaderEvent(event, handler, columnFrame, columnHeadFrame, i, ...);
 						end);
 					end
 				end
 
-				row.cols[i] = columnHeader;
+				columnHeadFrame.cols[i] = columnFrame;
 			end
 
 			local align = cols[i].align or 'LEFT';
-			columnHeader.text:SetJustifyH(align);
-			columnHeader.text:SetText(cols[i].name);
+			columnFrame.text:SetJustifyH(align);
+			columnFrame.text:SetText(cols[i].name);
 
 			if align == 'LEFT' then
-				columnHeader.arrow:ClearAllPoints();
-				StdUi:GlueRight(columnHeader.arrow, columnHeader, 0, 0, true);
+				columnFrame.arrow:ClearAllPoints();
+				StdUi:GlueRight(columnFrame.arrow, columnFrame, 0, 0, true);
 			else
-				columnHeader.arrow:ClearAllPoints();
-				StdUi:GlueLeft(columnHeader.arrow, columnHeader, 5, 0, true);
+				columnFrame.arrow:ClearAllPoints();
+				StdUi:GlueLeft(columnFrame.arrow, columnFrame, 5, 0, true);
 			end
 
 			if cols[i].sortable == false and cols[i].sortable ~= nil then
@@ -101,17 +101,17 @@ local methods = {
 			end
 
 			if i > 1 then
-				columnHeader:SetPoint('LEFT', row.cols[i - 1], 'RIGHT', 0, 0);
+				columnFrame:SetPoint('LEFT', columnHeadFrame.cols[i - 1], 'RIGHT', 0, 0);
 			else
-				columnHeader:SetPoint('LEFT', row, 'LEFT', 2, 0);
+				columnFrame:SetPoint('LEFT', columnHeadFrame, 'LEFT', 2, 0);
 			end
 
-			columnHeader:SetHeight(self.rowHeight);
-			columnHeader:SetWidth(cols[i].width);
+			columnFrame:SetHeight(self.rowHeight);
+			columnFrame:SetWidth(cols[i].width);
 		end
 
 		self:SetDisplayRows(self.displayRows, self.rowHeight);
-		self:SetWidth();
+		self:SetAutoWidth();
 	end,
 
 	--- Set the number and height of displayed rows
@@ -127,34 +127,38 @@ local methods = {
 		end
 
 		for i = 1, num do
-			local row = self.rows[i];
+			local rowFrame = self.rows[i];
 
-			if not row then
-				row = CreateFrame('Button', nil, self.frame);
-				self.rows[i] = row;
+			if not rowFrame then
+				rowFrame = CreateFrame('Button', nil, self);
+				self.rows[i] = rowFrame;
+
 				if i > 1 then
-					row:SetPoint('TOPLEFT', self.rows[i - 1], 'BOTTOMLEFT', 0, 0);
-					row:SetPoint('TOPRIGHT', self.rows[i - 1], 'BOTTOMRIGHT', 0, 0);
+					rowFrame:SetPoint('TOPLEFT', self.rows[i - 1], 'BOTTOMLEFT', 0, 0);
+					rowFrame:SetPoint('TOPRIGHT', self.rows[i - 1], 'BOTTOMRIGHT', 0, 0);
 				else
-					row:SetPoint('TOPLEFT', self.scrollFrame, 'TOPLEFT', 1, -1);
-					row:SetPoint('TOPRIGHT', self.scrollFrame, 'TOPRIGHT', -1, -1);
+					rowFrame:SetPoint('TOPLEFT', self.scrollFrame, 'TOPLEFT', 1, -1);
+					rowFrame:SetPoint('TOPRIGHT', self.scrollFrame, 'TOPRIGHT', -1, -1);
 				end
-				row:SetHeight(rowHeight);
+
+				rowFrame:SetHeight(rowHeight);
 			end
 
-			if not row.cols then
-				row.cols = {};
+			if not rowFrame.cols then
+				rowFrame.cols = {};
 			end
 
 			for j = 1, #self.cols do
-				local cell = row.cols[j];
+				local columnData = self.cols[j];
+
+				local cell = rowFrame.cols[j];
 				if not cell then
-					cell = CreateFrame('Button', nil, row);
+					cell = CreateFrame('Button', nil, rowFrame);
 					cell.text = StdUi:FontString(cell, '');
 
-					row.cols[j] = cell;
+					rowFrame.cols[j] = cell;
 
-					local align = self.cols[j].align or 'LEFT';
+					local align = columnData.align or 'LEFT';
 
 					cell.text:SetJustifyH(align);
 					cell:EnableMouse(true);
@@ -165,23 +169,25 @@ local methods = {
 						for event, handler in pairs(self.cellEvents) do
 							cell:SetScript(event, function(cellFrame, ...)
 								if table.offset then
-									local realIndex = table.filtered[i + table.offset];
-									table:FireCellEvent(cell, event, handler, row, cellFrame, table.data, table.cols, i,
-											realIndex, j, table, ...);
+									local rowIndex = table.filtered[i + table.offset];
+									local rowData = table:GetRow(rowIndex);
+									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
+									rowIndex, ...);
 								end
 							end);
 						end
 					end
 
 					-- override a column based events
-					if self.cols[j].events then
-						for event, handler in pairs(self.cols[j].events) do
+					if columnData.events then
+						for event, handler in pairs(columnData.events) do
 
 							cell:SetScript(event, function(cellFrame, ...)
 								if table.offset then
-									local realIndex = table.filtered[i + table.offset];
-									table:FireCellEvent(cell, event, handler, row, cellFrame, table.data, table.cols, i,
-											realIndex, j, table, ...);
+									local rowIndex = table.filtered[i + table.offset];
+									local rowData = table:GetRow(rowIndex);
+									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
+											rowIndex, ...);
 								end
 							end);
 						end
@@ -189,9 +195,9 @@ local methods = {
 				end
 
 				if j > 1 then
-					cell:SetPoint('LEFT', row.cols[j - 1], 'RIGHT', 0, 0);
+					cell:SetPoint('LEFT', rowFrame.cols[j - 1], 'RIGHT', 0, 0);
 				else
-					cell:SetPoint('LEFT', row, 'LEFT', 2, 0);
+					cell:SetPoint('LEFT', rowFrame, 'LEFT', 2, 0);
 				end
 
 				cell:SetHeight(rowHeight);
@@ -203,11 +209,11 @@ local methods = {
 			end
 
 			j = #self.cols + 1;
-			col = row.cols[j];
+			col = rowFrame.cols[j];
 			while col do
 				col:Hide();
 				j = j + 1;
-				col = row.cols[j];
+				col = rowFrame.cols[j];
 			end
 		end
 
@@ -215,7 +221,7 @@ local methods = {
 			self.rows[i]:Hide();
 		end
 
-		self:SetHeight();
+		self:SetAutoHeight();
 	end,
 
 	-------------------------------------------------------------
@@ -295,6 +301,7 @@ local methods = {
 
 	DoFilter = function(self)
 		local result = {};
+
 		for row = 1, #self.data do
 			local realRow = self.sortTable[row];
 			local rowData = self:GetRow(realRow);
@@ -303,6 +310,7 @@ local methods = {
 				table.insert(result, realRow);
 			end
 		end
+
 		return result;
 	end,
 
@@ -386,12 +394,12 @@ local methods = {
 	--- Sets the currently selected row to 'realRow'. RealRow is the unaltered index of the data row in your table.
 	--- You should not need to refresh the table.
 	--- @usage st:SetSelection(12)
-	SetSelection = function(self, realRow)
-		self.selected = realRow;
+	SetSelection = function(self, rowIndex)
+		self.selected = rowIndex;
 		self:Refresh();
 	end,
 
-	--- Gets the currently selected to row.
+	--- Gets the currently selected row.
 	--- Return will be the unaltered index of the data row that is selected.
 	--- @usage st:GetSelection()
 	GetSelection = function(self)
@@ -411,8 +419,8 @@ local methods = {
 
 	--- Returns the data row of the table from the given data row index
 	--- @usage used internally.
-	GetRow = function(self, realRow)
-		return self.data[realRow];
+	GetRow = function(self, rowIndex)
+		return self.data[rowIndex];
 	end,
 
 	--- Returns the cell data of the given row from the given row and column index
@@ -429,8 +437,8 @@ local methods = {
 	--- Checks if a row is currently being shown
 	--- @usage st:IsRowVisible(realrow)
 	--- @thanks sapu94
-	IsRowVisible = function(self, realRow)
-		return (realRow > self.offset and realRow <= (self.displayRows + self.offset));
+	IsRowVisible = function(self, rowIndex)
+		return (rowIndex > self.offset and rowIndex <= (self.displayRows + self.offset));
 	end,
 
 	-------------------------------------------------------------
@@ -439,41 +447,39 @@ local methods = {
 
 	--- Cell update function used to paint each cell.  Can be overridden in column data or table data.
 	--- @usage used internally.
-	DoCellUpdate = function(rowFrame, cellFrame, data, cols, row, realRow, column, fShow, table, ...)
-		if fShow then
-			local rowData = table:GetRow(realRow);
-
-			local idx = cols[column].index;
-			local format = cols[column].format;
-
-			local val = rowData[idx];
+	DoCellUpdate = function(table, shouldShow, rowFrame, cellFrame, value, columnData, rowData, rowIndex)
+		if shouldShow then
+			local format = columnData.format;
 
 			if type(format) == 'function' then
-				cellFrame.text:SetText(format(val, rowData, cols[column]));
+				cellFrame.text:SetText(format(value, rowData, columnData));
 			elseif (format == 'money') then
-				val = StdUi.Util.formatMoney(val);
-				cellFrame.text:SetText(val);
+				value = StdUi.Util.formatMoney(value);
+				cellFrame.text:SetText(value);
 			elseif (format == 'number') then
-				val = tostring(val);
-				cellFrame.text:SetText(val);
+				value = tostring(value);
+				cellFrame.text:SetText(value);
 			elseif (format == 'icon') then
 				if cellFrame.texture then
-					cellFrame.texture:SetTexture(val);
+					cellFrame.texture:SetTexture(value);
 				else
-					cellFrame.texture = StdUi:Texture(cellFrame, cols[column].width, cols[column].width, val);
+					local iconSize = columnData.iconSize or table.rowHeight;
+					cellFrame.texture = StdUi:Texture(cellFrame, iconSize, iconSize, value);
 					cellFrame.texture:SetPoint('CENTER', 0, 0);
 				end
 			else
-				cellFrame.text:SetText(val);
+				cellFrame.text:SetText(value);
 			end
 
 			local color;
 			if rowData.color then
 				color = rowData.color;
+			elseif columnData.color then
+				color = columnData.color;
 			end
 
 			if type(color) == 'function' then
-				color = color(data, cols, realRow, column, table);
+				color = color(table, value, rowData, columnData);
 			end
 
 			if color then
@@ -481,7 +487,7 @@ local methods = {
 			end
 
 			if table.selectionEnabled then
-				if table.selected == realRow then
+				if table.selected == rowIndex then
 					table:SetHighLightColor(rowFrame, table:GetDefaultHighlight());
 				else
 					table:SetHighLightColor(rowFrame, table:GetDefaultHighlightBlank());
@@ -504,31 +510,33 @@ local methods = {
 
 			if self.rows then
 				local rowFrame = self.rows[i];
-				local realRow = self.filtered[row];
-				local rowData = self:GetRow(realRow);
-				local fShow = true;
+
+				local rowIndex = self.filtered[row];
+				local rowData = self:GetRow(rowIndex);
+				local shouldShow = true;
 
 				for col = 1, #self.cols do
 					local cellFrame = rowFrame.cols[col];
+					local columnData = self.cols[col];
 					local fnDoCellUpdate = self.DoCellUpdate;
+					local value;
 
 					if rowData then
-						self.rows[i]:Show();
-						local cellData = self:GetCell(rowData, col);
+						value = rowData[columnData.index];
 
-						if type(cellData) == 'table' and cellData.DoCellUpdate then
-							fnDoCellUpdate = cellData.DoCellUpdate;
-						elseif self.cols[col].DoCellUpdate then
-							fnDoCellUpdate = self.cols[col].DoCellUpdate;
-						elseif rowData.DoCellUpdate then
-							fnDoCellUpdate = rowData.DoCellUpdate;
+						self.rows[i]:Show();
+
+						if rowData.doCellUpdate then
+							fnDoCellUpdate = rowData.doCellUpdate;
+						elseif columnData.doCellUpdate then
+							fnDoCellUpdate = columnData.doCellUpdate;
 						end
 					else
 						self.rows[i]:Hide();
-						fShow = false;
+						shouldShow = false;
 					end
 
-					fnDoCellUpdate(rowFrame, cellFrame, self.data, self.cols, row, self.filtered[row], col, fShow, self);
+					fnDoCellUpdate(self, shouldShow, rowFrame, cellFrame, value, columnData, rowData, rowIndex);
 				end
 			end
 		end
@@ -563,18 +571,18 @@ local methods = {
 		end
 	end,
 
-	FireCellEvent = function(self, frame, event, handler, ...)
-		if not handler(...) then
+	FireCellEvent = function(self, event, handler, ...)
+		if not handler(self, ...) then
 			if self.cellEvents[event] then
-				self.cellEvents[event](...);
+				self.cellEvents[event](self, ...);
 			end
 		end
 	end,
 
-	FireHeaderEvent = function(self, frame, event, handler, ...)
-		if not handler(...) then
+	FireHeaderEvent = function(self, event, handler, ...)
+		if not handler(self, ...) then
 			if self.headerEvents[event] then
-				self.headerEvents[event](...);
+				self.headerEvents[event](self, ...);
 			end
 		end
 	end,
@@ -586,8 +594,11 @@ local methods = {
 
 		if cellEvents then
 			-- Register events for each cell
-			for i, row in ipairs(self.rows) do
-				for j, cell in ipairs(row.cols) do
+			for i, rowFrame in ipairs(self.rows) do
+				for j, cell in ipairs(rowFrame.cols) do
+
+					local columnData = self.cols[j];
+
 					-- unregister old events.
 					if removeOldEvents and self.cellEvents then
 						for event, handler in pairs(self.cellEvents) do
@@ -598,21 +609,23 @@ local methods = {
 					-- register new ones.
 					for event, handler in pairs(cellEvents) do
 						cell:SetScript(event, function(cellFrame, ...)
-							local realIndex = table.filtered[i + table.offset];
-							table:FireCellEvent(cell, event, handler, row, cellFrame, table.data, table.cols, i,
-									realIndex, j, table, ...);
+							local rowIndex = table.filtered[i + table.offset];
+							local rowData = table:GetRow(rowIndex);
+							table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
+									rowIndex, ...);
 						end);
 					end
 
 					-- override a column based events
-					if self.cols[j].events then
+					if columnData.events then
 						for event, handler in pairs(self.cols[j].events) do
 
 							cell:SetScript(event, function(cellFrame, ...)
 								if table.offset then
-									local realIndex = table.filtered[i + table.offset];
-									table:FireCellEvent(cell, event, handler, row, cellFrame, table.data, table.cols, i,
-											realIndex, j, table, ...);
+									local rowIndex = table.filtered[i + table.offset];
+									local rowData = table:GetRow(rowIndex);
+									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
+											rowIndex, ...);
 								end
 							end);
 						end
@@ -624,18 +637,18 @@ local methods = {
 
 		if headerEvents then
 			-- Register events on column headers
-			for j, col in ipairs(self.head.cols) do
+			for columnIndex, columnFrame in ipairs(self.head.cols) do
 				-- unregister old events.
 				if removeOldEvents and self.headerEvents then
 					for event, handler in pairs(self.headerEvents) do
-						col:SetScript(event, nil);
+						columnFrame:SetScript(event, nil);
 					end
 				end
 
 				-- register new ones.
 				for event, handler in pairs(headerEvents) do
-					col:SetScript(event, function(cellFrame, ...)
-						table:FireHeaderEvent(col, event, handler, self.head, cellFrame, table.data, table.cols, nil, nil, j, table, ...);
+					columnFrame:SetScript(event, function(cellFrame, ...)
+						table:FireHeaderEvent(event, handler, columnFrame, self.head, columnIndex, ...);
 					end);
 				end
 			end
@@ -646,28 +659,25 @@ local methods = {
 };
 
 local cellEvents = {
-	OnEnter = function(rowFrame, cellFrame, data, cols, row, realRow, column, table, ...)
+	OnEnter = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex)
 		table:SetHighLightColor(rowFrame, table:GetDefaultHighlight());
-
 		return true;
 	end,
 
-	OnLeave = function(rowFrame, cellFrame, data, cols, row, realRow, column, table, ...)
-		if realRow ~= table.selected or not table.selectionEnabled then
+	OnLeave = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex)
+		if rowIndex ~= table.selected or not table.selectionEnabled then
 			table:SetHighLightColor(rowFrame, table:GetDefaultHighlightBlank());
 		end
 
 		return true;
 	end,
 
-	OnClick = function(rowFrame, cellFrame, data, cols, row, realRow, column, table, button, ...)
-		-- LS: added 'button' argument
+	OnClick = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex, button)
 		if button == 'LeftButton' then
-			-- LS: only handle on LeftButton click (right passes thru)
-			if table:GetSelection() == realRow then
+			if table:GetSelection() == rowIndex then
 				table:ClearSelection();
 			else
-				table:SetSelection(realRow);
+				table:SetSelection(rowIndex);
 			end
 
 			return true;
@@ -676,23 +686,26 @@ local cellEvents = {
 };
 
 local headerEvents = {
-	OnClick = function(rowFrame, cellFrame, data, cols, row, realRow, column, table, button, ...)
+	OnClick = function(table, columnFrame, columnHeadFrame, columnIndex, button, ...)
 		if button == 'LeftButton' then
-			for i, col in ipairs(cols) do
-				if i ~= column then
-					cols[i].sort = nil;
+			for i, columnFrame in ipairs(columnHeadFrame.cols) do
+				if i ~= columnIndex then
+					columnFrame.sort = nil;
 				end
 			end
 
 			local sortOrder = 'asc';
-			if not cols[column].sort and cols[column].defaultSort then
+			local cols = table.cols;
+			local column = cols[columnIndex];
+
+			if not column.sort and column.defaultSort then
 				-- sort by columns default sort first;
-				sortOrder = cols[column].defaultSort;
-			elseif cols[column].sort and cols[column].sort:lower() == 'asc' then
+				sortOrder = column.defaultSort;
+			elseif column.sort and column.sort:lower() == 'asc' then
 				sortOrder = 'dsc';
 			end
 
-			cols[column].sort = sortOrder;
+			column.sort = sortOrder;
 			table:SortData();
 
 			return true;
@@ -701,15 +714,8 @@ local headerEvents = {
 };
 
 function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
-	local scrollTable = {};
+	local scrollTable, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
 
-	local mainFrame, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
-
-	scrollTable.frame = mainFrame;
-	scrollTable.scrollFrame = scrollFrame;
-	scrollTable.scrollChild = scrollBar;
-
-	scrollTable.showing = true;
 	scrollTable.displayRows = numRows or 12;
 	scrollTable.rowHeight = rowHeight or 15;
 	scrollTable.cols = cols;
@@ -725,11 +731,6 @@ function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 	highlight = highlight or {};
 	scrollTable:SetDefaultHighlight(highlight.r, highlight.g, highlight.b, highlight.a); -- highlight color
 	scrollTable:SetDefaultHighlightBlank(); -- non highlight color
-
-	scrollFrame:SetScript('OnHide', function(self, ...)
-		self:Show();
-	end);
-
 	scrollTable.scrollFrame = scrollFrame;
 
 	scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
