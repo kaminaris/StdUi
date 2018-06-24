@@ -26,6 +26,8 @@ function StdUi:ObjectList(parent, itemsTable, create, update, data, padding, oX,
 		itemsTable[i]:Hide();
 	end
 
+	local totalHeight = -oY;
+
 	for i = 1, #data do
 		local itemFrame = itemsTable[i];
 
@@ -43,16 +45,18 @@ function StdUi:ObjectList(parent, itemsTable, create, update, data, padding, oX,
 		update(parent, itemFrame, data[i], i);
 		itemFrame:Show();
 
+		totalHeight = totalHeight + itemFrame:GetHeight();
 		if i == 1 then
 			-- glue first item to offset
 			self:GlueTop(itemFrame, parent, oX, oY, 'LEFT');
 		else
 			-- glue next items to previous
 			self:GlueBelow(itemFrame, itemsTable[i - 1], 0, -padding);
+			totalHeight = totalHeight + padding;
 		end
 	end
 
-	return itemsTable;
+	return itemsTable, totalHeight;
 end
 
 --- Creates frame list that reuses frames and is based on array data

@@ -27,6 +27,7 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 	end
 
 	self:HookDisabledBackdrop(editBox);
+	self:HookHoverBorder(editBox);
 	self:ApplyBackdrop(editBox);
 	self:SetObjSize(editBox, width, height);
 

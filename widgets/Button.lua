@@ -73,6 +73,7 @@ function StdUi:HighlightButton(parent, width, height, text)
 	button.text = self:ButtonLabel(button, text);
 
 	local hTex = self:HighlightButtonTexture(button);
+	hTex:SetBlendMode('ADD');
 
 	button:SetHighlightTexture(hTex);
 	button.highlightTexture = hTex;
@@ -83,13 +84,16 @@ end
 --- @return Button
 function StdUi:Button(parent, width, height, text)
 	local button = self:HighlightButton(parent, width, height, text)
+	button:SetHighlightTexture(nil);
 
 	self:ApplyBackdrop(button);
 	self:HookDisabledBackdrop(button);
+	self:HookHoverBorder(button);
+
 	return button;
 end
 
 function StdUi:ButtonAutoWidth(button, padding)
 	padding = padding or 5;
-	button:SetWidth(button.text:GetWidth() + padding * 2);
+	button:SetWidth(button.text:GetStringWidth() + padding * 2);
 end

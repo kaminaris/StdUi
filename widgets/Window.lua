@@ -8,6 +8,7 @@ end
 function StdUi:Window(parent, title, width, height)
 	parent = parent or UIParent;
 	local frame = self:PanelWithTitle(parent, width, height, title);
+	frame:SetClampedToScreen(true);
 	frame.titlePanel.isWidget = false;
 	self:MakeDraggable(frame); -- , frame.titlePanel
 	self:LayoutConfig(frame, 20);

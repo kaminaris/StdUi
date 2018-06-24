@@ -78,6 +78,40 @@ function StdUi:SetTextColor(fontString, colorType)
 	end
 end
 
+StdUi.SetHighlightBorder = function(self)
+	if self.target then
+		self = self.target;
+	end
+
+	if self.isDisabled then
+		return;
+	end
+
+	local hc = StdUi.config.highlight.color;
+	if not self.origBackdropBorderColor then
+		self.origBackdropBorderColor = {self:GetBackdropBorderColor()};
+	end
+	self:SetBackdropBorderColor(hc.r, hc.g, hc.b, 1);
+end
+
+StdUi.ResetHighlightBorder = function(self)
+	if self.target then
+		self = self.target;
+	end
+
+	if self.isDisabled then
+		return;
+	end
+
+	local hc = self.origBackdropBorderColor;
+	self:SetBackdropBorderColor(unpack(hc));
+end
+
+function StdUi:HookHoverBorder(object)
+	object:HookScript('OnEnter', self.SetHighlightBorder);
+	object:HookScript('OnLeave', self.ResetHighlightBorder);
+end
+
 function StdUi:ApplyBackdrop(frame, type, border, insets)
 	local config = frame.config or self.config;
 	local backdrop = {
@@ -117,6 +151,9 @@ function StdUi:ClearBackdrop(frame)
 end
 
 function StdUi:ApplyDisabledBackdrop(frame, enabled)
+	if frame.target then
+		frame = frame.target;
+	end
 	if enabled then
 		self:ApplyBackdrop(frame, 'button', 'border');
 		self:SetTextColor(frame, 'color');
@@ -127,6 +164,7 @@ function StdUi:ApplyDisabledBackdrop(frame, enabled)
 		if frame.text then
 			self:SetTextColor(frame.text, 'color');
 		end
+		frame.isDisabled = false;
 	else
 		self:ApplyBackdrop(frame, 'buttonDisabled', 'borderDisabled');
 		self:SetTextColor(frame, 'colorDisabled');
@@ -137,6 +175,7 @@ function StdUi:ApplyDisabledBackdrop(frame, enabled)
 		if frame.text then
 			self:SetTextColor(frame.text, 'colorDisabled');
 		end
+		frame.isDisabled = true;
 	end
 end
 

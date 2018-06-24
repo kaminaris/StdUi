@@ -108,10 +108,10 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 	end
 
 	if automatic then
-		owner:SetScript('OnEnter', function ()
+		owner:HookScript('OnEnter', function ()
 			tip:Show();
 		end);
-		owner:SetScript('OnLeave', function ()
+		owner:HookScript('OnLeave', function ()
 			tip:Hide();
 		end);
 	end

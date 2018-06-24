@@ -29,13 +29,13 @@ local methods = {
 	--end,
 
 	SetAutoHeight = function(self)
-		self:SetHeight((self.displayRows * self.rowHeight) + 10);
+		self:SetHeight((self.numberOfRows * self.rowHeight) + 10);
 		self:Refresh();
 	end,
 
 	SetAutoWidth = function(self)
 		local width = 13;
-		for num, col in pairs(self.cols) do
+		for num, col in pairs(self.columns) do
 			width = width + col.width;
 		end
 		self:SetWidth(width + 20);
@@ -47,24 +47,25 @@ local methods = {
 	-------------------------------------------------------------
 
 	--- Set the column info for the scrolling table
-	--- @usage st:SetColumns(cols)
-	SetColumns = function(self, cols)
+	--- @usage st:SetColumns(columns)
+	SetColumns = function(self, columns)
 		local table = self; -- reference saved for closure
-		self.cols = cols;
+		self.columns = columns;
 
-		local columnHeadFrame = self.head
+		local columnHeadFrame = self.head;
+		
 		if not columnHeadFrame then
 			columnHeadFrame = CreateFrame('Frame', nil, self); --  StdUi:Panel(self.frame); --
 			columnHeadFrame:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 4, 0);
 			columnHeadFrame:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', -4, 0);
 			columnHeadFrame:SetHeight(self.rowHeight);
-			columnHeadFrame.cols = {};
+			columnHeadFrame.columns = {};
 			self.head = columnHeadFrame;
 		end
 
-		for i = 1, #cols do
-			local columnFrame = columnHeadFrame.cols[i];
-			if not columnHeadFrame.cols[i] then
+		for i = 1, #columns do
+			local columnFrame = columnHeadFrame.columns[i];
+			if not columnHeadFrame.columns[i] then
 				columnFrame = StdUi:HighlightButton(columnHeadFrame);
 				columnFrame:SetPushedTextOffset(0, 0);
 
@@ -79,12 +80,12 @@ local methods = {
 					end
 				end
 
-				columnHeadFrame.cols[i] = columnFrame;
+				columnHeadFrame.columns[i] = columnFrame;
 			end
 
-			local align = cols[i].align or 'LEFT';
+			local align = columns[i].align or 'LEFT';
 			columnFrame.text:SetJustifyH(align);
-			columnFrame.text:SetText(cols[i].name);
+			columnFrame.text:SetText(columns[i].name);
 
 			if align == 'LEFT' then
 				columnFrame.arrow:ClearAllPoints();
@@ -94,39 +95,39 @@ local methods = {
 				StdUi:GlueLeft(columnFrame.arrow, columnFrame, 5, 0, true);
 			end
 
-			if cols[i].sortable == false and cols[i].sortable ~= nil then
+			if columns[i].sortable == false and columns[i].sortable ~= nil then
 
 			else
 
 			end
 
 			if i > 1 then
-				columnFrame:SetPoint('LEFT', columnHeadFrame.cols[i - 1], 'RIGHT', 0, 0);
+				columnFrame:SetPoint('LEFT', columnHeadFrame.columns[i - 1], 'RIGHT', 0, 0);
 			else
 				columnFrame:SetPoint('LEFT', columnHeadFrame, 'LEFT', 2, 0);
 			end
 
 			columnFrame:SetHeight(self.rowHeight);
-			columnFrame:SetWidth(cols[i].width);
+			columnFrame:SetWidth(columns[i].width);
 		end
 
-		self:SetDisplayRows(self.displayRows, self.rowHeight);
+		self:SetDisplayRows(self.numberOfRows, self.rowHeight);
 		self:SetAutoWidth();
 	end,
 
 	--- Set the number and height of displayed rows
 	--- @usage st:SetDisplayRows(10, 15)
-	SetDisplayRows = function(self, num, rowHeight)
+	SetDisplayRows = function(self, numberOfRows, rowHeight)
 		local table = self; -- reference saved for closure
 		-- should always set columns first
-		self.displayRows = num;
+		self.numberOfRows = numberOfRows;
 		self.rowHeight = rowHeight;
 
 		if not self.rows then
 			self.rows = {};
 		end
 
-		for i = 1, num do
+		for i = 1, numberOfRows do
 			local rowFrame = self.rows[i];
 
 			if not rowFrame then
@@ -144,26 +145,25 @@ local methods = {
 				rowFrame:SetHeight(rowHeight);
 			end
 
-			if not rowFrame.cols then
-				rowFrame.cols = {};
+			if not rowFrame.columns then
+				rowFrame.columns = {};
 			end
 
-			for j = 1, #self.cols do
-				local columnData = self.cols[j];
+			for j = 1, #self.columns do
+				local columnData = self.columns[j];
 
-				local cell = rowFrame.cols[j];
+				local cell = rowFrame.columns[j];
 				if not cell then
 					cell = CreateFrame('Button', nil, rowFrame);
 					cell.text = StdUi:FontString(cell, '');
 
-					rowFrame.cols[j] = cell;
+					rowFrame.columns[j] = cell;
 
 					local align = columnData.align or 'LEFT';
 
 					cell.text:SetJustifyH(align);
 					cell:EnableMouse(true);
 					cell:RegisterForClicks('AnyUp');
-
 
 					if self.cellEvents then
 						for event, handler in pairs(self.cellEvents) do
@@ -195,29 +195,29 @@ local methods = {
 				end
 
 				if j > 1 then
-					cell:SetPoint('LEFT', rowFrame.cols[j - 1], 'RIGHT', 0, 0);
+					cell:SetPoint('LEFT', rowFrame.columns[j - 1], 'RIGHT', 0, 0);
 				else
 					cell:SetPoint('LEFT', rowFrame, 'LEFT', 2, 0);
 				end
 
 				cell:SetHeight(rowHeight);
-				cell:SetWidth(self.cols[j].width);
+				cell:SetWidth(self.columns[j].width);
 
 				cell.text:SetPoint('TOP', cell, 'TOP', 0, 0);
 				cell.text:SetPoint('BOTTOM', cell, 'BOTTOM', 0, 0);
-				cell.text:SetWidth(self.cols[j].width - 2 * lrpadding);
+				cell.text:SetWidth(self.columns[j].width - 2 * lrpadding);
 			end
 
-			j = #self.cols + 1;
-			col = rowFrame.cols[j];
+			j = #self.columns + 1;
+			col = rowFrame.columns[j];
 			while col do
 				col:Hide();
 				j = j + 1;
-				col = rowFrame.cols[j];
+				col = rowFrame.columns[j];
 			end
 		end
 
-		for i = num + 1, #self.rows do
+		for i = numberOfRows + 1, #self.rows do
 			self.rows[i]:Hide();
 		end
 
@@ -245,8 +245,8 @@ local methods = {
 		-- go on sorting
 		if not sortBy then
 			local i = 1;
-			while i <= #self.cols and not sortBy do
-				if self.cols[i].sort then
+			while i <= #self.columns and not sortBy do
+				if self.columns[i].sort then
 					sortBy = i;
 				end
 				i = i + 1;
@@ -255,7 +255,7 @@ local methods = {
 
 		if sortBy then
 			table.sort(self.sortTable, function(rowA, rowB)
-				local column = self.cols[sortBy];
+				local column = self.columns[sortBy];
 				if column.compareSort then
 					return column.compareSort(self, rowA, rowB, sortBy);
 				else
@@ -274,7 +274,7 @@ local methods = {
 	CompareSort = function(self, rowA, rowB, sortBy)
 		local a = self:GetRow(rowA);
 		local b = self:GetRow(rowB);
-		local column = self.cols[sortBy];
+		local column = self.columns[sortBy];
 		local idx = column.index;
 
 		local direction = column.sort or column.defaultSort or 'asc';
@@ -325,55 +325,13 @@ local methods = {
 			frame.highlight = frame:CreateTexture(nil, 'OVERLAY');
 			frame.highlight:SetAllPoints(frame);
 		end
-		frame.highlight:SetColorTexture(color.r, color.g, color.b, color.a);
-	end,
-
-
-	GetDefaultHighlightBlank = function(self)
-		return self.defaultHighlightBlank;
-	end,
-
-	SetDefaultHighlightBlank = function(self, red, green, blue, alpha)
-		if not self.defaultHighlightBlank then
-			self.defaultHighlightBlank = StdUi.config.highlight.blank;
-		end
-
-		if red then
-			self.defaultHighlightBlank.r = red;
-		end
-		if green then
-			self.defaultHighlightBlank.g = green;
-		end
-		if blue then
-			self.defaultHighlightBlank.b = blue;
-		end
-		if alpha then
-			self.defaultHighlightBlank.a = alpha;
+		if not color then
+			frame.highlight:SetColorTexture(0, 0, 0, 0);
+		else
+			frame.highlight:SetColorTexture(color.r, color.g, color.b, color.a);
 		end
 	end,
 
-	GetDefaultHighlight = function(self)
-		return self.defaultHighlight;
-	end,
-
-	SetDefaultHighlight = function(self, red, green, blue, alpha)
-		if not self.defaultHighlight then
-			self.defaultHighlight = StdUi.config.highlight.color;
-		end
-
-		if red then
-			self.defaultHighlight.r = red;
-		end
-		if green then
-			self.defaultHighlight.g = green;
-		end
-		if blue then
-			self.defaultHighlight.b = blue;
-		end
-		if alpha then
-			self.defaultHighlight.a = alpha;
-		end
-	end,
 
 	-------------------------------------------------------------
 	--- Selection Methods
@@ -438,7 +396,7 @@ local methods = {
 	--- @usage st:IsRowVisible(realrow)
 	--- @thanks sapu94
 	IsRowVisible = function(self, rowIndex)
-		return (rowIndex > self.offset and rowIndex <= (self.displayRows + self.offset));
+		return (rowIndex > self.offset and rowIndex <= (self.numberOfRows + self.offset));
 	end,
 
 	-------------------------------------------------------------
@@ -488,9 +446,9 @@ local methods = {
 
 			if table.selectionEnabled then
 				if table.selected == rowIndex then
-					table:SetHighLightColor(rowFrame, table:GetDefaultHighlight());
+					table:SetHighLightColor(rowFrame, StdUi.config.highlight.color);
 				else
-					table:SetHighLightColor(rowFrame, table:GetDefaultHighlightBlank());
+					table:SetHighLightColor(rowFrame, nil);
 				end
 			end
 		else
@@ -500,12 +458,12 @@ local methods = {
 
 	Refresh = function(self)
 		local scrollFrame = self.scrollFrame;
-		StdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.displayRows, self.rowHeight);
+		StdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.numberOfRows, self.rowHeight);
 
 		local o = StdUi.FauxScrollFrameMethods.GetOffset(scrollFrame);
 		self.offset = o;
 
-		for i = 1, self.displayRows do
+		for i = 1, self.numberOfRows do
 			local row = i + o;
 
 			if self.rows then
@@ -515,9 +473,9 @@ local methods = {
 				local rowData = self:GetRow(rowIndex);
 				local shouldShow = true;
 
-				for col = 1, #self.cols do
-					local cellFrame = rowFrame.cols[col];
-					local columnData = self.cols[col];
+				for col = 1, #self.columns do
+					local cellFrame = rowFrame.columns[col];
+					local columnData = self.columns[col];
 					local fnDoCellUpdate = self.DoCellUpdate;
 					local value;
 
@@ -551,11 +509,11 @@ local methods = {
 			return ;
 		end
 
-		for i = 1, #self.cols do
-			local col = self.head.cols[i];
+		for i = 1, #self.columns do
+			local col = self.head.columns[i];
 			if col then
 				if i == sortBy then
-					local column = self.cols[sortBy];
+					local column = self.columns[sortBy];
 					local direction = column.sort or column.defaultSort or 'asc';
 					if direction == 'asc' then
 						col.arrow:SetTexCoord(0, 0.5625, 0, 1);
@@ -595,9 +553,9 @@ local methods = {
 		if cellEvents then
 			-- Register events for each cell
 			for i, rowFrame in ipairs(self.rows) do
-				for j, cell in ipairs(rowFrame.cols) do
+				for j, cell in ipairs(rowFrame.columns) do
 
-					local columnData = self.cols[j];
+					local columnData = self.columns[j];
 
 					-- unregister old events.
 					if removeOldEvents and self.cellEvents then
@@ -618,7 +576,7 @@ local methods = {
 
 					-- override a column based events
 					if columnData.events then
-						for event, handler in pairs(self.cols[j].events) do
+						for event, handler in pairs(self.columns[j].events) do
 
 							cell:SetScript(event, function(cellFrame, ...)
 								if table.offset then
@@ -637,7 +595,7 @@ local methods = {
 
 		if headerEvents then
 			-- Register events on column headers
-			for columnIndex, columnFrame in ipairs(self.head.cols) do
+			for columnIndex, columnFrame in ipairs(self.head.columns) do
 				-- unregister old events.
 				if removeOldEvents and self.headerEvents then
 					for event, handler in pairs(self.headerEvents) do
@@ -660,13 +618,13 @@ local methods = {
 
 local cellEvents = {
 	OnEnter = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex)
-		table:SetHighLightColor(rowFrame, table:GetDefaultHighlight());
+		table:SetHighLightColor(rowFrame, StdUi.config.highlight.color);
 		return true;
 	end,
 
 	OnLeave = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex)
 		if rowIndex ~= table.selected or not table.selectionEnabled then
-			table:SetHighLightColor(rowFrame, table:GetDefaultHighlightBlank());
+			table:SetHighLightColor(rowFrame, nil);
 		end
 
 		return true;
@@ -688,15 +646,18 @@ local cellEvents = {
 local headerEvents = {
 	OnClick = function(table, columnFrame, columnHeadFrame, columnIndex, button, ...)
 		if button == 'LeftButton' then
-			for i, columnFrame in ipairs(columnHeadFrame.cols) do
+
+			local columns = table.columns;
+			local column = columns[columnIndex];
+			
+			-- clear sort for other columns
+			for i, columnFrame in ipairs(columnHeadFrame.columns) do
 				if i ~= columnIndex then
-					columnFrame.sort = nil;
+					columns[i].sort = nil;
 				end
 			end
 
 			local sortOrder = 'asc';
-			local cols = table.cols;
-			local column = cols[columnIndex];
 
 			if not column.sort and column.defaultSort then
 				-- sort by columns default sort first;
@@ -713,12 +674,12 @@ local headerEvents = {
 	end
 };
 
-function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
+function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
 	local scrollTable, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
 
-	scrollTable.displayRows = numRows or 12;
+	scrollTable.numberOfRows = numRows or 12;
 	scrollTable.rowHeight = rowHeight or 15;
-	scrollTable.cols = cols;
+	scrollTable.columns = columns;
 	scrollTable.data = {};
 	scrollTable.cellEvents = cellEvents;
 	scrollTable.headerEvents = headerEvents;
@@ -728,9 +689,6 @@ function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 		scrollTable[methodName] = method;
 	end
 
-	highlight = highlight or {};
-	scrollTable:SetDefaultHighlight(highlight.r, highlight.g, highlight.b, highlight.a); -- highlight color
-	scrollTable:SetDefaultHighlightBlank(); -- non highlight color
 	scrollTable.scrollFrame = scrollFrame;
 
 	scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
@@ -742,7 +700,7 @@ function StdUi:ScrollTable(parent, cols, numRows, rowHeight, highlight)
 	end);
 
 	scrollTable:SortData();
-	scrollTable:SetColumns(scrollTable.cols);
+	scrollTable:SetColumns(scrollTable.columns);
 	scrollTable:UpdateSortArrows();
 	scrollTable:RegisterEvents(scrollTable.cellEvents, scrollTable.headerEvents);
 	-- no need to assign it once again and override all column events
