@@ -6,8 +6,8 @@ end
 
 --- Draws table in a panel according to data, example:
 --- local columns = {
----		{header = 'Name', dataIndex = 'name', width = 20, align = 'RIGHT'},
----		{header = 'Price', dataIndex = 'price', width = 60},
+---		{header = 'Name', index = 'name', width = 20, align = 'RIGHT'},
+---		{header = 'Price', index = 'price', width = 60},
 --- };
 --- local data {
 ---		{name = 'Item one', price = 12.22},
@@ -64,7 +64,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 				StdUi:GlueTop(column.text, self, marginLeft, 0, 'LEFT');
 				marginLeft = marginLeft + col.width;
 
-				column.dataIndex = col.dataIndex
+				column.index = col.index
 				column.width = col.width
 			end
 		end
@@ -95,7 +95,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 
 				local cell = self.rows[y][x];
 
-				cell.text:SetText(row[col.dataIndex]);
+				cell.text:SetText(row[col.index]);
 				cell.text:SetWidth(col.width);
 				cell.text:SetHeight(rowHeight);
 				cell.text:ClearAllPoints();

@@ -8,6 +8,7 @@ StdUi.tooltips = {}
 StdUi.frameTooltips = {}
 
 --- Standard blizzard tooltip
+---@return GameTooltip
 function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 	--- @type GameTooltip
 	local tip;
@@ -22,7 +23,7 @@ function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 	end
 
 	if automatic then
-		owner:SetScript('OnEnter', function ()
+		owner:HookScript('OnEnter', function ()
 			tip:SetOwner(owner);
 			tip:SetPoint(anchor);
 			if type(text) == 'string' then
@@ -38,7 +39,7 @@ function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 
 			tip:Show();
 		end);
-		owner:SetScript('OnLeave', function ()
+		owner:HookScript('OnLeave', function ()
 			tip:Hide();
 		end);
 	end

@@ -100,7 +100,7 @@ function StdUi:EditBox(parent, width, height, text, validator)
 			end
 
 			if self.OnValueChanged and tostring(self.lastValue) ~= tostring(self.value) then
-				self:OnValueChanged();
+				self:OnValueChanged(self.value);
 				self.lastValue = self.value;
 			end
 		end
@@ -181,7 +181,13 @@ end
 function StdUi:MultiLineBox(parent, width, height, text)
 	local editBox = CreateFrame('EditBox');
 	local panel, scrollFrame = self:ScrollFrame(parent, width, height, editBox);
+
+	scrollFrame.target = panel;
+	editBox.target = panel;
+
 	self:ApplyBackdrop(panel, 'button');
+	self:HookHoverBorder(scrollFrame);
+	self:HookHoverBorder(editBox);
 
 	editBox:SetWidth(scrollFrame:GetWidth());
 	--editBox:SetHeight(scrollFrame:GetHeight());
@@ -212,6 +218,10 @@ function StdUi:MultiLineBox(parent, width, height, text)
 			end
 		end
 	end)
+
+	scrollFrame:HookScript('OnMouseDown', function(sf, button)
+		sf.scrollChild:SetFocus();
+	end);
 
 	scrollFrame:HookScript('OnVerticalScroll', function(self, offset)
 		self.scrollChild:SetHitRectInsets(0, 0, offset, self.scrollChild:GetHeight() - offset - self:GetHeight());
