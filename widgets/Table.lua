@@ -16,6 +16,7 @@ end
 --- }
 ---
 function StdUi:Table(parent, width, height, rowHeight, columns, data)
+  local this = self;
 	local panel = self:Panel(parent, width, height);
 	panel.rowHeight = rowHeight;
 
@@ -47,7 +48,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 			if col.header and strlen(col.header) > 0 then
 				if not self.headers[i] then
 					self.headers[i] = {
-						text = StdUi:FontString(self, ''),
+						text = this:FontString(self, ''),
 					};
 				end
 
@@ -61,7 +62,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 					column.text:SetJustifyH(col.align);
 				end
 
-				StdUi:GlueTop(column.text, self, marginLeft, 0, 'LEFT');
+				this:GlueTop(column.text, self, marginLeft, 0, 'LEFT');
 				marginLeft = marginLeft + col.width;
 
 				column.index = col.index
@@ -89,7 +90,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 
 				if not self.rows[y][x] then
 					self.rows[y][x] = {
-						text = StdUi:FontString(self, '');
+						text = this:FontString(self, '');
 					};
 				end
 
@@ -103,7 +104,7 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 					cell.text:SetJustifyH(col.align);
 				end
 
-				StdUi:GlueTop(cell.text, self, marginLeft, marginTop, 'LEFT');
+				this:GlueTop(cell.text, self, marginLeft, marginTop, 'LEFT');
 				marginLeft = marginLeft + col.width;
 			end
 

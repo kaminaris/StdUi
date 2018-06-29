@@ -58,7 +58,7 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 		self:EnumerateTabs(function(tab)
 			local btn = tab.button;
 			if not btn then
-				btn = StdUi:Button(self, nil, buttonHeight);
+				btn = this:Button(self, nil, buttonHeight);
 				btn:SetScript('OnClick', function (btn)
 					tabFrame:SelectTab(btn.tab.name);
 				end);
