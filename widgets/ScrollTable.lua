@@ -422,7 +422,7 @@ local methods = {
 					cellFrame.texture:SetTexture(value);
 				else
 					local iconSize = columnData.iconSize or table.rowHeight;
-					cellFrame.texture = self.stdUi:Texture(cellFrame, iconSize, iconSize, value);
+					cellFrame.texture = table.stdUi:Texture(cellFrame, iconSize, iconSize, value);
 					cellFrame.texture:SetPoint('CENTER', 0, 0);
 				end
 			else

@@ -16,7 +16,7 @@ end
 --- }
 ---
 function StdUi:Table(parent, width, height, rowHeight, columns, data)
-  local this = self;
+  	local this = self;
 	local panel = self:Panel(parent, width, height);
 	panel.rowHeight = rowHeight;
 
