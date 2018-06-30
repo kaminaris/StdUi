@@ -46,7 +46,7 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	);
 	local label = self:Label(editBox, placeholderText);
 	label:SetFont(self.config.font.familly, self.config.font.size, 'NONE');
-	StdUi:SetTextColor(label, 'colorDisabled');
+	self:SetTextColor(label, 'colorDisabled');
 
 	self:GlueLeft(icon, editBox, 5, 0, true);
 	self:GlueRight(label, icon, 2, 0);

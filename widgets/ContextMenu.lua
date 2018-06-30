@@ -54,22 +54,22 @@ StdUi.ContextMenuMethods = {
 		local itemFrame;
 
 		if data.title then
-			itemFrame = StdUi:Frame(parent, nil, 20);
-			itemFrame.text = StdUi:Label(itemFrame);
-			StdUi:GlueLeft(itemFrame.text, itemFrame, 0, 0, true);
+			itemFrame = parent.stdUi:Frame(parent, nil, 20);
+			itemFrame.text = parent.stdUi:Label(itemFrame);
+			parent.stdUi:GlueLeft(itemFrame.text, itemFrame, 0, 0, true);
 		elseif data.isSeparator then
-			itemFrame = StdUi:Frame(parent, nil, 20);
-			itemFrame.texture = StdUi:Texture(itemFrame, nil, 8,
+			itemFrame = parent.stdUi:Frame(parent, nil, 20);
+			itemFrame.texture = parent.stdUi:Texture(itemFrame, nil, 8,
 				[[Interface\COMMON\UI-TooltipDivider-Transparent]]);
 			itemFrame.texture:SetPoint('CENTER');
 			itemFrame.texture:SetPoint('LEFT');
 			itemFrame.texture:SetPoint('RIGHT');
 		elseif data.checkbox then
-			itemFrame = StdUi:Checkbox(parent, '');
+			itemFrame = parent.stdUi:Checkbox(parent, '');
 		elseif data.radio then
-			itemFrame = StdUi:Radio(parent, '', data.radioGroup);
+			itemFrame = parent.stdUi:Radio(parent, '', data.radioGroup);
 		elseif data.text then
-			itemFrame = StdUi:HighlightButton(parent, nil, 20);
+			itemFrame = parent.stdUi:HighlightButton(parent, nil, 20);
 		end
 
 		if not data.isSeparator then
@@ -77,11 +77,11 @@ StdUi.ContextMenuMethods = {
 		end
 
 		if not data.isSeparator and data.children then
-			itemFrame.icon = StdUi:Texture(itemFrame, 10, 10, [[Interface\Buttons\SquareButtonTextures]]);
+			itemFrame.icon = parent.stdUi:Texture(itemFrame, 10, 10, [[Interface\Buttons\SquareButtonTextures]]);
 			itemFrame.icon:SetTexCoord(0.42187500, 0.23437500, 0.01562500, 0.20312500);
-			StdUi:GlueRight(itemFrame.icon, itemFrame, -4, 0, true);
+			parent.stdUi:GlueRight(itemFrame.icon, itemFrame, -4, 0, true);
 
-			itemFrame.childContext = StdUi:ContextMenu(parent, data.children, true, parent.level + 1);
+			itemFrame.childContext = parent.stdUi:ContextMenu(parent, data.children, true, parent.level + 1);
 			itemFrame.parentContext = parent;
 			-- this will keep propagating mainContext thru all children
 			itemFrame.mainContext = parent.mainContext;
@@ -117,7 +117,7 @@ StdUi.ContextMenuMethods = {
 
 		if data.title then
 			itemFrame.text:SetText(data.title);
-			StdUi:ButtonAutoWidth(itemFrame);
+			parent.stdUi:ButtonAutoWidth(itemFrame);
 		elseif data.checkbox or data.radio then
 			itemFrame.text:SetText(data.checkbox or data.radio);
 			itemFrame:AutoWidth();
@@ -126,7 +126,7 @@ StdUi.ContextMenuMethods = {
 			end
 		elseif data.text then
 			itemFrame:SetText(data.text);
-			StdUi:ButtonAutoWidth(itemFrame);
+			parent.stdUi:ButtonAutoWidth(itemFrame);
 		end
 
 		if data.children then
@@ -151,7 +151,7 @@ StdUi.ContextMenuMethods = {
 			self.optionFrames = {};
 		end
 
-		local _, totalHeight = StdUi:ObjectList(
+		local _, totalHeight = self.stdUi:ObjectList(
 			self,
 			self.optionFrames,
 			self.CreateItem,
@@ -189,6 +189,7 @@ StdUi.ContextMenuEvents = {
 function StdUi:ContextMenu(parent, options, stopHook, level)
 	---@class ContextMenu
 	local panel = self:Panel(parent);
+	panel.stdUi = self;
 	panel.level = level or 1;
 	panel.padding = 16;
 

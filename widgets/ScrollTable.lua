@@ -66,10 +66,10 @@ local methods = {
 		for i = 1, #columns do
 			local columnFrame = columnHeadFrame.columns[i];
 			if not columnHeadFrame.columns[i] then
-				columnFrame = StdUi:HighlightButton(columnHeadFrame);
+				columnFrame = self.stdUi:HighlightButton(columnHeadFrame);
 				columnFrame:SetPushedTextOffset(0, 0);
 
-				columnFrame.arrow = StdUi:Texture(columnFrame, 8, 8, [[Interface\Buttons\UI-SortArrow]]);
+				columnFrame.arrow = self.stdUi:Texture(columnFrame, 8, 8, [[Interface\Buttons\UI-SortArrow]]);
 				columnFrame.arrow:Hide();
 
 				if self.headerEvents then
@@ -89,10 +89,10 @@ local methods = {
 
 			if align == 'LEFT' then
 				columnFrame.arrow:ClearAllPoints();
-				StdUi:GlueRight(columnFrame.arrow, columnFrame, 0, 0, true);
+				self.stdUi:GlueRight(columnFrame.arrow, columnFrame, 0, 0, true);
 			else
 				columnFrame.arrow:ClearAllPoints();
-				StdUi:GlueLeft(columnFrame.arrow, columnFrame, 5, 0, true);
+				self.stdUi:GlueLeft(columnFrame.arrow, columnFrame, 5, 0, true);
 			end
 
 			if columns[i].sortable == false and columns[i].sortable ~= nil then
@@ -155,7 +155,7 @@ local methods = {
 				local cell = rowFrame.columns[j];
 				if not cell then
 					cell = CreateFrame('Button', nil, rowFrame);
-					cell.text = StdUi:FontString(cell, '');
+					cell.text = self.stdUi:FontString(cell, '');
 
 					rowFrame.columns[j] = cell;
 
@@ -422,7 +422,7 @@ local methods = {
 					cellFrame.texture:SetTexture(value);
 				else
 					local iconSize = columnData.iconSize or table.rowHeight;
-					cellFrame.texture = StdUi:Texture(cellFrame, iconSize, iconSize, value);
+					cellFrame.texture = self.stdUi:Texture(cellFrame, iconSize, iconSize, value);
 					cellFrame.texture:SetPoint('CENTER', 0, 0);
 				end
 			else
@@ -675,8 +675,9 @@ local headerEvents = {
 };
 
 function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
-	local scrollTable, scrollFrame, scrollChild, scrollBar = StdUi:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
+	local scrollTable, scrollFrame, scrollChild, scrollBar = self:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
 
+	scrollTable.stdUi = self;
 	scrollTable.numberOfRows = numRows or 12;
 	scrollTable.rowHeight = rowHeight or 15;
 	scrollTable.columns = columns;

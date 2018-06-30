@@ -45,7 +45,7 @@ function StdUi:Dropdown(parent, width, height, options, value)
 		scrollChild:SetHeight(optionsHeight);
 
 		local buttonCreate = function(parent, i)
-			local optionButton = StdUi:HighlightButton(parent, parent:GetWidth(), 20, '');
+			local optionButton = this:HighlightButton(parent, parent:GetWidth(), 20, '');
 			optionButton:SetFrameLevel(parent:GetFrameLevel() + 2);
 			optionButton.text:SetJustifyH('LEFT');
 
