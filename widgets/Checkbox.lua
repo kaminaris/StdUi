@@ -42,6 +42,10 @@ function StdUi:Checkbox(parent, text, width, height)
 	function checkbox:SetChecked(flag)
 		self.isChecked = flag;
 
+		if self.OnValueChanged then
+			self:OnValueChanged(flag, self.value);
+		end
+
 		if not flag then
 			self.checkedTexture:Hide();
 			self.disabledCheckedTexture:Hide();
@@ -55,6 +59,10 @@ function StdUi:Checkbox(parent, text, width, height)
 			self.checkedTexture:Show();
 			self.disabledCheckedTexture:Hide();
 		end
+	end
+
+	function checkbox:SetText(text)
+		self.text:SetText(text);
 	end
 
 	function checkbox:SetValue(value)
