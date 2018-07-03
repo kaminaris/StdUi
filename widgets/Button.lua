@@ -66,8 +66,8 @@ end
 
 --- Creates a button with only a highlight
 --- @return Button
-function StdUi:HighlightButton(parent, width, height, text)
-	local button = CreateFrame('Button', nil, parent);
+function StdUi:HighlightButton(parent, width, height, text, inherit)
+	local button = CreateFrame('Button', nil, parent, inherit);
 	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 	button.text = self:ButtonLabel(button, text);
@@ -82,8 +82,8 @@ function StdUi:HighlightButton(parent, width, height, text)
 end
 
 --- @return Button
-function StdUi:Button(parent, width, height, text)
-	local button = self:HighlightButton(parent, width, height, text)
+function StdUi:Button(parent, width, height, text, inherit)
+	local button = self:HighlightButton(parent, width, height, text, inherit)
 	button:SetHighlightTexture(nil);
 
 	self:ApplyBackdrop(button);
