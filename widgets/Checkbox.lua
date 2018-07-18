@@ -31,10 +31,6 @@ function StdUi:Checkbox(parent, text, width, height)
 	checkbox.disabledCheckedTexture:SetAllPoints();
 	checkbox.disabledCheckedTexture:Hide();
 
-	self:ApplyBackdrop(checkbox.target);
-	self:HookDisabledBackdrop(checkbox);
-	self:HookHoverBorder(checkbox);
-
 	function checkbox:GetChecked()
 		return self.isChecked;
 	end
@@ -77,9 +73,23 @@ function StdUi:Checkbox(parent, text, width, height)
 		end
 	end
 
+	function checkbox:Disable()
+		self.isDisabled = true;
+		self:SetChecked(self.isChecked);
+	end
+
+	function checkbox:Enable()
+		self.isDisabled = false;
+		self:SetChecked(self.isChecked);
+	end
+
 	function checkbox:AutoWidth()
 		self:SetWidth(self.target:GetWidth() + 15 + self.text:GetWidth());
 	end
+
+	self:ApplyBackdrop(checkbox.target);
+	self:HookDisabledBackdrop(checkbox);
+	self:HookHoverBorder(checkbox);
 
 	if width == nil then
 		checkbox:AutoWidth();

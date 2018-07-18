@@ -364,6 +364,13 @@ local methods = {
 		return self.selected;
 	end,
 
+	--- Gets the currently selected row.
+	--- Return will be the unaltered index of the data row that is selected.
+	--- @usage st:GetSelection()
+	GetSelectedItem = function(self)
+		return self:GetRow(self.selected);
+	end,
+
 	-------------------------------------------------------------
 	--- Data Methods
 	-------------------------------------------------------------

@@ -36,6 +36,7 @@ function StdUi:PanelWithTitle(parent, width, height, text)
 	frame.titlePanel:SetPoint('TOP', 0, -10);
 	frame.titlePanel:SetPoint('LEFT', 30, 0);
 	frame.titlePanel:SetPoint('RIGHT', -30, 0);
+	frame.titlePanel:SetBackdrop(nil);
 
 	frame.titlePanel.label:SetFont(self.config.font.familly, self.config.font.titleSize, self.config.font.effect);
 

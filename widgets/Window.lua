@@ -94,7 +94,7 @@ function StdUi:Confirm(title, message, buttons, dialogId)
 				btn:SetScript('OnClick', btnDefinition.onClick);
 			end
 
-			tinsert(window.buttons, btn);
+			window.buttons[k] = btn;
 			i = i + 1;
 		end
 
