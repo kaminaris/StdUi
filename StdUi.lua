@@ -67,14 +67,10 @@ function StdUi:SetObjSize(obj, width, height)
 end
 
 function StdUi:SetTextColor(fontString, colorType)
-	colorType = colorType or 'color';
+	colorType = colorType or 'normal';
 	if fontString.SetTextColor then
-		fontString:SetTextColor(
-			self.config.font[colorType].r,
-			self.config.font[colorType].g,
-			self.config.font[colorType].b,
-			self.config.font[colorType].a
-		);
+		local c = self.config.font.color[colorType];
+		fontString:SetTextColor(c.r, c.g, c.b, c.a);
 	end
 end
 
@@ -156,24 +152,24 @@ function StdUi:ApplyDisabledBackdrop(frame, enabled)
 	end
 	if enabled then
 		self:ApplyBackdrop(frame, 'button', 'border');
-		self:SetTextColor(frame, 'color');
+		self:SetTextColor(frame, 'normal');
 		if frame.label then
-			self:SetTextColor(frame.label, 'color');
+			self:SetTextColor(frame.label, 'normal');
 		end
 
 		if frame.text then
-			self:SetTextColor(frame.text, 'color');
+			self:SetTextColor(frame.text, 'normal');
 		end
 		frame.isDisabled = false;
 	else
 		self:ApplyBackdrop(frame, 'buttonDisabled', 'borderDisabled');
-		self:SetTextColor(frame, 'colorDisabled');
+		self:SetTextColor(frame, 'disabled');
 		if frame.label then
-			self:SetTextColor(frame.label, 'colorDisabled');
+			self:SetTextColor(frame.label, 'disabled');
 		end
 
 		if frame.text then
-			self:SetTextColor(frame.text, 'colorDisabled');
+			self:SetTextColor(frame.text, 'disabled');
 		end
 		frame.isDisabled = true;
 	end

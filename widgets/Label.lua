@@ -26,7 +26,7 @@ function StdUi:Label(parent, text, size, inherit, width, height)
 	if size then
 		fs:SetFont(self.config.font.familly, size, self.config.font.effect);
 	end
-	self:SetTextColor(fs, 'color');
+	self:SetTextColor(fs, 'normal');
 	self:SetObjSize(fs, width, height);
 
 	return fs;

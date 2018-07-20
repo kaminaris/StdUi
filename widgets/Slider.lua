@@ -105,6 +105,12 @@ function StdUi:Slider(parent, width, height, value, vertical, min, max)
 	slider:SetMinMaxValues(min or 0, max or 100);
 	slider:SetValue(value or min or 0);
 
+	slider:HookScript('OnValueChanged', function(s, ...)
+		if s.OnValueChanged then
+			s.OnValueChanged(s, ...);
+		end
+	end);
+
 	return slider;
 end
 

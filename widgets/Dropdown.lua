@@ -65,6 +65,7 @@ function StdUi:Dropdown(parent, width, height, options, value, multi)
 	end
 
 	function dropdown:SetOptions(options)
+		self.options = options;
 		local optionsHeight = #options * 20;
 		local scrollChild = self.optsFrame.scrollChild;
 

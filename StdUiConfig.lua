@@ -14,8 +14,11 @@ function StdUi:ResetConfig()
 			titleSize     = 16,
 			effect        = 'NONE',
 			strata        = 'OVERLAY',
-			color         = { r = 1, g = 1, b = 1, a = 1 },
-			colorDisabled = { r = 0.55, g = 0.55, b = 0.55, a = 1 },
+			color         = {
+				normal   = { r = 1, g = 1, b = 1, a = 1 },
+				disabled = { r = 0.55, g = 0.55, b = 0.55, a = 1 },
+				header   = { r = 1, g = 0.9, b = 0, a = 1 },
+			}
 		},
 
 		backdrop  = {

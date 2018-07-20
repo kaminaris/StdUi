@@ -151,7 +151,7 @@ function StdUi:ColorPicker(parent, alphaSliderTexture)
 		self.alphaTexture:SetGradientAlpha('VERTICAL', 1, 1, 1, 0, r, g, b, 1);
 	end);
 
-	local function onValueChanged()
+	local function OnValueChanged()
 		local r = tonumber(cpf.rEdit:GetValue() or 255) / 255;
 		local g = tonumber(cpf.gEdit:GetValue() or 255) / 255;
 		local b = tonumber(cpf.bEdit:GetValue() or 255) / 255;
@@ -164,10 +164,10 @@ function StdUi:ColorPicker(parent, alphaSliderTexture)
 	end
 
 
-	cpf.rEdit.OnValueChanged = onValueChanged;
-	cpf.gEdit.OnValueChanged = onValueChanged;
-	cpf.bEdit.OnValueChanged = onValueChanged;
-	cpf.aEdit.OnValueChanged = onValueChanged;
+	cpf.rEdit.OnValueChanged = OnValueChanged;
+	cpf.gEdit.OnValueChanged = OnValueChanged;
+	cpf.bEdit.OnValueChanged = OnValueChanged;
+	cpf.aEdit.OnValueChanged = OnValueChanged;
 
 	return cpf;
 end
@@ -178,6 +178,7 @@ function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback, alphaSli
 	local colorPickerFrame = self.colorPickerFrame;
 	if not colorPickerFrame then
 		colorPickerFrame = self:ColorPicker(UIParent, alphaSliderTexture);
+		colorPickerFrame:SetFrameStrata('FULLSCREEN_DIALOG');
 		self.colorPickerFrame = colorPickerFrame;
 	end
 
@@ -205,11 +206,20 @@ end
 
 function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
 	local this = self;
-	local button = self:Button(parent, width or 24, height or 24);
-	button:SetHighlightTexture(nil);
-	button.color = {};
 
-	self:AddLabel(parent, button, label, 'RIGHT');
+	local button = CreateFrame('Button', nil, parent);
+	button:EnableMouse(true);
+	self:SetObjSize(button, width, height or 20);
+	self:InitWidget(button);
+
+	button.target = self:Panel(button, 16, 16);
+	button.target:SetPoint('LEFT', 0, 0);
+
+	button.text = self:Label(button, label);
+	button.text:SetPoint('LEFT', button.target, 'RIGHT', 5, 0);
+	button.text:SetPoint('RIGHT', button, 'RIGHT', -5, 0);
+
+	button.color = {};
 
 	function button:SetColor(r, g, b, a)
 		if type(r) == 'table' then
@@ -225,7 +235,10 @@ function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
 			};
 		end
 
-		self:SetBackdropColor(r, g, b, a);
+		self.target:SetBackdropColor(r, g, b, a);
+		if self.OnValueChanged then
+			self:OnValueChanged(r, g, b, a);
+		end
 	end
 
 	function button:GetColor(type)
