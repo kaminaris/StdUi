@@ -200,12 +200,16 @@ function StdUi:MultiLineBox(parent, width, height, text)
 	editBox:EnableMouse(true);
 	editBox:SetAutoFocus(false);
 	editBox:SetCountInvisibleLetters(false);
-	--editBox:SetAllPoints();
+	editBox:SetAllPoints();
 
 	editBox.scrollFrame = scrollFrame;
 	editBox.panel = panel;
 
-	editBox:SetScript('OnCursorChanged', function (self, _, y, _, cursorHeight)
+	if text then
+		editBox:SetText(text);
+	end
+
+	editBox:SetScript('OnCursorChanged', function(self, _, y, _, cursorHeight)
 		local sf, y = self.scrollFrame, -y;
 		local offset = sf:GetVerticalScroll();
 
@@ -219,6 +223,12 @@ function StdUi:MultiLineBox(parent, width, height, text)
 		end
 	end)
 
+	editBox:SetScript('OnTextChanged', function(self)
+		if self.OnValueChanged then
+			self:OnValueChanged(self:GetText());
+		end
+	end);
+
 	scrollFrame:HookScript('OnMouseDown', function(sf, button)
 		sf.scrollChild:SetFocus();
 	end);
@@ -227,9 +237,6 @@ function StdUi:MultiLineBox(parent, width, height, text)
 		self.scrollChild:SetHitRectInsets(0, 0, offset, self.scrollChild:GetHeight() - offset - self:GetHeight());
 	end);
 
-	if text then
-		editBox:SetText(text);
-	end
 
 	return editBox;
 end
