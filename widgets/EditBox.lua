@@ -38,12 +38,8 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	local editBox = self:SimpleEditBox(parent, width, height, '');
 
 	local icon = self:Texture(editBox, 14, 14, [[Interface\Common\UI-Searchbox-Icon]]);
-	icon:SetVertexColor(
-		self.config.font.colorDisabled.r,
-		self.config.font.colorDisabled.g,
-		self.config.font.colorDisabled.b,
-		self.config.font.colorDisabled.a
-	);
+	local c = self.config.font.color.disabled;
+	icon:SetVertexColor(c.r, c.g, c.b, c.a);
 	local label = self:Label(editBox, placeholderText);
 	label:SetFont(self.config.font.familly, self.config.font.size, 'NONE');
 	self:SetTextColor(label, 'disabled');
