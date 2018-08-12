@@ -4,6 +4,9 @@ if not StdUi then
 	return ;
 end
 
+local module, version = 'ScrollTable', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 local lrpadding = 2.5;
 
 --- Public methods of ScrollTable
@@ -715,3 +718,5 @@ function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
 
 	return scrollTable;
 end
+
+StdUi:RegisterModule(module, version);

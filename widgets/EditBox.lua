@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'EditBox', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- @return EditBox
 function StdUi:SimpleEditBox(parent, width, height, text)
 	local this = self;
@@ -236,3 +239,5 @@ function StdUi:MultiLineBox(parent, width, height, text)
 
 	return editBox;
 end
+
+StdUi:RegisterModule(module, version);

@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Label', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- @return FontString
 function StdUi:FontString(parent, text, inherit)
 	local this = self;
@@ -50,3 +53,5 @@ function StdUi:AddLabel(parent, object, text, labelPosition, labelWidth)
 
 	return label;
 end
+
+StdUi:RegisterModule(module, version);

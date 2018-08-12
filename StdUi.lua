@@ -1,6 +1,7 @@
 local MAJOR, MINOR = 'StdUi', 1;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
+StdUi.moduleVersions = {};
 
 if not StdUi then
 	return ;
@@ -29,6 +30,18 @@ function StdUi:NewInstance()
 	instance:ResetConfig();
 	tinsert(StdUiInstances, instance);
 	return instance;
+end
+
+function StdUi:RegisterModule(module, version)
+	self.moduleVersions[module] = version;
+end
+
+function StdUi:UpgradeNeeded(module, version)
+	if not self.moduleVersions[module] then
+		return true;
+	end
+
+	return self.moduleVersions[module] < version;
 end
 
 function StdUi:RegisterWidget(name, func)

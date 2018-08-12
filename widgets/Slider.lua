@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Slider', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 function StdUi:SliderButton(parent, width, height, direction)
 	local button = self:Button(parent, width, height);
 
@@ -153,3 +156,5 @@ function StdUi:ScrollBar(parent, width, height, horizontal)
 
 	return scrollBar, panel;
 end
+
+StdUi:RegisterModule(module, version);

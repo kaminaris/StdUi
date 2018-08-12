@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Table', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- Draws table in a panel according to data, example:
 --- local columns = {
 ---		{header = 'Name', index = 'name', width = 20, align = 'RIGHT'},
@@ -123,3 +126,5 @@ function StdUi:Table(parent, width, height, rowHeight, columns, data)
 
 	return panel;
 end
+
+StdUi:RegisterModule(module, version);

@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'ProgressBar', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 function StdUi:ProgressBar(parent, width, height, vertical)
 	vertical = vertical or false;
 
@@ -47,3 +50,5 @@ function StdUi:ProgressBar(parent, width, height, vertical)
 
 	return progressBar;
 end
+
+StdUi:RegisterModule(module, version);

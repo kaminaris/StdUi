@@ -4,6 +4,8 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Grid', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- Creates frame list that reuses frames and is based on array data
 --- @param parent Frame
@@ -124,3 +126,5 @@ function StdUi:ObjectGrid(parent, itemsMatrix, create, update, data, paddingX, p
 		end
 	end
 end
+
+StdUi:RegisterModule(module, version);

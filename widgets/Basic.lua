@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Basic', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 function StdUi:Frame(parent, width, height, inherits)
 	local frame = CreateFrame('Frame', nil, parent, inherits);
 	self:InitWidget(frame);
@@ -67,3 +70,5 @@ function StdUi:ArrowTexture(parent, direction)
 
 	return texture;
 end
+
+StdUi:RegisterModule(module, version);

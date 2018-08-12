@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Tab', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 ---
 ---local t = {
 ---	{
@@ -58,7 +61,7 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 		self:EnumerateTabs(function(tab)
 			local btn = tab.button;
 			if not btn then
-				btn = this:Button(self, nil, buttonHeight);
+				btn = this:Button(tabFrame, nil, buttonHeight);
 				btn:SetScript('OnClick', function (btn)
 					tabFrame:SelectTab(btn.tab.name);
 				end);
@@ -72,11 +75,12 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 			this:ButtonAutoWidth(btn);
 
 			if not prevBtn then
-				this:GlueTop(btn, self, 0, 0, 'LEFT');
+				this:GlueTop(btn, tabFrame, 0, 0, 'LEFT');
 			else
 				this:GlueRight(btn, prevBtn, 5, 0);
 			end
 
+			btn:Show();
 			prevBtn = btn;
 		end);
 	end
@@ -140,3 +144,5 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 
 	return tabFrame;
 end
+
+StdUi:RegisterModule(module, version);

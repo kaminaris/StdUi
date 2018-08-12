@@ -3,6 +3,10 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi or StdUi.ColorPickerFrame then
 	return ;
 end
+
+local module, version = 'ColorPicker', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- alphaSliderTexture = [[Interface\AddOns\YourAddon\Libs\StdUi\media\Checkers.tga]]
 function StdUi:ColorPicker(parent, alphaSliderTexture)
 	local wheelWidth = 128;
@@ -269,3 +273,5 @@ function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
 
 	return button;
 end
+
+StdUi:RegisterModule(module, version);

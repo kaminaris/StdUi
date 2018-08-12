@@ -3,6 +3,8 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
+local module, version = 'Checkbox', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ---@return CheckButton
 function StdUi:Checkbox(parent, text, width, height)
@@ -164,3 +166,5 @@ function StdUi:AddToRadioGroup(groupName, frame)
 		end
 	end);
 end
+
+StdUi:RegisterModule(module, version);

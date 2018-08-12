@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Tooltip', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 StdUi.tooltips = {}
 StdUi.frameTooltips = {}
 
@@ -126,3 +129,5 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 
 	return tip;
 end
+
+StdUi:RegisterModule(module, version);

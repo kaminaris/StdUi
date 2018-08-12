@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Scroll', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 StdUi.ScrollBarEvents = {
 	UpButtonOnClick = function(self)
 		local scrollBar = self.scrollBar;
@@ -282,3 +285,5 @@ function StdUi:FauxScrollFrame(parent, width, height, displayCount, lineHeight, 
 
 	return panel, scrollFrame, scrollChild, scrollBar;
 end
+
+StdUi:RegisterModule(module, version);

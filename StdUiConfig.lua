@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Config', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 StdUi.config = {};
 
 function StdUi:ResetConfig()
@@ -65,3 +68,5 @@ function StdUi:SetDefaultFont(font, size, effect, strata)
 	self.config.font.effect = effect;
 	self.config.font.strata = strata;
 end
+
+StdUi:RegisterModule(module, version);

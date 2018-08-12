@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Window', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- @return Frame
 function StdUi:Window(parent, title, width, height)
 	parent = parent or UIParent;
@@ -104,3 +107,5 @@ function StdUi:Confirm(title, message, buttons, dialogId)
 
 	return window;
 end
+
+StdUi:RegisterModule(module, version);

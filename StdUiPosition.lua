@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Position', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 -- Points
 local Top = 'TOP';
 local Bottom = 'BOTTOM';
@@ -110,3 +113,5 @@ function StdUi:GlueOpposite(object, referencedObject, x, y, anchor)
 	else								object:SetPoint('CENTER', referencedObject, anchor, x, y);
 	end
 end
+
+StdUi:RegisterModule(module, version);

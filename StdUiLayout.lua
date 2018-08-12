@@ -5,6 +5,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Layout', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 function StdUi:SetMargins(widget, top, right, bottom, left)
 	widget.margins = {
 		top = top or 0,
@@ -51,3 +54,5 @@ function StdUi:AutoPosition(parent)
 		end
 	end
 end
+
+StdUi:RegisterModule(module, version);

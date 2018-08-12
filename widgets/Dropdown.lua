@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Dropdown', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 -- reference to all other dropdowns to close them when new one opens
 local dropdowns = {};
 
@@ -204,3 +207,5 @@ function StdUi:Dropdown(parent, width, height, options, value, multi)
 
 	return dropdown;
 end
+
+StdUi:RegisterModule(module, version);

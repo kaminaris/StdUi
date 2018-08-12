@@ -162,3 +162,5 @@ StdUi.Util.tableCount = function(tab)
 
 	return n;
 end
+
+StdUi:RegisterModule(module, version);

@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'ContextMenu', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 ---@type ContextMenu
 StdUi.ContextMenuMethods = {
 
@@ -215,3 +218,5 @@ function StdUi:ContextMenu(parent, options, stopHook, level)
 
 	return panel;
 end
+
+StdUi:RegisterModule(module, version);

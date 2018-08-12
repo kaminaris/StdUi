@@ -4,6 +4,9 @@ if not StdUi then
 	return;
 end
 
+local module, version = 'Button', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 local SquareButtonCoords = {
 	["UP"] = {     0.45312500,    0.64062500,     0.01562500,     0.20312500};
 	["DOWN"] = {   0.45312500,    0.64062500,     0.20312500,     0.01562500};
@@ -97,3 +100,5 @@ function StdUi:ButtonAutoWidth(button, padding)
 	padding = padding or 5;
 	button:SetWidth(button.text:GetStringWidth() + padding * 2);
 end
+
+StdUi:RegisterModule(module, version);
