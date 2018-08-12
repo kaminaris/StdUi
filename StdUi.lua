@@ -1,11 +1,12 @@
 local MAJOR, MINOR = 'StdUi', 1;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
-StdUi.moduleVersions = {};
 
 if not StdUi then
 	return ;
 end
+
+StdUi.moduleVersions = {};
 
 StdUiInstances = {StdUi};
 
