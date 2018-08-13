@@ -3,6 +3,10 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
+
+local module, version = 'Util', 1;
+if not StdUi:UpgradeNeeded(module, version) then return end;
+
 --- @param frame Frame
 function StdUi:MarkAsValid(frame, valid)
 	if not valid then
