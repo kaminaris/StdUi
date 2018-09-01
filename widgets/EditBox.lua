@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'EditBox', 1;
+local module, version = 'EditBox', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return EditBox
@@ -62,6 +62,10 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 		else
 			self.placeholder.icon:Show();
 			self.placeholder.label:Show();
+		end
+
+		if self.OnValueChanged then
+			self:OnValueChanged(self:GetText());
 		end
 	end);
 

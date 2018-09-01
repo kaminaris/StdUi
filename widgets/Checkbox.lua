@@ -3,7 +3,7 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
-local module, version = 'Checkbox', 1;
+local module, version = 'Checkbox', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ---@return CheckButton
@@ -121,6 +121,12 @@ function StdUi:Radio(parent, text, groupName, width, height)
 	radio.disabledCheckedTexture:Hide();
 	radio.disabledCheckedTexture:SetTexCoord(0.75, 1, 0, 1);
 
+	radio:SetScript('OnClick', function(frame)
+		if not frame.isDisabled then
+			frame:SetChecked(true);
+		end
+	end);
+
 	if groupName then
 		self:AddToRadioGroup(groupName, radio);
 	end
@@ -147,6 +153,45 @@ function StdUi:GetRadioGroupValue(groupName)
 		if radio:GetChecked() then
 			return radio:GetValue();
 		end
+	end
+
+	return nil;
+end
+
+function StdUi:SetRadioGroupValue(groupName, value)
+	local group = self:RadioGroup(groupName);
+
+	for i = 1, #group do
+		local radio = group[i];
+		radio:SetChecked(radio.value == value)
+	end
+
+	return nil;
+end
+
+function StdUi:OnRadioGroupValueChanged(groupName, callback)
+	local group = self:RadioGroup(groupName);
+
+	local function changed(radio, flag, value)
+		radio.notified = true;
+
+		-- We must get all notifications from group
+		for i = 1, #group do
+			if not group[i].notified then
+				return;
+			end
+		end
+
+		callback(self:GetRadioGroupValue(groupName), groupName);
+
+		for i = 1, #group do
+			group[i].notified = false;
+		end
+	end
+
+	for i = 1, #group do
+		local radio = group[i];
+		radio.OnValueChanged = changed;
 	end
 
 	return nil;

@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'ContextMenu', 1;
+local module, version = 'ContextMenu', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ---@type ContextMenu
@@ -112,6 +112,12 @@ StdUi.ContextMenuMethods = {
 			end)
 		end
 
+		if data.custom then
+			for key, value in pairs(data.custom) do
+				itemFrame[key] = value;
+			end
+		end
+
 		return itemFrame;
 	end,
 
@@ -182,10 +188,10 @@ StdUi.ContextMenuMethods = {
 
 StdUi.ContextMenuEvents = {
 	OnEnter = function(self)
-		print('entered')
+
 	end,
 	OnLeave = function(self)
-		print('left')
+
 	end
 };
 
@@ -211,7 +217,9 @@ function StdUi:ContextMenu(parent, options, stopHook, level)
 	if panel.level == 1 then
 		-- self reference for children
 		panel.mainContext = panel;
-		panel:HookRightClick();
+		if not stopHook then
+			panel:HookRightClick();
+		end
 	end
 
 	panel:Hide();
