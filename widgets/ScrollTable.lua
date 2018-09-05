@@ -4,7 +4,7 @@ if not StdUi then
 	return ;
 end
 
-local module, version = 'ScrollTable', 1;
+local module, version = 'ScrollTable', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local lrpadding = 2.5;
@@ -15,21 +15,6 @@ local methods = {
 	-------------------------------------------------------------
 	--- Basic Methods
 	-------------------------------------------------------------
-
-	--- Used to show the scrolling table when hidden.
-	--- @usage st:Show()
-	--Show = function(self)
-	--	self.frame:Show();
-	--	self.scrollFrame:Show();
-	--	self.showing = true;
-	--end,
-
-	--- Used to hide the scrolling table when shown.
-	--- @usage st:Hide()
-	--Hide = function(self)
-	--	self.frame:Hide();
-	--	self.showing = false;
-	--end,
 
 	SetAutoHeight = function(self)
 		self:SetHeight((self.numberOfRows * self.rowHeight) + 10);
@@ -43,6 +28,18 @@ local methods = {
 		end
 		self:SetWidth(width + 20);
 		self:Refresh();
+	end,
+
+	ScrollToLine = function(self, line)
+		line = Clamp(line, 1, #self.filtered - self.numberOfRows + 1);
+
+		StdUi.FauxScrollFrameMethods.OnVerticalScroll(
+			self.scrollFrame,
+			self.rowHeight * (line - 1),
+			self.rowHeight, function()
+				self:Refresh();
+			end
+		);
 	end,
 
 	-------------------------------------------------------------

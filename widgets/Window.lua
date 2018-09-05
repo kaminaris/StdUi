@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Window', 1;
+local module, version = 'Window', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return Frame
@@ -26,6 +26,10 @@ function StdUi:Window(parent, title, width, height)
 	end);
 
 	frame.closeBtn = closeBtn;
+
+	function frame:SetWindowTitle(title)
+		self.titlePanel.label:SetText(title);
+	end
 
 	return frame;
 end

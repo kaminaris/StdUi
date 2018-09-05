@@ -4,9 +4,10 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'ProgressBar', 1;
+local module, version = 'ProgressBar', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
+--- @return StatusBar
 function StdUi:ProgressBar(parent, width, height, vertical)
 	vertical = vertical or false;
 
@@ -45,6 +46,12 @@ function StdUi:ProgressBar(parent, width, height, vertical)
 
 	progressBar:SetScript('OnValueChanged', function(self, value)
 		local min, max = self:GetMinMaxValues();
+		self.text:SetText(self:TextUpdate(min, max, value));
+	end);
+
+	progressBar:SetScript('OnMinMaxChanged', function(self)
+		local min, max = self:GetMinMaxValues();
+		local value = self:GetValue();
 		self.text:SetText(self:TextUpdate(min, max, value));
 	end);
 
