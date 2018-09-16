@@ -4,7 +4,7 @@ if not StdUi then
 	return ;
 end
 
-local module, version = 'ScrollTable', 2;
+local module, version = 'ScrollTable', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local lrpadding = 2.5;
@@ -33,7 +33,7 @@ local methods = {
 	ScrollToLine = function(self, line)
 		line = Clamp(line, 1, #self.filtered - self.numberOfRows + 1);
 
-		StdUi.FauxScrollFrameMethods.OnVerticalScroll(
+		self.stdUi.FauxScrollFrameMethods.OnVerticalScroll(
 			self.scrollFrame,
 			self.rowHeight * (line - 1),
 			self.rowHeight, function()
@@ -55,7 +55,7 @@ local methods = {
 		local columnHeadFrame = self.head;
 		
 		if not columnHeadFrame then
-			columnHeadFrame = CreateFrame('Frame', nil, self); --  StdUi:Panel(self.frame); --
+			columnHeadFrame = CreateFrame('Frame', nil, self);
 			columnHeadFrame:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 4, 0);
 			columnHeadFrame:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', -4, 0);
 			columnHeadFrame:SetHeight(self.rowHeight);
@@ -419,7 +419,7 @@ local methods = {
 			if type(format) == 'function' then
 				cellFrame.text:SetText(format(value, rowData, columnData));
 			elseif (format == 'money') then
-				value = StdUi.Util.formatMoney(value);
+				value = table.stdUi.Util.formatMoney(value);
 				cellFrame.text:SetText(value);
 			elseif (format == 'number') then
 				value = tostring(value);
@@ -449,11 +449,13 @@ local methods = {
 
 			if color then
 				cellFrame.text:SetTextColor(color.r, color.g, color.b, color.a);
+			else
+				table.stdUi:SetTextColor(cellFrame.text, 'normal');
 			end
 
 			if table.selectionEnabled then
 				if table.selected == rowIndex then
-					table:SetHighLightColor(rowFrame, StdUi.config.highlight.color);
+					table:SetHighLightColor(rowFrame, table.stdUi.config.highlight.color);
 				else
 					table:SetHighLightColor(rowFrame, nil);
 				end
@@ -465,9 +467,9 @@ local methods = {
 
 	Refresh = function(self)
 		local scrollFrame = self.scrollFrame;
-		StdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.numberOfRows, self.rowHeight);
+		self.stdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.numberOfRows, self.rowHeight);
 
-		local o = StdUi.FauxScrollFrameMethods.GetOffset(scrollFrame);
+		local o = self.stdUi.FauxScrollFrameMethods.GetOffset(scrollFrame);
 		self.offset = o;
 
 		for i = 1, self.numberOfRows do
@@ -625,7 +627,7 @@ local methods = {
 
 local cellEvents = {
 	OnEnter = function(table, cellFrame, rowFrame, rowData, columnData, rowIndex)
-		table:SetHighLightColor(rowFrame, StdUi.config.highlight.color);
+		table:SetHighLightColor(rowFrame, table.stdUi.config.highlight.color);
 		return true;
 	end,
 
@@ -702,7 +704,7 @@ function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
 	scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
 		-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you
 		-- reference the st if you decide to hook the refresh
-		StdUi.FauxScrollFrameMethods.OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
+		scrollTable.stdUi.FauxScrollFrameMethods.OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
 			scrollTable:Refresh();
 		end);
 	end);

@@ -10,11 +10,13 @@ if not StdUi:UpgradeNeeded(module, version) then return end;
 StdUi.config = {};
 
 function StdUi:ResetConfig()
+	local font, fontSize = GameFontNormal:GetFont();
+	local _, largeFontSize = GameFontNormalLarge:GetFont();
 	self.config = {
 		font      = {
-			familly       = [[Fonts\FRIZQT__.ttf]],
-			size          = 12,
-			titleSize     = 16,
+			family        = font,
+			size          = fontSize,
+			titleSize     = largeFontSize,
 			effect        = 'NONE',
 			strata        = 'OVERLAY',
 			color         = {
@@ -63,7 +65,7 @@ end
 StdUi:ResetConfig();
 
 function StdUi:SetDefaultFont(font, size, effect, strata)
-	self.config.font.familly = font;
+	self.config.font.family = font;
 	self.config.font.size = size;
 	self.config.font.effect = effect;
 	self.config.font.strata = strata;

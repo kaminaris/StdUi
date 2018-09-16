@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Basic', 1;
+local module, version = 'Basic', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:Frame(parent, width, height, inherits)
@@ -25,7 +25,7 @@ end
 function StdUi:PanelWithLabel(parent, width, height, inherits, text)
 	local frame = self:Panel(parent, width, height, inherits);
 
-	frame.label = self:Label(frame, text);
+	frame.label = self:Header(frame, text);
 	frame.label:SetAllPoints();
 	frame.label:SetJustifyH('MIDDLE');
 
@@ -40,8 +40,6 @@ function StdUi:PanelWithTitle(parent, width, height, text)
 	frame.titlePanel:SetPoint('LEFT', 30, 0);
 	frame.titlePanel:SetPoint('RIGHT', -30, 0);
 	frame.titlePanel:SetBackdrop(nil);
-
-	frame.titlePanel.label:SetFont(self.config.font.familly, self.config.font.titleSize, self.config.font.effect);
 
 	return frame;
 end

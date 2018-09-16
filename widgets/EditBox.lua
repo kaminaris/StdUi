@@ -4,17 +4,18 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'EditBox', 2;
+local module, version = 'EditBox', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return EditBox
 function StdUi:SimpleEditBox(parent, width, height, text)
 	local this = self;
+	--- @type EditBox
 	local editBox = CreateFrame('EditBox', nil, parent);
 	self:InitWidget(editBox);
 
 	editBox:SetTextInsets(3, 3, 3, 3);
-	editBox:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
+	editBox:SetFontObject(ChatFontNormal);
 	editBox:SetAutoFocus(false);
 
 	editBox:SetScript('OnEscapePressed', function (self)
@@ -22,7 +23,7 @@ function StdUi:SimpleEditBox(parent, width, height, text)
 	end);
 
 	function editBox:SetFontSize(newSize)
-		self:SetFont(this.config.font.familly, newSize, this.config.font.effect);
+		self:SetFont(self:GetFont(), newSize, this.config.font.effect);
 	end
 
 	if text then
@@ -44,7 +45,6 @@ function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	local c = self.config.font.color.disabled;
 	icon:SetVertexColor(c.r, c.g, c.b, c.a);
 	local label = self:Label(editBox, placeholderText);
-	label:SetFont(self.config.font.familly, self.config.font.size, 'NONE');
 	self:SetTextColor(label, 'disabled');
 
 	self:GlueLeft(icon, editBox, 5, 0, true);
@@ -196,7 +196,7 @@ function StdUi:MultiLineBox(parent, width, height, text)
 	--editBox:SetHeight(scrollFrame:GetHeight());
 
 	editBox:SetTextInsets(3, 3, 3, 3);
-	editBox:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
+	editBox:SetFontObject(ChatFontNormal);
 	editBox:SetAutoFocus(false);
 	editBox:SetScript('OnEscapePressed', editBox.ClearFocus);
 	editBox:SetMultiLine(true);

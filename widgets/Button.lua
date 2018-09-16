@@ -4,40 +4,52 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Button', 1;
+local module, version = 'Button', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local SquareButtonCoords = {
-	["UP"] = {     0.45312500,    0.64062500,     0.01562500,     0.20312500};
-	["DOWN"] = {   0.45312500,    0.64062500,     0.20312500,     0.01562500};
-	["LEFT"] = {   0.23437500,    0.42187500,     0.01562500,     0.20312500};
-	["RIGHT"] = {  0.42187500,    0.23437500,     0.01562500,     0.20312500};
-	["DELETE"] = { 0.01562500,    0.20312500,     0.01562500,     0.20312500};
+	UP = {     0.45312500,    0.64062500,     0.01562500,     0.20312500};
+	DOWN = {   0.45312500,    0.64062500,     0.20312500,     0.01562500};
+	LEFT = {   0.23437500,    0.42187500,     0.01562500,     0.20312500};
+	RIGHT = {  0.42187500,    0.23437500,     0.01562500,     0.20312500};
+	DELETE = { 0.01562500,    0.20312500,     0.01562500,     0.20312500};
 };
 
 function StdUi:SquareButton(parent, width, height, icon)
+	local this = self;
 	local button = CreateFrame('Button', nil, parent);
 	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 
 	self:ApplyBackdrop(button);
 
-	button.icon = self:Texture(button, 12, 12, [[Interface\Buttons\SquareButtonTextures]]);
-	button.icon:SetPoint('CENTER', 0, 0);
-
-	button.iconDisabled = self:Texture(button, 16, 16, [[Interface\Buttons\SquareButtonTextures]]);
-	button.iconDisabled:SetDesaturated(true);
-	button.iconDisabled:SetPoint('CENTER', 0, 0);
-
 	local hTex = self:HighlightButtonTexture(button);
 	button:SetHighlightTexture(hTex);
 	button.highlightTexture = hTex;
 
-	button:SetNormalTexture(button.icon);
-	button:SetDisabledTexture(button.iconDisabled);
+	function button:SetIconDisabled(texture, width, height)
+		button.iconDisabled = this:Texture(button, width, height, texture);
+		button.iconDisabled:SetDesaturated(true);
+		button.iconDisabled:SetPoint('CENTER', 0, 0);
+
+		button:SetDisabledTexture(button.iconDisabled);
+	end
+
+	function button:SetIcon(texture, width, height, alsoDisabled)
+		button.icon = this:Texture(button, width, height, texture);
+		button.icon:SetPoint('CENTER', 0, 0);
+
+		button:SetNormalTexture(button.icon);
+
+		if alsoDisabled then
+			button:SetIconDisabled(texture, width, height);
+		end
+	end
+
 
 	local coords = SquareButtonCoords[icon];
 	if coords then
+		button:SetIcon([[Interface\Buttons\SquareButtonTextures]], 16, 16, true);
 		button.icon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
 		button.iconDisabled:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
 	end

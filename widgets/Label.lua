@@ -4,20 +4,20 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Label', 1;
+local module, version = 'Label', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return FontString
 function StdUi:FontString(parent, text, inherit)
 	local this = self;
-	local fs = parent:CreateFontString(nil, self.config.font.strata, inherit);
-	fs:SetFont(self.config.font.familly, self.config.font.size, self.config.font.effect);
+	local fs = parent:CreateFontString(nil, self.config.font.strata, inherit or 'GameFontNormal');
+
 	fs:SetText(text);
 	fs:SetJustifyH('LEFT');
 	fs:SetJustifyV('MIDDLE');
 
 	function fs:SetFontSize(newSize)
-		self:SetFont(this.config.font.familly, newSize, this.config.font.effect);
+		self:SetFont(self:GetFont(), newSize);
 	end
 
 	return fs;
@@ -27,10 +27,20 @@ end
 function StdUi:Label(parent, text, size, inherit, width, height)
 	local fs = self:FontString(parent, text, inherit);
 	if size then
-		fs:SetFont(self.config.font.familly, size, self.config.font.effect);
+		fs:SetFontSize(size);
 	end
+
 	self:SetTextColor(fs, 'normal');
 	self:SetObjSize(fs, width, height);
+
+	return fs;
+end
+
+--- @return FontString
+function StdUi:Header(parent, text, size, inherit, width, height)
+	local fs = self:Label(parent, text, size, inherit or 'GameFontNormalLarge', width, height);
+
+	self:SetTextColor(fs, 'header');
 
 	return fs;
 end
