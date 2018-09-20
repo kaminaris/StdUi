@@ -540,7 +540,6 @@ local methods = {
 
 	FireCellEvent = function(self, event, handler, ...)
 		if not handler(self, ...) then
-			print('wut', event, self.cellEvents[event]);
 			if self.cellEvents[event] then
 				self.cellEvents[event](self, ...);
 			end
