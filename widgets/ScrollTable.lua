@@ -540,6 +540,7 @@ local methods = {
 
 	FireCellEvent = function(self, event, handler, ...)
 		if not handler(self, ...) then
+			print('wut', event, self.cellEvents[event]);
 			if self.cellEvents[event] then
 				self.cellEvents[event](self, ...);
 			end
@@ -586,7 +587,6 @@ local methods = {
 					-- override a column based events
 					if columnData.events then
 						for event, handler in pairs(self.columns[j].events) do
-
 							cell:SetScript(event, function(cellFrame, ...)
 								if table.offset then
 									local rowIndex = table.filtered[i + table.offset];
@@ -599,7 +599,6 @@ local methods = {
 					end
 				end
 			end
-			self.cellEvents = cellEvents;
 		end
 
 		if headerEvents then
@@ -619,8 +618,6 @@ local methods = {
 					end);
 				end
 			end
-
-			self.headerEvents = headerEvents;
 		end
 	end,
 };
