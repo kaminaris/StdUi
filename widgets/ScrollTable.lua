@@ -4,7 +4,7 @@ if not StdUi then
 	return ;
 end
 
-local module, version = 'ScrollTable', 3;
+local module, version = 'ScrollTable', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local lrpadding = 2.5;
