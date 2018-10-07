@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Button', 2;
+local module, version = 'Button', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local SquareButtonCoords = {
@@ -22,10 +22,8 @@ function StdUi:SquareButton(parent, width, height, icon)
 	self:SetObjSize(button, width, height);
 
 	self:ApplyBackdrop(button);
-
-	local hTex = self:HighlightButtonTexture(button);
-	button:SetHighlightTexture(hTex);
-	button.highlightTexture = hTex;
+	self:HookDisabledBackdrop(button);
+	self:HookHoverBorder(button);
 
 	function button:SetIconDisabled(texture, width, height)
 		button.iconDisabled = this:Texture(button, width, height, texture);
