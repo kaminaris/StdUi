@@ -8,49 +8,135 @@ end
 local module, version = 'Layout', 1;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
-function StdUi:SetMargins(widget, top, right, bottom, left)
-	widget.margins = {
-		top = top or 0,
-		right = right or 0,
-		bottom = bottom or 0,
-		left = left or 0
-	};
-end
-
-function StdUi:LayoutConfig(parent, top, right, bottom, left, gutter)
-	parent.layoutConfig = {
-		padding = {
-			top = top or 10,
-			right = right or 10,
-			bottom = bottom or 10,
-			left = left or 10
-		},
-		gutter = gutter or 10
+local defaultLayoutConfig = {
+	gutter = 10,
+	columns = 12,
+	padding = {
+		top = 0,
+		right = 10,
+		left = 10
 	}
-end
+};
 
---- Auto position
-function StdUi:AutoPosition(parent)
-	local children = parent:GetChildrenWidgets();
-	--assert(not parent.layoutConfig, 'To do auto position parent must have layoutConfig member!');
+local defaultRowConfig = {
+	margin = {
+		top = 0,
+		right = 0,
+		bottom = 15,
+		left = 0
+	}
+};
 
+local defaultElementConfig = {
+	margin = {
+		top = 0,
+		right = 0,
+		bottom = 0,
+		left = 0
+	}
+};
 
-	local row = 1;
+---@return EasyLayoutRow
+function StdUi:EasyLayoutRow(parent, config)
+	local row = {
+		parent = parent,
+		config = self.Util.tableMerge(defaultRowConfig, config or {}),
+		elements = {}
+	};
 
-	for i = 1, #children do
-		local child = children[i];
-		local childMargins = child.margins or {top = 0, right = 0, bottom = 0, left = 0};
-
-		if i == 1 then
-			self:GlueTop(child, parent, parent.layoutConfig.padding.left,
-					-parent.layoutConfig.padding.top - childMargins.top, 'LEFT');
-		else
-			local prevChild = children[i - 1];
-			self:GlueBelow(child, prevChild, 0, -parent.layoutConfig.childrenMargin - childMargins.top, 'LEFT')
+	function row:AddElement(frame, config)
+		if not frame.layoutConfig then
+			frame.layoutConfig = StdUi.Util.tableMerge(defaultElementConfig , config or {});
+		elseif config then
+			frame.layoutConfig = StdUi.Util.tableMerge(frame.layoutConfig , config or {});
 		end
 
-		if child.fullWidth then
-			self:GlueRight(child, parent, -parent.layoutConfig.padding.right, 0, true);
+		tinsert(row.elements, frame);
+	end
+
+	function row:AddElements(...)
+		local r = {...};
+		local cfg = tremove(r, #r);
+
+		if cfg.column == 'even' then
+			cfg.column = math.floor(self.parent.layout.columns / #r);
+		end
+
+		for i = 1, #r do
+			self:AddElement(r[i], StdUi.Util.tableMerge(defaultElementConfig, cfg));
+		end
+	end
+
+	function row:DrawRow(parentWidth, yOffset)
+		yOffset = yOffset or 0;
+		local l = self.parent.layout;
+		local g = l.gutter;
+
+		local rowMargin = self.config.margin;
+		local totalHeight = 0;
+		local columnsTaken = 0;
+		local x = g + l.padding.left + rowMargin.left;
+
+		-- if row has margins, cut down available width
+		parentWidth = parentWidth - rowMargin.left - rowMargin.right;
+
+		for i = 1, #self.elements do
+			local frame = self.elements[i];
+
+			frame:ClearAllPoints();
+
+			local lc = frame.layoutConfig;
+			local m = lc.margin;
+
+			local col = lc.column or l.columns;
+			local w = (parentWidth / (l.columns / col)) - 2 * g;
+
+			frame:SetWidth(w);
+
+			if columnsTaken + col > self.parent.layout.columns then
+				print('Element will not fit row capacity: ' .. l.columns);
+				return totalHeight;
+			end
+
+			-- move it down by rowMargin and element margin
+			frame:SetPoint('TOPLEFT', self.parent, 'TOPLEFT', x, yOffset - m.top - rowMargin.top);
+
+			--each element takes 1 gutter plus column * colWidth, while gutter is inclusive
+			x = x + w + 2 * g; -- double the gutter because width subtracts gutter
+
+			totalHeight = math.max(totalHeight, frame:GetHeight() + m.bottom + m.top + rowMargin.top + rowMargin.bottom);
+			columnsTaken = columnsTaken + col;
+		end
+
+		return totalHeight;
+	end
+
+	return row;
+end
+
+function StdUi:EasyLayout(parent, config)
+	local stdUi = self;
+
+	parent.layout = self.Util.tableMerge(defaultLayoutConfig, config or {});
+
+	---@return EasyLayoutRow
+	function parent:AddRow(config)
+		if not self.rows then self.rows = {}; end
+
+		local row = stdUi:EasyLayoutRow(self, config);
+		tinsert(self.rows, row);
+
+		return row;
+	end
+
+	function parent:DoLayout()
+		local l = self.layout;
+		local width = self:GetWidth() - l.padding.left - l.padding.right;
+
+		local y = -l.padding.top;
+		for i = 1, #self.rows do
+			local r = self.rows[i];
+			y = y - r:DrawRow(width, y);
 		end
 	end
 end

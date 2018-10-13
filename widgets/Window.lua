@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Window', 3;
+local module, version = 'Window', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return Frame
@@ -14,7 +14,6 @@ function StdUi:Window(parent, title, width, height)
 	frame:SetClampedToScreen(true);
 	frame.titlePanel.isWidget = false;
 	self:MakeDraggable(frame); -- , frame.titlePanel
-	self:LayoutConfig(frame, 20);
 
 	local closeBtn = self:Button(frame, 16, 16, 'X');
 	closeBtn.text:SetFontSize(12);

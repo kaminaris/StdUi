@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Util', 1;
+local module, version = 'Util', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @param frame Frame
@@ -165,6 +165,29 @@ StdUi.Util.tableCount = function(tab)
 	end
 
 	return n;
+end
+
+StdUi.Util.tableMerge = function(default, new)
+	local result = {};
+	for k, v in pairs(default) do
+		if type(v) == 'table' then
+			if new[k] then
+				result[k] = StdUi.Util.tableMerge(v, new[k]);
+			else
+				result[k] = v;
+			end
+		else
+			result[k] = new[k] or default[k];
+		end
+	end
+
+	for k, v in pairs(new) do
+		if not result[k] then
+			result[k] = v;
+		end
+	end
+
+	return result;
 end
 
 StdUi:RegisterModule(module, version);
