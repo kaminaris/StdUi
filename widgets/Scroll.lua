@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Scroll', 1;
+local module, version = 'Scroll', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 StdUi.ScrollBarEvents = {
@@ -249,6 +249,8 @@ function StdUi:ScrollFrame(parent, width, height, scrollChild)
 	scrollFrame:EnableMouse(true);
 	scrollFrame:SetClampedToScreen(true);
 	scrollFrame:SetClipsChildren(true);
+
+	scrollChild:SetPoint('RIGHT', scrollFrame, 'RIGHT', 0, 0);
 
 	scrollFrame.scrollChild = scrollChild;
 

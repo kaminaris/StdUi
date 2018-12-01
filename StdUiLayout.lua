@@ -5,7 +5,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Layout', 1;
+local module, version = 'Layout', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local defaultLayoutConfig = {
@@ -109,6 +109,19 @@ function StdUi:EasyLayoutRow(parent, config)
 		end
 
 		return totalHeight;
+	end
+
+	function row:GetColumnsTaken()
+		local columnsTaken = 0;
+		local l = self.parent.layout;
+
+		for i = 1, #self.elements do
+			local lc = self.elements[i].layoutConfig;
+			local col = lc.column or l.columns;
+			columnsTaken = columnsTaken + col;
+		end
+
+		return columnsTaken;
 	end
 
 	return row;
