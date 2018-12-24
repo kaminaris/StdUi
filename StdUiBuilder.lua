@@ -8,7 +8,6 @@ local module, version = 'Builder', 1;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local function setDatabaseValue(db, key, value)
-	print('set', key, value)
 	if key:find('.') then
 		local accessor = StdUi.Util.stringSplit('.', key);
 		local startPos = db;
@@ -27,7 +26,6 @@ local function setDatabaseValue(db, key, value)
 end
 
 local function getDatabaseValue(db, key)
-	print('get', key)
 	if key:find('.') then
 		local accessor = StdUi.Util.stringSplit('.', key);
 		local startPos = db;
