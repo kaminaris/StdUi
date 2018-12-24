@@ -36,8 +36,12 @@ local defaultElementConfig = {
 	}
 };
 
----@return EasyLayoutRow
+
+---EasyLayoutRow
+---@param parent Frame
+---@param config table
 function StdUi:EasyLayoutRow(parent, config)
+	---@class EasyLayoutRow
 	local row = {
 		parent = parent,
 		config = self.Util.tableMerge(defaultRowConfig, config or {}),

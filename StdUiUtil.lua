@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Util', 2;
+local module, version = 'Util', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @param frame Frame
@@ -188,6 +188,10 @@ StdUi.Util.tableMerge = function(default, new)
 	end
 
 	return result;
+end
+
+StdUi.Util.stringSplit = function(separator, input, limit)
+	return {strsplit(separator, input, limit)};
 end
 
 StdUi:RegisterModule(module, version);

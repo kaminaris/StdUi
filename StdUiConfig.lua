@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Config', 2;
+local module, version = 'Config', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 StdUi.config = {};
@@ -12,6 +12,7 @@ StdUi.config = {};
 function StdUi:ResetConfig()
 	local font, fontSize = GameFontNormal:GetFont();
 	local _, largeFontSize = GameFontNormalLarge:GetFont();
+
 	self.config = {
 		font      = {
 			family        = font,
@@ -61,6 +62,11 @@ function StdUi:ResetConfig()
 			padding = 10
 		}
 	};
+
+	if IsAddOnLoaded('ElvUI') then
+		local eb = ElvUI[1].media.backdropfadecolor;
+		self.config.backdrop.panel = { r = eb[1],g = eb[2],b = eb[3],a = eb[4] };
+	end
 end
 StdUi:ResetConfig();
 
