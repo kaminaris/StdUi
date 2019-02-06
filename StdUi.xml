@@ -24,5 +24,6 @@
 	<Script file="widgets\ProgressBar.lua"/>
 	<Script file="widgets\ColorPicker.lua"/>
 	<Script file="widgets\Tab.lua"/>
+	<Script file="widgets\Spell.lua"/>
 	<Script file="widgets\ContextMenu.lua"/>
 </Ui>

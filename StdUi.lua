@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'StdUi', 1;
+local MAJOR, MINOR = 'StdUi', 2;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
 
@@ -10,24 +10,8 @@ StdUi.moduleVersions = {};
 
 StdUiInstances = {StdUi};
 
-local function clone(t) -- deep-copy a table
-	local meta = getmetatable(t);
-
-	local target = {};
-	for k, v in pairs(t) do
-		if type(v) == "table" then
-			target[k] = clone(v)
-		else
-			target[k] = v
-		end
-	end
-
-	setmetatable(target, meta);
-	return target;
-end
-
 function StdUi:NewInstance()
-	local instance = clone(self);
+	local instance = CopyTable(self);
 	instance:ResetConfig();
 	tinsert(StdUiInstances, instance);
 	return instance;

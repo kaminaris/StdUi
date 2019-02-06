@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Slider', 1;
+local module, version = 'Slider', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:SliderButton(parent, width, height, direction)
@@ -115,6 +115,85 @@ function StdUi:Slider(parent, width, height, value, vertical, min, max)
 	end);
 
 	return slider;
+end
+
+function StdUi:SliderWithBox(parent, width, height, value, min, max)
+	local widget = CreateFrame('Frame', nil, parent);
+	self:SetObjSize(widget, width, height);
+
+	widget.label = self:Label(widget, '');
+	widget.slider = self:Slider(widget, 100, 12, value, false);
+	widget.editBox = self:NumericBox(widget, 80, 16, value);
+	widget.value = value;
+	widget.editBox:SetNumeric(false);
+	widget.leftLabel = self:Label(widget, '');
+	widget.rightLabel = self:Label(widget, '');
+
+	widget.slider.widget = widget;
+	widget.editBox.widget = widget;
+
+	function widget:SetValue(value)
+		self.lock = true;
+		self.editBox:SetValue(value);
+		self.slider:SetValue(value);
+		self.value = value;
+		self.lock = false;
+
+		if self.OnValueChanged then
+			self.OnValueChanged(self, value);
+		end
+	end
+
+	function widget:GetValue()
+		return self.value;
+	end
+
+	function widget:SetLabelText(text)
+		self.label:SetText(text);
+	end
+
+	function widget:SetMinMaxValues(min, max)
+		widget.min = min;
+		widget.max = max;
+
+		widget.editBox:SetMinMaxValue(min, max);
+		widget.slider:SetMinMaxValues(min, max);
+		widget.leftLabel:SetText(min);
+		widget.rightLabel:SetText(max);
+	end
+
+	if min and max then
+		widget:SetMinMaxValues(min, max);
+	end
+
+	widget.slider.OnValueChanged = function(s, val)
+		if s.widget.lock then return end;
+
+		val = math.floor(val * 100) / 100;
+		if val < s.widget.min then val = s.widget.min end
+		if val > s.widget.max then val = s.widget.max end
+
+		s.widget:SetValue(val);
+	end;
+
+	widget.editBox.OnValueChanged = function(e, val)
+		if e.widget.lock then return end;
+
+		val = math.floor(val * 100) / 100;
+		if val < e.widget.min then val = e.widget.min end
+		if val > e.widget.max then val = e.widget.max end
+
+		e.widget:SetValue(val);
+	end;
+
+	self:GlueTop(widget.label, widget, 0, 0, 'CENTER');
+	widget.slider:SetPoint('LEFT', widget, 'LEFT', 0, 0);
+	widget.slider:SetPoint('RIGHT', widget, 'RIGHT', 0, 0);
+	self:GlueBottom(widget.editBox, widget, 0, 0, 'CENTER');
+	widget.leftLabel:SetPoint('TOPLEFT', widget.slider, 'BOTTOMLEFT', 0, 0);
+	widget.rightLabel:SetPoint('TOPRIGHT', widget.slider, 'BOTTOMRIGHT', 0, 0);
+
+	return widget;
 end
 
 function StdUi:ScrollBar(parent, width, height, horizontal)

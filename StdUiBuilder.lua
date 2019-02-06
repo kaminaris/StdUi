@@ -67,8 +67,15 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 			element:SetChecked(getDatabaseValue(db, dataKey));
 			element.OnValueChanged = genericChangeEvent;
 		end
-	elseif info.type == 'text' then
-		element = StdUi:EditBox(frame, info.label);
+	elseif info.type == 'text' or info.type == 'editBox' then
+		element = StdUi:EditBox(frame, nil, 20, info.label);
+
+		if db then
+			element:SetValue(getDatabaseValue(db, dataKey));
+			element.OnValueChanged = genericChangeEvent;
+		end
+	elseif info.type == 'sliderWithBox' then
+		element = StdUi:SliderWithBox(frame, nil, 20, 0, info.min or 0, info.max or 2);
 
 		if db then
 			element:SetValue(getDatabaseValue(db, dataKey));
@@ -76,6 +83,8 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		end
 	elseif info.type == 'header' then
 		element = StdUi:Header(frame, info.label);
+	elseif info.type == 'custom' then
+		element = info.createFunction(frame, row, info, dataKey, db);
 	end
 
 	row:AddElement(element, {column = info.column or 12});

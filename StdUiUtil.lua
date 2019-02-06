@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Util', 3;
+local module, version = 'Util', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @param frame Frame
@@ -75,6 +75,24 @@ StdUi.Util.numericBoxValidator = function(self)
 
 	StdUi:MarkAsValid(self, true);
 
+	return true;
+end
+
+StdUi.Util.spellValidator = function(self)
+	local text = self:GetText();
+	text = text:trim();
+	local name, _, icon, _, _, _, spellId = GetSpellInfo(text);
+
+	if not name then
+		StdUi:MarkAsValid(self, false);
+		return false;
+	end
+
+	self:SetText(name);
+	self.value = spellId;
+	self.icon:SetTexture(icon);
+
+	StdUi:MarkAsValid(self, true);
 	return true;
 end
 
@@ -191,7 +209,7 @@ StdUi.Util.tableMerge = function(default, new)
 end
 
 StdUi.Util.stringSplit = function(separator, input, limit)
-	return {strsplit(separator, input, limit)};
+	return { strsplit(separator, input, limit) };
 end
 
 StdUi:RegisterModule(module, version);
