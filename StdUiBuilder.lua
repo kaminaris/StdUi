@@ -4,8 +4,46 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Builder', 1;
+local module, version = 'Builder', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
+
+function __genOrderedIndex(t)
+	local orderedIndex = {}
+	for key in pairs(t) do
+		tinsert(orderedIndex, key)
+	end
+	table.sort(orderedIndex)
+	return orderedIndex
+end
+
+function orderedNext(t, state)
+	local key;
+
+	if state == nil then
+		-- the first time, generate the index
+		t.__orderedIndex = __genOrderedIndex(t)
+		key = t.__orderedIndex[1]
+	else
+		-- fetch the next value
+		for i = 1, table.getn(t.__orderedIndex) do
+			if t.__orderedIndex[i] == state then
+				key = t.__orderedIndex[i + 1]
+			end
+		end
+	end
+
+	if key then
+		return key, t[key]
+	end
+
+	-- no more value to return, cleanup
+	t.__orderedIndex = nil
+	return
+end
+
+function orderedPairs(t)
+	return orderedNext, t, nil
+end
 
 local function setDatabaseValue(db, key, value)
 	if key:find('.') then
@@ -58,8 +96,9 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		end
 	end
 
+	local hasLabel = false;
 	if info.type == 'checkbox' then
-		element = StdUi:Checkbox(frame, info.label);
+		element = self:Checkbox(frame, info.label);
 		element.dbReference = db;
 		element.dataKey = dataKey;
 
@@ -68,14 +107,28 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 			element.OnValueChanged = genericChangeEvent;
 		end
 	elseif info.type == 'text' or info.type == 'editBox' then
-		element = StdUi:EditBox(frame, nil, 20, info.label);
+		element = self:EditBox(frame, nil, 20);
+		element.dbReference = db;
+		element.dataKey = dataKey;
+
+		if info.label then
+			self:AddLabel(frame, element, info.label);
+			hasLabel = true;
+		end
 
 		if db then
 			element:SetValue(getDatabaseValue(db, dataKey));
 			element.OnValueChanged = genericChangeEvent;
 		end
 	elseif info.type == 'sliderWithBox' then
-		element = StdUi:SliderWithBox(frame, nil, 20, 0, info.min or 0, info.max or 2);
+		element = self:SliderWithBox(frame, nil, 32, 0, info.min or 0, info.max or 2);
+		element.dbReference = db;
+		element.dataKey = dataKey;
+
+		if info.label then
+			self:AddLabel(frame, element, info.label);
+			hasLabel = true;
+		end
 
 		if db then
 			element:SetValue(getDatabaseValue(db, dataKey));
@@ -87,7 +140,10 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		element = info.createFunction(frame, row, info, dataKey, db);
 	end
 
-	row:AddElement(element, {column = info.column or 12});
+	row:AddElement(element, {column = info.column or 12, margin = {top = (hasLabel and 20 or 0)}});
+	--if hasLabel then
+	--	row.config.margin.top = 20;
+	--end
 end
 
 ---BuildRow
@@ -97,7 +153,7 @@ end
 function StdUi:BuildRow(frame, info, db)
 	local row = frame:AddRow();
 
-	for key, element in pairs(info) do
+	for key, element in orderedPairs(info) do
 		local dataKey = element.key or key or nil;
 
 		self:BuildElement(frame, row, element, dataKey, db);
@@ -115,7 +171,7 @@ function StdUi:BuildWindow(frame, info)
 
 	self:EasyLayout(frame, info.layoutConfig);
 
-	for i, row in pairs(rows) do
+	for i, row in orderedPairs(rows) do
 		self:BuildRow(frame, row, db);
 	end
 

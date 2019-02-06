@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Slider', 2;
+local module, version = 'Slider', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:SliderButton(parent, width, height, direction)
@@ -187,9 +187,9 @@ function StdUi:SliderWithBox(parent, width, height, value, min, max)
 	end;
 
 	self:GlueTop(widget.label, widget, 0, 0, 'CENTER');
-	widget.slider:SetPoint('LEFT', widget, 'LEFT', 0, 0);
-	widget.slider:SetPoint('RIGHT', widget, 'RIGHT', 0, 0);
-	self:GlueBottom(widget.editBox, widget, 0, 0, 'CENTER');
+	widget.slider:SetPoint('TOPLEFT', widget, 'TOPLEFT', 0, 0);
+	widget.slider:SetPoint('TOPRIGHT', widget, 'TOPRIGHT', 0, 0);
+	self:GlueBelow(widget.editBox, widget.slider, 0, -5, 'CENTER');
 	widget.leftLabel:SetPoint('TOPLEFT', widget.slider, 'BOTTOMLEFT', 0, 0);
 	widget.rightLabel:SetPoint('TOPRIGHT', widget.slider, 'BOTTOMRIGHT', 0, 0);
 
