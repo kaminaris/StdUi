@@ -4,8 +4,13 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Slider', 3;
+local module, version = 'Slider', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
+
+local function roundPrecision(value, precision)
+	local multiplier = 10 ^ (precision or 0);
+	return math.floor(value * multiplier + 0.5) / multiplier;
+end
 
 function StdUi:SliderButton(parent, width, height, direction)
 	local button = self:Button(parent, width, height);
@@ -78,6 +83,7 @@ function StdUi:Slider(parent, width, height, value, vertical, min, max)
 	self:SetObjSize(slider, width, height);
 
 	slider.vertical = vertical;
+	slider.precision = 1;
 
 	local thumbWidth = vertical and width or 20;
 	local thumbHeight = vertical and 20 or height;
@@ -105,13 +111,34 @@ function StdUi:Slider(parent, width, height, value, vertical, min, max)
 		slider.ThumbTexture:SetPoint('BOTTOM');
 	end
 
+	function slider:SetPrecision(numberOfDecimals)
+		self.precision = numberOfDecimals;
+	end
+
+	function slider:GetPrecision()
+		return self.precision;
+	end
+
+	slider.OriginalGetValue = slider.GetValue;
+
+	function slider:GetValue()
+		local minimum, maximum = self:GetMinMaxValues();
+		return Clamp(roundPrecision(self:OriginalGetValue(), self.precision), minimum, maximum);
+	end
+
 	slider:SetMinMaxValues(min or 0, max or 100);
 	slider:SetValue(value or min or 0);
 
-	slider:HookScript('OnValueChanged', function(s, ...)
+	slider:HookScript('OnValueChanged', function(s, value, ...)
+		if s.lock then return; end
+		s.lock = true;
+		value = slider:GetValue();
+
 		if s.OnValueChanged then
-			s.OnValueChanged(s, ...);
+			s.OnValueChanged(s, value, ...);
 		end
+
+		s.lock = false;
 	end);
 
 	return slider;
@@ -121,7 +148,6 @@ function StdUi:SliderWithBox(parent, width, height, value, min, max)
 	local widget = CreateFrame('Frame', nil, parent);
 	self:SetObjSize(widget, width, height);
 
-	widget.label = self:Label(widget, '');
 	widget.slider = self:Slider(widget, 100, 12, value, false);
 	widget.editBox = self:NumericBox(widget, 80, 16, value);
 	widget.value = value;
@@ -134,8 +160,9 @@ function StdUi:SliderWithBox(parent, width, height, value, min, max)
 
 	function widget:SetValue(value)
 		self.lock = true;
-		self.editBox:SetValue(value);
 		self.slider:SetValue(value);
+		value = self.slider:GetValue();
+		self.editBox:SetValue(value);
 		self.value = value;
 		self.lock = false;
 
@@ -148,8 +175,16 @@ function StdUi:SliderWithBox(parent, width, height, value, min, max)
 		return self.value;
 	end
 
-	function widget:SetLabelText(text)
-		self.label:SetText(text);
+	function widget:SetValueStep(step)
+		self.slider:SetValueStep(step);
+	end
+
+	function widget:SetPrecision(numberOfDecimals)
+		self.slider.precision = numberOfDecimals;
+	end
+
+	function widget:GetPrecision()
+		return self.slider.precision;
 	end
 
 	function widget:SetMinMaxValues(min, max)
@@ -169,24 +204,15 @@ function StdUi:SliderWithBox(parent, width, height, value, min, max)
 	widget.slider.OnValueChanged = function(s, val)
 		if s.widget.lock then return end;
 
-		val = math.floor(val * 100) / 100;
-		if val < s.widget.min then val = s.widget.min end
-		if val > s.widget.max then val = s.widget.max end
-
 		s.widget:SetValue(val);
 	end;
 
 	widget.editBox.OnValueChanged = function(e, val)
 		if e.widget.lock then return end;
 
-		val = math.floor(val * 100) / 100;
-		if val < e.widget.min then val = e.widget.min end
-		if val > e.widget.max then val = e.widget.max end
-
 		e.widget:SetValue(val);
 	end;
 
-	self:GlueTop(widget.label, widget, 0, 0, 'CENTER');
 	widget.slider:SetPoint('TOPLEFT', widget, 'TOPLEFT', 0, 0);
 	widget.slider:SetPoint('TOPRIGHT', widget, 'TOPRIGHT', 0, 0);
 	self:GlueBelow(widget.editBox, widget.slider, 0, -5, 'CENTER');

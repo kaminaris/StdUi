@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Builder', 2;
+local module, version = 'Builder', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function __genOrderedIndex(t)
@@ -128,6 +128,10 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		if info.label then
 			self:AddLabel(frame, element, info.label);
 			hasLabel = true;
+		end
+
+		if info.precision then
+			element:SetPrecision(info.precision);
 		end
 
 		if db then
