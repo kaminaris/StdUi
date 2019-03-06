@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Tab', 1;
+local module, version = 'Tab', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ---
@@ -27,16 +27,22 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 	vertical = vertical or false;
 
 	local buttonHeight = 20;
+	local buttonWidth = 160;
 	local tabFrame = self:Frame(parent, width, height);
+	tabFrame.vertical = vertical;
 
 	tabFrame.tabs = tabs;
 	tabFrame.panel = self:Panel(tabFrame);
-	self:GlueAcross(tabFrame.panel, tabFrame, 0, -buttonHeight, 0, 0);
+	if vertical then
+		self:GlueAcross(tabFrame.panel, tabFrame, 0, -buttonHeight, 0, 0);
+	else
+		self:GlueAcross(tabFrame.panel, tabFrame, 0, -buttonHeight, 0, 0);
+	end
 
 	function tabFrame:EnumerateTabs(callback)
 		for i = 1, #self.tabs do
 			local tab = self.tabs[i];
-			if callback(tab) then
+			if callback(tab, self) then
 				break;
 			end
 		end
@@ -58,26 +64,39 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical)
 		end);
 
 		local prevBtn;
-		self:EnumerateTabs(function(tab)
+		self:EnumerateTabs(function(tab, parentTabFrame)
 			local btn = tab.button;
 			if not btn then
-				btn = this:Button(tabFrame, nil, buttonHeight);
-				btn:SetScript('OnClick', function (btn)
-					tabFrame:SelectTab(btn.tab.name);
-				end);
-
+				btn = this:Button(parentTabFrame, nil, buttonHeight);
 				tab.button = btn;
+				btn.tabFrame = parentTabFrame;
+
+				btn:SetScript('OnClick', function (bt)
+					bt.tabFrame:SelectTab(bt.tab.name);
+				end);
 			end
 
 			btn.tab = tab;
 			btn:SetText(tab.title);
 			btn:ClearAllPoints();
-			this:ButtonAutoWidth(btn);
+			if parentTabFrame.vertical then
 
-			if not prevBtn then
-				this:GlueTop(btn, tabFrame, 0, 0, 'LEFT');
 			else
-				this:GlueRight(btn, prevBtn, 5, 0);
+				this:ButtonAutoWidth(btn);
+			end
+
+			if parentTabFrame.vertical then
+				if not prevBtn then
+					this:GlueTop(btn, parentTabFrame, 0, 0, 'LEFT');
+				else
+					this:GlueBelow(btn, prevBtn, 0, -1);
+				end
+			else
+				if not prevBtn then
+					this:GlueTop(btn, parentTabFrame, 0, 0, 'LEFT');
+				else
+					this:GlueRight(btn, prevBtn, 5, 0);
+				end
 			end
 
 			btn:Show();
