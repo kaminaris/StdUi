@@ -15,6 +15,7 @@
 	<Script file="widgets\EditBox.lua"/>
 	<Script file="widgets\CheckBox.lua"/>
 	<Script file="widgets\Dropdown.lua"/>
+	<Script file="widgets\Autocomplete.lua"/>
 	<Script file="widgets\Label.lua"/>
 	<Script file="widgets\Scroll.lua"/>
 	<Script file="widgets\ScrollTable.lua"/>

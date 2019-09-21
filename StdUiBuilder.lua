@@ -4,45 +4,54 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Builder', 3;
+local module, version = 'Builder', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
-function __genOrderedIndex(t)
-	local orderedIndex = {}
+
+local function __genOrderedIndex(t)
+	local orderedIndex = {};
+
 	for key in pairs(t) do
 		tinsert(orderedIndex, key)
 	end
-	table.sort(orderedIndex)
-	return orderedIndex
+
+	table.sort(orderedIndex, function (a, b)
+		if not t[a].order or not t[b].order then
+			return a < b;
+		end
+		return t[a].order < t[b].order;
+	end);
+
+	return orderedIndex;
 end
 
-function orderedNext(t, state)
+local function orderedNext(t, state)
 	local key;
 
 	if state == nil then
 		-- the first time, generate the index
-		t.__orderedIndex = __genOrderedIndex(t)
-		key = t.__orderedIndex[1]
+		t.__orderedIndex = __genOrderedIndex(t);
+		key = t.__orderedIndex[1];
 	else
 		-- fetch the next value
 		for i = 1, table.getn(t.__orderedIndex) do
 			if t.__orderedIndex[i] == state then
-				key = t.__orderedIndex[i + 1]
+				key = t.__orderedIndex[i + 1];
 			end
 		end
 	end
 
 	if key then
-		return key, t[key]
+		return key, t[key];
 	end
 
 	-- no more value to return, cleanup
-	t.__orderedIndex = nil
+	t.__orderedIndex = nil;
 	return
 end
 
-function orderedPairs(t)
-	return orderedNext, t, nil
+local function orderedPairs(t)
+	return orderedNext, t, nil;
 end
 
 local function setDatabaseValue(db, key, value)
@@ -120,6 +129,56 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 			element:SetValue(getDatabaseValue(db, dataKey));
 			element.OnValueChanged = genericChangeEvent;
 		end
+	elseif info.type == 'button' then
+		element = self:Button(frame, nil, 20, info.text or '');
+
+		if info.onClick then
+			element:SetScript('OnClick', info.onClick);
+		end
+	elseif info.type == 'dropdown' then
+		element = self:Dropdown(frame, 300, 20, info.options or {}, nil, info.multi or nil, info.assoc or false);
+		element.dbReference = db;
+		element.dataKey = dataKey;
+
+		if info.label then
+			self:AddLabel(frame, element, info.label);
+			hasLabel = true;
+		end
+
+		if db then
+			element:SetValue(getDatabaseValue(db, dataKey));
+			element.OnValueChanged = genericChangeEvent;
+		end
+	elseif info.type == 'autocomplete' then
+		element = self:Autocomplete(frame, 300, 20, '');
+		if info.validator then
+			element.validator = info.validator;
+		end
+		if info.transformer then
+			element.transformer = info.transformer;
+		end
+		if info.buttonCreate then
+			element.buttonCreate = info.buttonCreate;
+		end
+		if info.buttonUpdate then
+			element.buttonUpdate = info.buttonUpdate;
+		end
+		if info.items then
+			element:SetItems(info.items);
+		end
+
+		element.dbReference = db;
+		element.dataKey = dataKey;
+
+		if info.label then
+			self:AddLabel(frame, element, info.label);
+			hasLabel = true;
+		end
+
+		if db then
+			element:SetValue(getDatabaseValue(db, dataKey));
+			element.OnValueChanged = genericChangeEvent;
+		end
 	elseif info.type == 'sliderWithBox' then
 		element = self:SliderWithBox(frame, nil, 32, 0, info.min or 0, info.max or 2);
 		element.dbReference = db;
@@ -144,10 +203,18 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		element = info.createFunction(frame, row, info, dataKey, db);
 	end
 
-	row:AddElement(element, {column = info.column or 12, margin = {top = (hasLabel and 20 or 0)}});
-	--if hasLabel then
-	--	row.config.margin.top = 20;
-	--end
+	if element.hasLabel then
+		hasLabel = true;
+	end
+
+	row:AddElement(element, {
+		column = info.column or 12,
+		margin = info.layoutMargins or {
+			top = (hasLabel and 20 or 0)
+		}
+	});
+
+	return element;
 end
 
 ---BuildRow
@@ -160,7 +227,14 @@ function StdUi:BuildRow(frame, info, db)
 	for key, element in orderedPairs(info) do
 		local dataKey = element.key or key or nil;
 
-		self:BuildElement(frame, row, element, dataKey, db);
+		local el = self:BuildElement(frame, row, element, dataKey, db);
+		if element then
+			if not frame.elements then
+				frame.elements = {};
+			end
+
+			frame.elements[key] = el;
+		end
 	end
 end
 

@@ -4,13 +4,14 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Util', 4;
+local module, version = 'Util', 5;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @param frame Frame
 function StdUi:MarkAsValid(frame, valid)
 	if not valid then
 		frame:SetBackdropBorderColor(1, 0, 0, 1);
+		frame.origBackdropBorderColor = {frame:GetBackdropBorderColor()};
 	else
 		frame:SetBackdropBorderColor(
 			self.config.backdrop.border.r,
@@ -18,6 +19,7 @@ function StdUi:MarkAsValid(frame, valid)
 			self.config.backdrop.border.b,
 			self.config.backdrop.border.a
 		);
+		frame.origBackdropBorderColor = {frame:GetBackdropBorderColor()};
 	end
 end
 

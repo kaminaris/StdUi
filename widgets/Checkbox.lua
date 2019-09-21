@@ -3,7 +3,7 @@ local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
 	return;
 end
-local module, version = 'Checkbox', 2;
+local module, version = 'Checkbox', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ---@return CheckButton
@@ -37,10 +37,14 @@ function StdUi:Checkbox(parent, text, width, height)
 		return self.isChecked;
 	end
 
-	function checkbox:SetChecked(flag)
+	--- Set checkbox state
+	---
+	--- @param flag boolean
+	--- @param internal boolean - indicates to not run OnValueChanged
+	function checkbox:SetChecked(flag, internal)
 		self.isChecked = flag;
 
-		if self.OnValueChanged then
+		if not internal and self.OnValueChanged then
 			self:OnValueChanged(flag, self.value);
 		end
 
@@ -102,6 +106,19 @@ function StdUi:Checkbox(parent, text, width, height)
 			frame:SetChecked(not frame:GetChecked());
 		end
 	end);
+
+	return checkbox;
+end
+
+function StdUi:IconCheckbox(parent, icon, text, width, height, iconSize)
+	iconSize = iconSize or 16
+	local checkbox = self:Checkbox(parent, text, width, height);
+	checkbox.icon = self:Texture(checkbox, iconSize, iconSize, icon);
+	checkbox.icon:SetPoint('LEFT', checkbox.target, 'RIGHT', 5, 0);
+
+	checkbox.text:ClearAllPoints();
+	checkbox.text:SetPoint('LEFT', checkbox.target, 'RIGHT', iconSize + 5, 0);
+	checkbox.text:SetPoint('RIGHT', checkbox, 'RIGHT', -5, 0);
 
 	return checkbox;
 end

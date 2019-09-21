@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'EditBox', 3;
+local module, version = 'EditBox', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return EditBox
@@ -77,6 +77,7 @@ function StdUi:EditBox(parent, width, height, text, validator)
 	validator = validator or StdUi.Util.editBoxValidator;
 
 	local editBox = self:SimpleEditBox(parent, width, height, text);
+	editBox.validator = validator;
 
 	function editBox:GetValue()
 		return self.value;
@@ -95,7 +96,7 @@ function StdUi:EditBox(parent, width, height, text, validator)
 
 	function editBox:Validate()
 		self.isValidated = true;
-		self.isValid = validator(self);
+		self.isValid = self.validator(self);
 
 		if self.isValid then
 			if self.button then
@@ -116,12 +117,12 @@ function StdUi:EditBox(parent, width, height, text, validator)
 	button.editBox = editBox;
 	editBox.button = button;
 
-	button:SetScript('OnClick', function(self)
-		self.editBox:Validate(self.editBox);
+	button:SetScript('OnClick', function(b)
+		b.editBox:Validate(b.editBox);
 	end);
 
-	editBox:SetScript('OnEnterPressed', function(self)
-		self:Validate();
+	editBox:SetScript('OnEnterPressed', function(e)
+		e:Validate();
 	end)
 
 	editBox:SetScript('OnTextChanged', function(self, isUserInput)

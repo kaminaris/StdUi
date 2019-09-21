@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Scroll', 2;
+local module, version = 'Scroll', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 StdUi.ScrollBarEvents = {
@@ -211,6 +211,7 @@ StdUi.FauxScrollFrameMethods = {
 
 function StdUi:ScrollFrame(parent, width, height, scrollChild)
 	local panel = self:Panel(parent, width, height);
+	local stdUi = self;
 	local scrollBarWidth = 16;
 
 	local scrollFrame = CreateFrame('ScrollFrame', nil, panel);
@@ -225,17 +226,28 @@ function StdUi:ScrollFrame(parent, width, height, scrollChild)
 
 	scrollFrame.ScrollBar = scrollBar;
 	scrollBar.ScrollFrame = scrollFrame;
+	panel.scrollBar = scrollBar;
 
-	--scrollFrame:SetScript('OnLoad', StdUi.ScrollFrameEvents.OnLoad);-- LOL, no wonder it wasnt working
 	StdUi.ScrollFrameEvents.OnLoad(scrollFrame);
 
 	scrollFrame.panel = panel;
-	scrollFrame:ClearAllPoints();
-	scrollFrame:SetSize(width - scrollBarWidth - 5, height - 4); -- scrollbar width and margins
-	self:GlueAcross(scrollFrame, panel, 2, -2, -scrollBarWidth - 2, 2);
+	panel.scrollFrame = scrollFrame;
 
-	scrollBar.panel:SetPoint('TOPRIGHT', panel, 'TOPRIGHT', -2, - 2);
-	scrollBar.panel:SetPoint('BOTTOMRIGHT', panel, 'BOTTOMRIGHT', -2, 2);
+	function panel:UpdateSize(newWidth, newHeight)
+		self:SetSize(newWidth, newHeight);
+		self.scrollFrame:ClearAllPoints();
+
+		self.scrollFrame:SetSize(newWidth - scrollBarWidth - 5, newHeight - 4); -- scrollbar width and margins
+		stdUi:GlueAcross(self.scrollFrame, self, 2, -2, -scrollBarWidth - 2, 2);
+
+		self.scrollBar.panel:SetPoint('TOPRIGHT', self, 'TOPRIGHT', -2, - 2);
+		self.scrollBar.panel:SetPoint('BOTTOMRIGHT', self, 'BOTTOMRIGHT', -2, 2);
+
+		if self.scrollChild then
+			self.scrollChild:SetWidth(self.scrollFrame:GetWidth());
+			self.scrollChild:SetHeight(self.scrollFrame:GetHeight());
+		end
+	end
 
 	if not scrollChild then
 		scrollChild = CreateFrame('Frame', nil, scrollFrame);
@@ -244,6 +256,9 @@ function StdUi:ScrollFrame(parent, width, height, scrollChild)
 	else
 		scrollChild:SetParent(scrollFrame);
 	end
+	panel.scrollChild = scrollChild;
+
+	panel:UpdateSize(width, height);
 
 	scrollFrame:SetScrollChild(scrollChild);
 	scrollFrame:EnableMouse(true);
@@ -253,10 +268,6 @@ function StdUi:ScrollFrame(parent, width, height, scrollChild)
 	scrollChild:SetPoint('RIGHT', scrollFrame, 'RIGHT', 0, 0);
 
 	scrollFrame.scrollChild = scrollChild;
-
-	panel.scrollFrame = scrollFrame;
-	panel.scrollChild = scrollChild;
-	panel.scrollBar = scrollBar;
 
 	return panel, scrollFrame, scrollChild, scrollBar;
 end
