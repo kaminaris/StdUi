@@ -1,12 +1,13 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return ;
 end
 
-local module, version = 'Builder', 4;
-if not StdUi:UpgradeNeeded(module, version) then return end;
-
+local module, version = 'Builder', 5;
+if not StdUi:UpgradeNeeded(module, version) then
+	return
+end ;
 
 local function __genOrderedIndex(t)
 	local orderedIndex = {};
@@ -15,7 +16,7 @@ local function __genOrderedIndex(t)
 		tinsert(orderedIndex, key)
 	end
 
-	table.sort(orderedIndex, function (a, b)
+	table.sort(orderedIndex, function(a, b)
 		if not t[a].order or not t[b].order then
 			return a < b;
 		end
@@ -62,10 +63,10 @@ local function setDatabaseValue(db, key, value)
 		for i, subKey in pairs(accessor) do
 			if i == #accessor then
 				startPos[subKey] = value;
-				return;
+				return
 			end
 
-			startPos = db[subKey];
+			startPos = startPos[subKey];
 		end
 	else
 		db[key] = value;
@@ -82,7 +83,7 @@ local function getDatabaseValue(db, key)
 				return startPos[subKey];
 			end
 
-			startPos = db[subKey];
+			startPos = startPos[subKey];
 		end
 	else
 		return db[key];
@@ -108,49 +109,13 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 	local hasLabel = false;
 	if info.type == 'checkbox' then
 		element = self:Checkbox(frame, info.label);
-		element.dbReference = db;
-		element.dataKey = dataKey;
-
-		if db then
-			element:SetChecked(getDatabaseValue(db, dataKey));
-			element.OnValueChanged = genericChangeEvent;
-		end
 	elseif info.type == 'text' or info.type == 'editBox' then
 		element = self:EditBox(frame, nil, 20);
-		element.dbReference = db;
-		element.dataKey = dataKey;
-
-		if info.label then
-			self:AddLabel(frame, element, info.label);
-			hasLabel = true;
-		end
-
-		if db then
-			element:SetValue(getDatabaseValue(db, dataKey));
-			element.OnValueChanged = genericChangeEvent;
-		end
-	elseif info.type == 'button' then
-		element = self:Button(frame, nil, 20, info.text or '');
-
-		if info.onClick then
-			element:SetScript('OnClick', info.onClick);
-		end
 	elseif info.type == 'dropdown' then
 		element = self:Dropdown(frame, 300, 20, info.options or {}, nil, info.multi or nil, info.assoc or false);
-		element.dbReference = db;
-		element.dataKey = dataKey;
-
-		if info.label then
-			self:AddLabel(frame, element, info.label);
-			hasLabel = true;
-		end
-
-		if db then
-			element:SetValue(getDatabaseValue(db, dataKey));
-			element.OnValueChanged = genericChangeEvent;
-		end
 	elseif info.type == 'autocomplete' then
 		element = self:Autocomplete(frame, 300, 20, '');
+
 		if info.validator then
 			element.validator = info.validator;
 		end
@@ -166,36 +131,17 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		if info.items then
 			element:SetItems(info.items);
 		end
-
-		element.dbReference = db;
-		element.dataKey = dataKey;
-
-		if info.label then
-			self:AddLabel(frame, element, info.label);
-			hasLabel = true;
-		end
-
-		if db then
-			element:SetValue(getDatabaseValue(db, dataKey));
-			element.OnValueChanged = genericChangeEvent;
-		end
 	elseif info.type == 'sliderWithBox' then
 		element = self:SliderWithBox(frame, nil, 32, 0, info.min or 0, info.max or 2);
-		element.dbReference = db;
-		element.dataKey = dataKey;
-
-		if info.label then
-			self:AddLabel(frame, element, info.label);
-			hasLabel = true;
-		end
 
 		if info.precision then
 			element:SetPrecision(info.precision);
 		end
+	elseif info.type == 'button' then
+		element = self:Button(frame, nil, 20, info.text or '');
 
-		if db then
-			element:SetValue(getDatabaseValue(db, dataKey));
-			element.OnValueChanged = genericChangeEvent;
+		if info.onClick then
+			element:SetScript('OnClick', info.onClick);
 		end
 	elseif info.type == 'header' then
 		element = StdUi:Header(frame, info.label);
@@ -203,8 +149,38 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		element = info.createFunction(frame, row, info, dataKey, db);
 	end
 
+	element.dbReference = db;
+	element.dataKey = dataKey;
+
 	if element.hasLabel then
 		hasLabel = true;
+	end
+
+	local canHaveLabel = info.type ~= 'checkbox' and info.type ~= 'header';
+	if info.label and canHaveLabel then
+		self:AddLabel(frame, element, info.label);
+		hasLabel = true;
+	end
+
+	if info.initialValue and element.SetValue then
+		element:SetValue(info.initialValue);
+	end
+
+	if info.initialValue and element.SetChecked then
+		element:SetChecked(info.initialValue);
+	end
+
+	-- Setting onValueChanged disqualifies from any writes to database
+	if info.onValueChanged then
+		element.OnValueChanged = info.onValueChanged;
+	elseif db then
+		if info.type == 'checkbox' then
+			element:SetChecked(getDatabaseValue(db, dataKey))
+		elseif element.SetValue then
+			element:SetValue(getDatabaseValue(db, dataKey));
+		end
+
+		element.OnValueChanged = genericChangeEvent;
 	end
 
 	row:AddElement(element, {

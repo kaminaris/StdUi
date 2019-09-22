@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Dropdown', 2;
+local module, version = 'Dropdown', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 -- reference to all other dropdowns to close them when new one opens
@@ -35,6 +35,7 @@ function StdUi:Dropdown(parent, width, height, options, value, multi, assoc)
 
 	dropdown.multi = multi;
 	dropdown.assoc = assoc;
+	print('assoc', dropdown.assoc, assoc)
 	dropdown.optsFrame = optsFrame;
 	dropdown.dropTex = dropTex;
 	dropdown.options = options;
@@ -161,9 +162,12 @@ function StdUi:Dropdown(parent, width, height, options, value, multi, assoc)
 
 		if self.multi then
 			for _, checkbox in pairs(self.optsFrame.scrollChild.items) do
-				local isChecked = self.assoc and
-					self.value[checkbox.value] or
-					tContains(self.value, checkbox.value);
+				local isChecked = false;
+				if self.assoc then
+					isChecked = self.value[checkbox.value];
+				else
+					isChecked = tContains(self.value, checkbox.value);
+				end
 
 				checkbox:SetChecked(isChecked, true);
 			end
