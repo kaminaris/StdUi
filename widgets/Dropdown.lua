@@ -35,7 +35,7 @@ function StdUi:Dropdown(parent, width, height, options, value, multi, assoc)
 
 	dropdown.multi = multi;
 	dropdown.assoc = assoc;
-	print('assoc', dropdown.assoc, assoc)
+
 	dropdown.optsFrame = optsFrame;
 	dropdown.dropTex = dropTex;
 	dropdown.options = options;
