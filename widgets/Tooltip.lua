@@ -4,7 +4,7 @@ if not StdUi then
 	return;
 end
 
-local module, version = 'Tooltip', 1;
+local module, version = 'Tooltip', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 StdUi.tooltips = {}
@@ -47,6 +47,7 @@ function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 			tip:ClearAllPoints();
 			this:GlueOpposite(tip, tip.owner, 0, 0, tip.anchor);
 		end);
+
 		owner:HookScript('OnLeave', function ()
 			tip:Hide();
 		end);
@@ -55,15 +56,14 @@ function StdUi:Tooltip(owner, text, tooltipName, anchor, automatic)
 	return tip;
 end
 
-function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
-	--- @type GameTooltip
+function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic, manualPosition)
 	local tip;
 	local this = self;
 
 	if tooltipName and self.frameTooltips[tooltipName] then
 		tip = self.frameTooltips[tooltipName];
 	else
-		tip = self:Panel(UIParent, 10, 10);
+		tip = self:Panel(owner, 10, 10);
 		tip:SetFrameStrata('TOOLTIP');
 		self:ApplyBackdrop(tip, 'panel');
 
@@ -102,11 +102,13 @@ function StdUi:FrameTooltip(owner, text, tooltipName, anchor, automatic)
 			tip:SetSize(tip.text:GetWidth() + padding * 2, tip.text:GetHeight() + padding * 2);
 		end
 
-		hooksecurefunc(tip, 'Show', function(self)
-			self:RecalculateSize();
-			self:ClearAllPoints();
-			this:GlueOpposite(self, self.owner, 0, 0, self.anchor);
-		end);
+		if manualPosition then
+			hooksecurefunc(tip, 'Show', function(self)
+				self:RecalculateSize();
+				self:ClearAllPoints();
+				this:GlueOpposite(self, self.owner, 0, 0, self.anchor);
+			end);
+		end
 	end
 
 	tip.owner = owner;
