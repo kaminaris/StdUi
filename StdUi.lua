@@ -1,19 +1,24 @@
-local MAJOR, MINOR = 'StdUi', 2;
+local MAJOR, MINOR = 'StdUi', 3;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
 
 if not StdUi then
-	return ;
+	return
 end
 
-StdUi.moduleVersions = {};
+local TableInsert = tinsert;
 
-StdUiInstances = {StdUi};
+StdUi.moduleVersions = {};
+if not StdUiInstances then
+	StdUiInstances = {StdUi};
+else
+	TableInsert(StdUiInstances, StdUi);
+end
 
 function StdUi:NewInstance()
 	local instance = CopyTable(self);
 	instance:ResetConfig();
-	tinsert(StdUiInstances, instance);
+	TableInsert(StdUiInstances, instance);
 	return instance;
 end
 
@@ -34,6 +39,7 @@ function StdUi:RegisterWidget(name, func)
 		self[name] = func;
 		return true;
 	end
+
 	return false;
 end
 
@@ -46,7 +52,7 @@ function StdUi:InitWidget(widget)
 		for i = 1, #children do
 			local child = children[i];
 			if child.isWidget then
-				tinsert(result, child);
+				TableInsert(result, child);
 			end
 		end
 
@@ -78,7 +84,7 @@ StdUi.SetHighlightBorder = function(self)
 	end
 
 	if self.isDisabled then
-		return;
+		return
 	end
 
 	local hc = StdUi.config.highlight.color;
@@ -94,11 +100,13 @@ StdUi.ResetHighlightBorder = function(self)
 	end
 
 	if self.isDisabled then
-		return;
+		return
 	end
 
 	local hc = self.origBackdropBorderColor;
-	self:SetBackdropBorderColor(unpack(hc));
+	if hc then
+		self:SetBackdropBorderColor(unpack(hc));
+	end
 end
 
 function StdUi:HookHoverBorder(object)
@@ -148,6 +156,7 @@ function StdUi:ApplyDisabledBackdrop(frame, enabled)
 	if frame.target then
 		frame = frame.target;
 	end
+
 	if enabled then
 		self:ApplyBackdrop(frame, 'button', 'border');
 		self:SetTextColor(frame, 'normal');
@@ -205,9 +214,11 @@ function StdUi:MakeDraggable(frame, handle)
 		handle:EnableMouse(true);
 		handle:SetMovable(true);
 		handle:RegisterForDrag('LeftButton');
+
 		handle:SetScript('OnDragStart', function(self)
 			frame.StartMoving(frame);
 		end);
+
 		handle:SetScript('OnDragStop', function(self)
 			frame.StopMovingOrSizing(frame);
 		end);

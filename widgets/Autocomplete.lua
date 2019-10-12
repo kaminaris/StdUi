@@ -1,13 +1,15 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Autocomplete', 1;
+local module, version = 'Autocomplete', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
-StdUi.Util.autocompleteTransformer = function(ac, value)
+local TableInsert = tinsert;
+
+StdUi.Util.autocompleteTransformer = function(_, value)
 	return value;
 end
 
@@ -16,7 +18,7 @@ StdUi.Util.autocompleteValidator = function(self)
 	return true;
 end
 
-StdUi.Util.autocompleteItemTransformer = function(ac, value)
+StdUi.Util.autocompleteItemTransformer = function(_, value)
 	if not value or value == '' then
 		return value;
 	end
@@ -55,37 +57,14 @@ StdUi.Util.autocompleteItemValidator = function(ac)
 	end
 end
 
---- Very similar to dropdown except it has the ability to create new records and filters results
---- @return EditBox
-function StdUi:Autocomplete(parent, width, height, text, validator, transformer, items)
-	local this = self;
-	transformer = transformer or StdUi.Util.autocompleteTransformer;
-	validator = validator or StdUi.Util.autocompleteValidator;
-
-	local autocomplete = self:EditBox(parent, width, height, text, validator);
-	autocomplete.transformer = transformer;
-	autocomplete.items = items;
-	autocomplete.filteredItems = {};
-	autocomplete.selectedItem = nil;
-	autocomplete.itemLimit = 8;
-	autocomplete.itemTable = {};
-
-	autocomplete.dropdown = self:Panel(parent, width, 20);
-	autocomplete.dropdown:SetPoint('TOPLEFT', autocomplete, 'BOTTOMLEFT', 0, 0);
-	autocomplete.dropdown:SetPoint('TOPRIGHT', autocomplete, 'BOTTOMRIGHT', 0, 0);
-	autocomplete.dropdown:Hide();
-	autocomplete.dropdown:SetFrameLevel(autocomplete:GetFrameLevel() + 10);
-
-	function self:GetFilteredItems()
-		return self.filteredItems;
-	end
-
-	autocomplete.buttonCreate = function(panel, i)
+local AutocompleteMethods = {
+	--- Private methods
+	buttonCreate = function(panel)
 		local optionButton;
 
-		optionButton = this:HighlightButton(panel, panel:GetWidth(), 20, '');
+		optionButton = StdUi:HighlightButton(panel, panel:GetWidth(), 20, '');
 		optionButton.text:SetJustifyH('LEFT');
-		optionButton.autocomplete = autocomplete;
+		optionButton.autocomplete = panel.autocomplete;
 		optionButton:SetFrameLevel(panel:GetFrameLevel() + 2);
 
 		optionButton:SetScript('OnClick', function(b)
@@ -99,47 +78,68 @@ function StdUi:Autocomplete(parent, width, height, text, validator, transformer,
 		end);
 
 		return optionButton;
-	end
+	end,
 
-	autocomplete.buttonUpdate = function(panel, optionButton, data)
+	buttonUpdate = function(panel, optionButton, data)
 		optionButton.boundItem = data;
 		optionButton.value = data.value;
 
 		optionButton:SetWidth(panel:GetWidth());
 		optionButton:SetText(data.text);
-	end
+	end,
 
-	function autocomplete:SetItems(newItems)
+	filterItems = function(ac, search, itemsToSearch)
+		local result = {};
+
+		for _, item in pairs(itemsToSearch) do
+			local valueString = tostring(item.value);
+			if
+			item.text:lower():find(search:lower(), nil, true) or
+				valueString:lower():find(search:lower(), nil, true)
+			then
+				TableInsert(result, item);
+			end
+
+			if #result >= ac.itemLimit then
+				break;
+			end
+		end
+
+		return result;
+	end,
+
+	--- Public methods
+	SetItems = function(self, newItems)
 		self.items = newItems;
 		self:RenderItems();
 		self.dropdown:Hide();
-	end
+	end,
 
-	function autocomplete:RenderItems()
+	RenderItems = function(self)
 		local dropdownHeight = 20 * #self.filteredItems;
 		self.dropdown:SetHeight(dropdownHeight);
 
-		this:ObjectList(
-			autocomplete.dropdown,
-			autocomplete.itemTable,
+		self.stdUi:ObjectList(
+			self.dropdown,
+			self.itemTable,
 			self.buttonCreate,
 			self.buttonUpdate,
 			self.filteredItems
 		);
-	end
+	end,
 
-	function autocomplete:ValueToText(value)
+	ValueToText = function(self, value)
 		return self.transformer(value)
-	end
+	end,
 
-	function autocomplete:SetValue(value, text)
+	SetValue = function(self, value, t)
 		self.value = value;
-		self:SetText(text or self:ValueToText(value) or '');
+		self:SetText(t or self:ValueToText(value) or '');
 		self:Validate();
 		self.button:Hide();
-	end
+	end,
 
-	function autocomplete:Validate()
+	Validate = function(self)
 		self.isValidated = true;
 		self.isValid = self:validator();
 
@@ -149,38 +149,20 @@ function StdUi:Autocomplete(parent, width, height, text, validator, transformer,
 			end
 		end
 		self.isValidated = false;
-	end;
+	end,
+};
 
-	autocomplete.filterItems = function(ac, search, itemsToSearch)
-		local result = {};
-
-		for _, item in pairs(itemsToSearch) do
-			local valueString = tostring(item.value);
-			if
-				item.text:lower():find(search:lower(), nil, true) or
-				valueString:lower():find(search:lower(), nil, true)
-			then
-				tinsert(result, item);
-			end
-
-			if #result >= ac.itemLimit then
-				break;
-			end
-		end
-
-		return result;
-	end
-
-	autocomplete:SetScript('OnEditFocusLost', function(s)
+local AutocompleteEvents = {
+	OnEditFocusLost = function(s)
 		s.dropdown:Hide();
-	end)
+	end,
 
-	autocomplete:SetScript('OnEnterPressed', function(s)
+	OnEnterPressed = function(s)
 		s.dropdown:Hide();
 		s:Validate();
-	end)
+	end,
 
-	autocomplete:SetScript('OnTextChanged', function(ac, isUserInput)
+	OnTextChanged = function(ac, isUserInput)
 		local plainText = StdUi.Util.stripColors(ac:GetText());
 		ac.selectedItem = nil;
 
@@ -202,7 +184,41 @@ function StdUi:Autocomplete(parent, width, height, text, validator, transformer,
 				ac.dropdown:Show();
 			end
 		end
-	end);
+	end
+}
+
+--- Very similar to dropdown except it has the ability to create new records and filters results
+--- @return EditBox
+function StdUi:Autocomplete(parent, width, height, text, validator, transformer, items)
+	transformer = transformer or StdUi.Util.autocompleteTransformer;
+	validator = validator or StdUi.Util.autocompleteValidator;
+
+	local autocomplete = self:EditBox(parent, width, height, text, validator);
+	---@type StdUi
+	autocomplete.stdUi = self;
+	autocomplete.transformer = transformer;
+	autocomplete.items = items;
+	autocomplete.filteredItems = {};
+	autocomplete.selectedItem = nil;
+	autocomplete.itemLimit = 8;
+	autocomplete.itemTable = {};
+
+	autocomplete.dropdown = self:Panel(parent, width, 20);
+	autocomplete.dropdown:SetPoint('TOPLEFT', autocomplete, 'BOTTOMLEFT', 0, 0);
+	autocomplete.dropdown:SetPoint('TOPRIGHT', autocomplete, 'BOTTOMRIGHT', 0, 0);
+	autocomplete.dropdown:Hide();
+	autocomplete.dropdown:SetFrameLevel(autocomplete:GetFrameLevel() + 10);
+
+	-- keep back reference
+	autocomplete.dropdown.autocomplete = autocomplete;
+
+	for k, v in pairs(AutocompleteMethods) do
+		autocomplete[k] = v;
+	end
+
+	for k, v in pairs(AutocompleteEvents) do
+		autocomplete:SetScript(k, v);
+	end
 
 	return autocomplete;
 end

@@ -1,13 +1,162 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return ;
+	return
 end
 
-local module, version = 'Tab', 3;
+local module, version = 'Tab', 4;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
-end ;
+end
+
+----------------------------------------------------
+--- TabPanel
+----------------------------------------------------
+
+local TabPanelMethods = {
+	--- Runs callback thru all tabs, if callback returns truthy value, enumeration stops and function returns result
+	EnumerateTabs = function(self, callback, ...)
+		local result;
+
+		for i = 1, #self.tabs do
+			local tab = self.tabs[i];
+			result = callback(tab, self, i, ...);
+			if result then
+				break
+			end
+		end
+
+		return result;
+	end,
+
+	HideAllFrames = function(self)
+		for _, tab in pairs(self.tabs) do
+			if tab.frame then
+				tab.frame:Hide();
+			end
+		end
+	end,
+
+	DrawButtons = function(self)
+		local prevBtn;
+		for _, tab in pairs(self.tabs) do
+			if tab.button then
+				tab.button:Hide();
+			end
+
+			local btn = tab.button;
+			local btnContainer = self.buttonContainer;
+
+			if not btn then
+				btn = self.stdUi:Button(btnContainer, nil, self.buttonHeight);
+				tab.button = btn;
+				btn.tabFrame = self;
+
+				btn:SetScript('OnClick', function(bt)
+					bt.tabFrame:SelectTab(bt.tab.name);
+				end);
+			end
+
+			btn.tab = tab;
+			btn:SetText(tab.title);
+			btn:ClearAllPoints();
+
+			if self.vertical then
+				btn:SetWidth(self.buttonWidth);
+			else
+				self.stdUi:ButtonAutoWidth(btn);
+			end
+
+			if self.vertical then
+				if not prevBtn then
+					self.stdUi:GlueTop(btn, btnContainer, 0, 0, 'CENTER');
+				else
+					self.stdUi:GlueBelow(btn, prevBtn, 0, -1);
+				end
+			else
+				if not prevBtn then
+					self.stdUi:GlueTop(btn, btnContainer, 0, 0, 'LEFT');
+				else
+					self.stdUi:GlueRight(btn, prevBtn, 5, 0);
+				end
+			end
+
+			btn:Show();
+			prevBtn = btn;
+		end
+	end,
+
+	DrawFrames = function(self)
+		for _, tab in pairs(self.tabs) do
+			if not tab.frame then
+				tab.frame = self.stdUi:Frame(self.container);
+			end
+
+			tab.frame:ClearAllPoints();
+			tab.frame:SetAllPoints();
+
+			if tab.layout then
+				self.stdUi:BuildWindow(tab.frame, tab.layout);
+				self.stdUi:EasyLayout(tab.frame, { padding = { top = 10 } });
+
+				tab.frame:SetScript('OnShow', function(of)
+					of:DoLayout();
+				end);
+			end
+
+			if tab.onHide then
+				tab.frame:SetScript('OnHide', tab.onHide);
+			end
+		end
+	end,
+
+	Update = function(self, newTabs)
+		if newTabs then
+			self.tabs = newTabs;
+		end
+		self:DrawButtons();
+		self:DrawFrames();
+	end,
+
+	GetTabByName = function(self, name)
+		for _, tab in pairs(self.tabs) do
+			if tab.name == name then
+				return tab;
+			end
+		end
+	end,
+
+	SelectTab = function(self, name)
+		self.selected = name;
+		if self.selectedTab then
+			self.selectedTab.button:Enable();
+		end
+
+		self:HideAllFrames();
+		local foundTab = self:GetTabByName(name);
+
+		if foundTab.name == name and foundTab.frame then
+			foundTab.button:Disable();
+			foundTab.frame:Show();
+			self.selectedTab = foundTab;
+			return true;
+		end
+	end,
+
+	GetSelectedTab = function(self)
+		return self.selectedTab;
+	end,
+
+	DoLayout = function(self)
+		-- redoing layout as container
+		local tab = self:GetSelectedTab();
+		if tab then
+			if tab.frame and tab.frame.DoLayout then
+				tab.frame:DoLayout();
+			end
+		end
+	end
+};
 
 ---
 ---local t = {
@@ -25,15 +174,16 @@ end ;
 ---    }
 ---}
 function StdUi:TabPanel(parent, width, height, tabs, vertical, buttonWidth, buttonHeight)
-	local this = self;
 	vertical = vertical or false;
-	buttonHeight = buttonHeight or 20;
 	buttonWidth = buttonWidth or 160;
+	buttonHeight = buttonHeight or 20;
 
 	local tabFrame = self:Frame(parent, width, height);
-	tabFrame.vertical = vertical;
-
+	tabFrame.stdUi = self;
 	tabFrame.tabs = tabs;
+	tabFrame.vertical = vertical;
+	tabFrame.buttonWidth = buttonWidth;
+	tabFrame.buttonHeight = buttonHeight;
 
 	tabFrame.buttonContainer = self:Frame(tabFrame);
 	tabFrame.container = self:Panel(tabFrame);
@@ -58,124 +208,8 @@ function StdUi:TabPanel(parent, width, height, tabs, vertical, buttonWidth, butt
 		tabFrame.container:SetPoint('BOTTOMRIGHT', tabFrame, 'BOTTOMRIGHT', 0, 0);
 	end
 
-	function tabFrame:EnumerateTabs(callback)
-		for i = 1, #self.tabs do
-			local tab = self.tabs[i];
-			if callback(tab, self) then
-				break ;
-			end
-		end
-	end
-
-	function tabFrame:HideAllFrames()
-		self:EnumerateTabs(function(tab)
-			if tab.frame then
-				tab.frame:Hide();
-			end
-		end);
-	end
-
-	function tabFrame:DrawButtons()
-		self:EnumerateTabs(function(tab)
-			if tab.button then
-				tab.button:Hide();
-			end
-		end);
-
-		local prevBtn;
-		self:EnumerateTabs(function(tab, parentTabFrame)
-			local btn = tab.button;
-			local btnContainer = parentTabFrame.buttonContainer;
-
-			if not btn then
-				btn = this:Button(btnContainer, nil, buttonHeight);
-				tab.button = btn;
-				btn.tabFrame = parentTabFrame;
-
-				btn:SetScript('OnClick', function(bt)
-					bt.tabFrame:SelectTab(bt.tab.name);
-				end);
-			end
-
-			btn.tab = tab;
-			btn:SetText(tab.title);
-			btn:ClearAllPoints();
-
-			if parentTabFrame.vertical then
-				btn:SetWidth(buttonWidth);
-			else
-				this:ButtonAutoWidth(btn);
-			end
-
-			if parentTabFrame.vertical then
-				if not prevBtn then
-					this:GlueTop(btn, btnContainer, 0, 0, 'CENTER');
-				else
-					this:GlueBelow(btn, prevBtn, 0, -1);
-				end
-			else
-				if not prevBtn then
-					this:GlueTop(btn, btnContainer, 0, 0, 'LEFT');
-				else
-					this:GlueRight(btn, prevBtn, 5, 0);
-				end
-			end
-
-			btn:Show();
-			prevBtn = btn;
-		end);
-	end
-
-	function tabFrame:DrawFrames()
-		self:EnumerateTabs(function(tab)
-			if not tab.frame then
-				tab.frame = this:Frame(self.container);
-			end
-
-			tab.frame:ClearAllPoints();
-			tab.frame:SetAllPoints();
-		end);
-	end
-
-	function tabFrame:Update(newTabs)
-		if newTabs then
-			self.tabs = newTabs;
-		end
-		self:DrawButtons();
-		self:DrawFrames();
-	end
-
-	function tabFrame:GetTabByName(name)
-		local foundTab;
-
-		self:EnumerateTabs(function(tab)
-			if tab.name == name then
-				foundTab = tab;
-				return true;
-			end
-		end);
-		return foundTab;
-	end
-
-	function tabFrame:SelectTab(name)
-		self.selected = name;
-		if self.selectedTab then
-			self.selectedTab.button:Enable();
-		end
-
-		self:HideAllFrames();
-		local foundTab = self:GetTabByName(name);
-
-		if foundTab.name == name and foundTab.frame then
-			foundTab.button:Disable();
-			foundTab.frame:Show();
-			tabFrame.selectedTab = foundTab;
-			return true;
-		end
-	end
-
-	function tabFrame:GetSelectedTab()
-		return self.selectedTab;
+	for k, v in pairs(TabPanelMethods) do
+		tabFrame[k] = v;
 	end
 
 	tabFrame:Update();

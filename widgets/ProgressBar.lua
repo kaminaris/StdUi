@@ -1,11 +1,40 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'ProgressBar', 2;
+local module, version = 'ProgressBar', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
+
+----------------------------------------------------
+--- ProgressBar
+----------------------------------------------------
+
+local ProgressBarMethods = {
+	GetPercentageValue = function(self)
+		local _, max = self:GetMinMaxValues();
+		local value = self:GetValue();
+		return (value/max) * 100;
+	end,
+
+	TextUpdate = function(self) -- min, max, value
+		return Round(self:GetPercentageValue()) .. '%';
+	end
+};
+
+local ProgressBarEvents = {
+	OnValueChanged = function(self, value)
+		local min, max = self:GetMinMaxValues();
+		self.text:SetText(self:TextUpdate(min, max, value));
+	end,
+
+	OnMinMaxChanged = function(self)
+		local min, max = self:GetMinMaxValues();
+		local value = self:GetValue();
+		self.text:SetText(self:TextUpdate(min, max, value));
+	end
+}
 
 --- @return StatusBar
 function StdUi:ProgressBar(parent, width, height, vertical)
@@ -34,26 +63,13 @@ function StdUi:ProgressBar(parent, width, height, vertical)
 
 	self:ApplyBackdrop(progressBar);
 
-	function progressBar:GetPercentageValue()
-		local min, max = self:GetMinMaxValues();
-		local value = self:GetValue();
-		return (value/max) * 100;
+	for k, v in pairs(ProgressBarMethods) do
+		progressBar[k] = v;
 	end
 
-	function progressBar:TextUpdate(min, max, value)
-		return Round(self:GetPercentageValue()) .. '%';
+	for k, v in pairs(ProgressBarEvents) do
+		progressBar:SetScript(k, v);
 	end
-
-	progressBar:SetScript('OnValueChanged', function(self, value)
-		local min, max = self:GetMinMaxValues();
-		self.text:SetText(self:TextUpdate(min, max, value));
-	end);
-
-	progressBar:SetScript('OnMinMaxChanged', function(self)
-		local min, max = self:GetMinMaxValues();
-		local value = self:GetValue();
-		self.text:SetText(self:TextUpdate(min, max, value));
-	end);
 
 	return progressBar;
 end

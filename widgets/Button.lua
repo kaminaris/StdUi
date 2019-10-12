@@ -1,10 +1,10 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Button', 3;
+local module, version = 'Button', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local SquareButtonCoords = {
@@ -15,9 +15,31 @@ local SquareButtonCoords = {
 	DELETE = { 0.01562500,    0.20312500,     0.01562500,     0.20312500};
 };
 
+local SquareButtonMethods = {
+	SetIconDisabled = function(self, texture, iconWidth, iconHeight)
+		self.iconDisabled = self.stdUi:Texture(self, iconWidth, iconHeight, texture);
+		self.iconDisabled:SetDesaturated(true);
+		self.iconDisabled:SetPoint('CENTER', 0, 0);
+
+		self:SetDisabledTexture(self.iconDisabled);
+	end,
+
+	SetIcon = function(self, texture, iconWidth, iconHeight, alsoDisabled)
+		self.icon = self.stdUi:Texture(self, iconWidth, iconHeight, texture);
+		self.icon:SetPoint('CENTER', 0, 0);
+
+		self:SetNormalTexture(self.icon);
+
+		if alsoDisabled then
+			self:SetIconDisabled(texture, iconWidth, iconHeight);
+		end
+	end
+};
+
 function StdUi:SquareButton(parent, width, height, icon)
-	local this = self;
 	local button = CreateFrame('Button', nil, parent);
+	button.stdUi = self;
+
 	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 
@@ -25,25 +47,9 @@ function StdUi:SquareButton(parent, width, height, icon)
 	self:HookDisabledBackdrop(button);
 	self:HookHoverBorder(button);
 
-	function button:SetIconDisabled(texture, width, height)
-		button.iconDisabled = this:Texture(button, width, height, texture);
-		button.iconDisabled:SetDesaturated(true);
-		button.iconDisabled:SetPoint('CENTER', 0, 0);
-
-		button:SetDisabledTexture(button.iconDisabled);
+	for k, v in pairs(SquareButtonMethods) do
+		button[k] = v;
 	end
-
-	function button:SetIcon(texture, width, height, alsoDisabled)
-		button.icon = this:Texture(button, width, height, texture);
-		button.icon:SetPoint('CENTER', 0, 0);
-
-		button:SetNormalTexture(button.icon);
-
-		if alsoDisabled then
-			button:SetIconDisabled(texture, width, height);
-		end
-	end
-
 
 	local coords = SquareButtonCoords[icon];
 	if coords then

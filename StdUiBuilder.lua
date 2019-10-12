@@ -1,59 +1,15 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return ;
+	return
 end
 
-local module, version = 'Builder', 5;
+local module, version = 'Builder', 6;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
-end ;
-
-local function __genOrderedIndex(t)
-	local orderedIndex = {};
-
-	for key in pairs(t) do
-		tinsert(orderedIndex, key)
-	end
-
-	table.sort(orderedIndex, function(a, b)
-		if not t[a].order or not t[b].order then
-			return a < b;
-		end
-		return t[a].order < t[b].order;
-	end);
-
-	return orderedIndex;
 end
 
-local function orderedNext(t, state)
-	local key;
-
-	if state == nil then
-		-- the first time, generate the index
-		t.__orderedIndex = __genOrderedIndex(t);
-		key = t.__orderedIndex[1];
-	else
-		-- fetch the next value
-		for i = 1, table.getn(t.__orderedIndex) do
-			if t.__orderedIndex[i] == state then
-				key = t.__orderedIndex[i + 1];
-			end
-		end
-	end
-
-	if key then
-		return key, t[key];
-	end
-
-	-- no more value to return, cleanup
-	t.__orderedIndex = nil;
-	return
-end
-
-local function orderedPairs(t)
-	return orderedNext, t, nil;
-end
+local util = StdUi.Util;
 
 local function setDatabaseValue(db, key, value)
 	if key:find('.') then
@@ -101,16 +57,18 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 
 	local genericChangeEvent = function(el, value)
 		setDatabaseValue(el.dbReference, el.dataKey, value);
-		if info.onChange then
-			info.onChange(el, value);
+		if el.onChange then
+			el:onChange(value);
 		end
 	end
 
 	local hasLabel = false;
 	if info.type == 'checkbox' then
 		element = self:Checkbox(frame, info.label);
-	elseif info.type == 'text' or info.type == 'editBox' then
+	elseif info.type == 'editBox' then
 		element = self:EditBox(frame, nil, 20);
+	elseif info.type == 'multiLineBox' then
+		element = self:MultiLineBox(frame, 300, 20);
 	elseif info.type == 'dropdown' then
 		element = self:Dropdown(frame, 300, 20, info.options or {}, nil, info.multi or nil, info.assoc or false);
 	elseif info.type == 'autocomplete' then
@@ -131,12 +89,14 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 		if info.items then
 			element:SetItems(info.items);
 		end
-	elseif info.type == 'sliderWithBox' then
+	elseif info.type == 'slider' or info.type == 'sliderWithBox' then
 		element = self:SliderWithBox(frame, nil, 32, 0, info.min or 0, info.max or 2);
 
 		if info.precision then
 			element:SetPrecision(info.precision);
 		end
+	elseif info.type == 'color' then
+		element = self:ColorInput(frame, info.label, 100, 20, info.color);
 	elseif info.type == 'button' then
 		element = self:Button(frame, nil, 20, info.text or '');
 
@@ -144,47 +104,119 @@ function StdUi:BuildElement(frame, row, info, dataKey, db)
 			element:SetScript('OnClick', info.onClick);
 		end
 	elseif info.type == 'header' then
-		element = StdUi:Header(frame, info.label);
+		element = self:Header(frame, info.label);
+	elseif info.type == 'label' then
+		element = self:Label(frame, info.label);
+	elseif info.type == 'texture' then
+		element = self:Texture(frame, info.width or 24, info.height or 24, info.texture);
+	elseif info.type == 'panel' then  -- Containers
+		element = self:Panel(frame, 300, 20);
+	elseif info.type == 'scroll' then
+		element = self:ScrollFrame(
+			frame,
+			300,
+			20,
+			type(info.scrollChild) == 'table' and info.scrollChild or nil
+		);
+		if type(info.scrollChild) == 'function' then
+			info.scrollChild(element);
+		end
+	elseif info.type == 'fauxScroll' then
+		element = self:FauxScrollFrame(
+			frame,
+			300,
+			20,
+			info.displayCount or 5,
+			info.lineHeight or 22,
+			type(info.scrollChild) == 'table' and info.scrollChild or nil
+		);
+		if type(info.scrollChild) == 'function' then
+			info.scrollChild(element);
+		end
+	elseif info.type == 'tab' then
+		element = self:TabPanel(
+			frame,
+			300,
+			20,
+			info.tabs or {},
+			info.vertical or false,
+			info.buttonWidth,
+			info.buttonHeight
+		);
 	elseif info.type == 'custom' then
 		element = info.createFunction(frame, row, info, dataKey, db);
 	end
 
+	if not element then
+		print('Could not build element with type: ', info.type);
+	end
+
+	-- Widgets can have initialization code
+	if info.init then
+		info.init(element);
+	end
+
 	element.dbReference = db;
 	element.dataKey = dataKey;
+	if info.onChange then
+		element.onChange = info.onChange;
+	end
 
 	if element.hasLabel then
 		hasLabel = true;
 	end
 
-	local canHaveLabel = info.type ~= 'checkbox' and info.type ~= 'header';
+	local canHaveLabel = info.type ~= 'checkbox' and
+		info.type ~= 'header' and
+		info.type ~= 'label' and
+		info.type ~= 'color';
+
 	if info.label and canHaveLabel then
 		self:AddLabel(frame, element, info.label);
 		hasLabel = true;
 	end
 
-	if info.initialValue and element.SetValue then
-		element:SetValue(info.initialValue);
-	end
-
-	if info.initialValue and element.SetChecked then
-		element:SetChecked(info.initialValue);
+	if info.initialValue then
+		if element.SetChecked then
+			element:SetChecked(info.initialValue);
+		elseif element.SetColor then
+			element:SetColor(info.initialValue);
+		elseif element.SetValue then
+			element:SetValue(info.initialValue);
+		end
 	end
 
 	-- Setting onValueChanged disqualifies from any writes to database
 	if info.onValueChanged then
 		element.OnValueChanged = info.onValueChanged;
 	elseif db then
+		local iVal = getDatabaseValue(db, dataKey);
+
 		if info.type == 'checkbox' then
-			element:SetChecked(getDatabaseValue(db, dataKey))
+			element:SetChecked(iVal)
+		elseif element.SetColor then
+			element:SetColor(iVal);
 		elseif element.SetValue then
-			element:SetValue(getDatabaseValue(db, dataKey));
+			element:SetValue(iVal);
 		end
 
 		element.OnValueChanged = genericChangeEvent;
 	end
 
+	-- Technically, every frame can be a container
+	if info.children then
+		self:BuildWindow(element, info.children);
+		self:EasyLayout(element, { padding = { top = 10 } });
+
+		element:SetScript('OnShow', function(of)
+			of:DoLayout();
+		end);
+	end
+
 	row:AddElement(element, {
 		column = info.column or 12,
+		fullSize = info.fullSize or false,
+		fullHeight = info.fullHeight or false,
 		margin = info.layoutMargins or {
 			top = (hasLabel and 20 or 0)
 		}
@@ -200,7 +232,7 @@ end
 function StdUi:BuildRow(frame, info, db)
 	local row = frame:AddRow();
 
-	for key, element in orderedPairs(info) do
+	for key, element in util.orderedPairs(info) do
 		local dataKey = element.key or key or nil;
 
 		local el = self:BuildElement(frame, row, element, dataKey, db);
@@ -225,7 +257,7 @@ function StdUi:BuildWindow(frame, info)
 
 	self:EasyLayout(frame, info.layoutConfig);
 
-	for i, row in orderedPairs(rows) do
+	for _, row in util.orderedPairs(rows) do
 		self:BuildRow(frame, row, db);
 	end
 

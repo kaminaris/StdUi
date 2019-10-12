@@ -1,13 +1,33 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return ;
+	return
 end
 
-local module, version = 'Spell', 1;
+local module, version = 'Spell', 2;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
-end ;
+end
+
+----------------------------------------------------
+--- SpellBox
+----------------------------------------------------
+
+local SpellBoxEvents = {
+	OnEnter = function(self)
+		if self.editBox.value then
+			GameTooltip:SetOwner(self.editBox);
+			GameTooltip:SetSpellByID(self.editBox.value);
+			GameTooltip:Show();
+		end
+	end,
+
+	OnLeave = function(self)
+		if self.editBox.value then
+			GameTooltip:Hide();
+		end
+	end
+};
 
 function StdUi:SpellBox(parent, width, height, iconSize, spellValidator)
 	iconSize = iconSize or 16;
@@ -21,23 +41,40 @@ function StdUi:SpellBox(parent, width, height, iconSize, spellValidator)
 	icon:SetAllPoints();
 
 	editBox.icon = icon;
+	iconFrame.editBox = editBox;
 
-	iconFrame:SetScript('OnEnter', function()
-		if editBox.value then
-			GameTooltip:SetOwner(editBox);
-			GameTooltip:SetSpellByID(editBox.value)
-			GameTooltip:Show();
-		end
-	end)
-
-	iconFrame:SetScript('OnLeave', function()
-		if editBox.value then
-			GameTooltip:Hide();
-		end
-	end)
+	for k, v in pairs(SpellBoxEvents) do
+		iconFrame:SetScript(k, v);
+	end
 
 	return editBox;
 end
+
+----------------------------------------------------
+--- SpellInfo
+----------------------------------------------------
+local SpellInfoMethods = {
+	SetSpell = function(self, nameOrId)
+		local name, _, i, _, _, _, spellId = GetSpellInfo(nameOrId);
+		self.spellId = spellId;
+		self.spellName = name;
+
+		self.icon:SetTexture(i);
+		self.text:SetText(name);
+	end
+};
+
+local SpellInfoEvents = {
+	OnEnter = function(self)
+		GameTooltip:SetOwner(self.widget);
+		GameTooltip:SetSpellByID(self.widget.spellId);
+		GameTooltip:Show();
+	end,
+
+	OnLeave = function()
+		GameTooltip:Hide();
+	end
+};
 
 function StdUi:SpellInfo(parent, width, height, iconSize)
 	iconSize = iconSize or 16;
@@ -62,17 +99,25 @@ function StdUi:SpellInfo(parent, width, height, iconSize)
 
 	btn.parent = frame;
 
-	iconFrame:SetScript('OnEnter', function()
-		GameTooltip:SetOwner(frame);
-		GameTooltip:SetSpellByID(frame.spellId);
-		GameTooltip:Show();
-	end)
+	iconFrame.widget = frame;
 
-	iconFrame:SetScript('OnLeave', function()
-		GameTooltip:Hide();
-	end)
+	for k, v in pairs(SpellInfoMethods) do
+		frame[k] = v;
+	end
 
-	function frame:SetSpell(nameOrId)
+	for k, v in pairs(SpellInfoEvents) do
+		iconFrame:SetScript(k, v);
+	end
+
+	return frame;
+end;
+
+----------------------------------------------------
+--- SpellCheckbox
+----------------------------------------------------
+
+local SpellCheckboxMethods = {
+	SetSpell = function(self, nameOrId)
 		local name, _, i, _, _, _, spellId = GetSpellInfo(nameOrId);
 		self.spellId = spellId;
 		self.spellName = name;
@@ -80,9 +125,23 @@ function StdUi:SpellInfo(parent, width, height, iconSize)
 		self.icon:SetTexture(i);
 		self.text:SetText(name);
 	end
+};
 
-	return frame;
-end;
+local SpellCheckboxEvents = {
+	OnEnter = function(self)
+		if self.spellId then
+			GameTooltip:SetOwner(self);
+			GameTooltip:SetSpellByID(self.spellId);
+			GameTooltip:Show();
+		end
+	end,
+
+	OnLeave = function(self)
+		if self.spellId then
+			GameTooltip:Hide();
+		end
+	end
+};
 
 function StdUi:SpellCheckbox(parent, width, height, iconSize)
 	iconSize = iconSize or 16;
@@ -100,27 +159,12 @@ function StdUi:SpellCheckbox(parent, width, height, iconSize)
 
 	checkbox.text:SetPoint('LEFT', iconFrame, 'RIGHT', 5, 0);
 
-	checkbox:SetScript('OnEnter', function()
-		if checkbox.spellId then
-			GameTooltip:SetOwner(checkbox);
-			GameTooltip:SetSpellByID(checkbox.spellId);
-			GameTooltip:Show();
-		end
-	end)
+	for k, v in pairs(SpellCheckboxMethods) do
+		checkbox[k] = v;
+	end
 
-	checkbox:SetScript('OnLeave', function()
-		if checkbox.spellId then
-			GameTooltip:Hide();
-		end
-	end)
-
-	function checkbox:SetSpell(nameOrId)
-		local name, _, i, _, _, _, spellId = GetSpellInfo(nameOrId);
-		self.spellId = spellId;
-		self.spellName = name;
-
-		self.icon:SetTexture(i);
-		self.text:SetText(name);
+	for k, v in pairs(SpellCheckboxEvents) do
+		checkbox:SetScript(k, v);
 	end
 
 	return checkbox;

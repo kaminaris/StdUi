@@ -1,13 +1,17 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return ;
+	return
 end
 
-local module, version = 'ScrollTable', 4;
-if not StdUi:UpgradeNeeded(module, version) then return end;
+local module, version = 'ScrollTable', 5;
+if not StdUi:UpgradeNeeded(module, version) then
+	return
+end
 
-local lrpadding = 2.5;
+local TableInsert = tinsert;
+local TableSort = table.sort;
+local padding = 2.5;
 
 --- Public methods of ScrollTable
 local methods = {
@@ -16,28 +20,27 @@ local methods = {
 	--- Basic Methods
 	-------------------------------------------------------------
 
-	SetAutoHeight = function(self)
+	SetAutoHeight     = function(self)
 		self:SetHeight((self.numberOfRows * self.rowHeight) + 10);
 		self:Refresh();
 	end,
 
-	SetAutoWidth = function(self)
+	SetAutoWidth      = function(self)
 		local width = 13;
-		for num, col in pairs(self.columns) do
+		for _, col in pairs(self.columns) do
 			width = width + col.width;
 		end
 		self:SetWidth(width + 20);
 		self:Refresh();
 	end,
 
-	ScrollToLine = function(self, line)
+	ScrollToLine      = function(self, line)
 		line = Clamp(line, 1, #self.filtered - self.numberOfRows + 1);
 
-		self.stdUi.FauxScrollFrameMethods.OnVerticalScroll(
-			self.scrollFrame,
+		self:DoVerticalScroll(
 			self.rowHeight * (line - 1),
-			self.rowHeight, function()
-				self:Refresh();
+			self.rowHeight, function(s)
+				s:Refresh();
 			end
 		);
 	end,
@@ -48,12 +51,12 @@ local methods = {
 
 	--- Set the column info for the scrolling table
 	--- @usage st:SetColumns(columns)
-	SetColumns = function(self, columns)
+	SetColumns        = function(self, columns)
 		local table = self; -- reference saved for closure
 		self.columns = columns;
 
 		local columnHeadFrame = self.head;
-		
+
 		if not columnHeadFrame then
 			columnHeadFrame = CreateFrame('Frame', nil, self);
 			columnHeadFrame:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 4, 0);
@@ -117,7 +120,7 @@ local methods = {
 
 	--- Set the number and height of displayed rows
 	--- @usage st:SetDisplayRows(10, 15)
-	SetDisplayRows = function(self, numberOfRows, rowHeight)
+	SetDisplayRows    = function(self, numberOfRows, rowHeight)
 		local table = self; -- reference saved for closure
 		-- should always set columns first
 		self.numberOfRows = numberOfRows;
@@ -172,7 +175,7 @@ local methods = {
 									local rowIndex = table.filtered[i + table.offset];
 									local rowData = table:GetRow(rowIndex);
 									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
-									rowIndex, ...);
+										rowIndex, ...);
 								end
 							end);
 						end
@@ -187,7 +190,7 @@ local methods = {
 									local rowIndex = table.filtered[i + table.offset];
 									local rowData = table:GetRow(rowIndex);
 									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
-											rowIndex, ...);
+										rowIndex, ...);
 								end
 							end);
 						end
@@ -205,11 +208,11 @@ local methods = {
 
 				cell.text:SetPoint('TOP', cell, 'TOP', 0, 0);
 				cell.text:SetPoint('BOTTOM', cell, 'BOTTOM', 0, 0);
-				cell.text:SetWidth(self.columns[j].width - 2 * lrpadding);
+				cell.text:SetWidth(self.columns[j].width - 2 * padding);
 			end
 
-			j = #self.columns + 1;
-			col = rowFrame.columns[j];
+			local j = #self.columns + 1;
+			local col = rowFrame.columns[j];
 			while col do
 				col:Hide();
 				j = j + 1;
@@ -230,7 +233,7 @@ local methods = {
 
 	--- Resorts the table using the rules specified in the table column info.
 	--- @usage st:SortData()
-	SortData = function(self, sortBy)
+	SortData          = function(self, sortBy)
 		-- sanity check
 		if not (self.sortTable) or (#self.sortTable ~= #self.data) then
 			self.sortTable = {};
@@ -254,7 +257,7 @@ local methods = {
 		end
 
 		if sortBy then
-			table.sort(self.sortTable, function(rowA, rowB)
+			TableSort(self.sortTable, function(rowA, rowB)
 				local column = self.columns[sortBy];
 				if column.compareSort then
 					return column.compareSort(self, rowA, rowB, sortBy);
@@ -271,7 +274,7 @@ local methods = {
 
 	--- CompareSort function used to determine how to sort column values. Can be overridden in column data or table data.
 	--- @usage used internally.
-	CompareSort = function(self, rowA, rowB, sortBy)
+	CompareSort       = function(self, rowA, rowB, sortBy)
 		local a = self:GetRow(rowA);
 		local b = self:GetRow(rowB);
 		local column = self.columns[sortBy];
@@ -286,20 +289,20 @@ local methods = {
 		end
 	end,
 
-	Filter = function(self, rowData)
+	Filter            = function(self, rowData)
 		return true;
 	end,
 
 	--- Set a display filter for the table.
 	--- @usage st:SetFilter( function (self, ...) return true end )
-	SetFilter = function(self, filter, noSort)
+	SetFilter         = function(self, filter, noSort)
 		self.Filter = filter;
 		if not noSort then
 			self:SortData();
 		end
 	end,
 
-	DoFilter = function(self)
+	DoFilter          = function(self)
 		local result = {};
 
 		for row = 1, #self.data do
@@ -307,7 +310,7 @@ local methods = {
 			local rowData = self:GetRow(realRow);
 
 			if self:Filter(rowData) then
-				table.insert(result, realRow);
+				TableInsert(result, realRow);
 			end
 		end
 
@@ -325,6 +328,7 @@ local methods = {
 			frame.highlight = frame:CreateTexture(nil, 'OVERLAY');
 			frame.highlight:SetAllPoints(frame);
 		end
+
 		if not color then
 			frame.highlight:SetColorTexture(0, 0, 0, 0);
 		else
@@ -339,20 +343,20 @@ local methods = {
 
 	--- Turn on or off selection on a table according to flag. Will not refresh the table display.
 	--- @usage st:EnableSelection(true)
-	EnableSelection = function(self, flag)
+	EnableSelection   = function(self, flag)
 		self.selectionEnabled = flag;
 	end,
 
 	--- Clear the currently selected row. You should not need to refresh the table.
 	--- @usage st:ClearSelection()
-	ClearSelection = function(self)
+	ClearSelection    = function(self)
 		self:SetSelection(nil);
 	end,
 
 	--- Sets the currently selected row to 'realRow'. RealRow is the unaltered index of the data row in your table.
 	--- You should not need to refresh the table.
 	--- @usage st:SetSelection(12)
-	SetSelection = function(self, rowIndex)
+	SetSelection      = function(self, rowIndex)
 		self.selected = rowIndex;
 		self:Refresh();
 	end,
@@ -360,14 +364,14 @@ local methods = {
 	--- Gets the currently selected row.
 	--- Return will be the unaltered index of the data row that is selected.
 	--- @usage st:GetSelection()
-	GetSelection = function(self)
+	GetSelection      = function(self)
 		return self.selected;
 	end,
 
 	--- Gets the currently selected row.
 	--- Return will be the unaltered index of the data row that is selected.
 	--- @usage st:GetSelection()
-	GetSelectedItem = function(self)
+	GetSelectedItem   = function(self)
 		return self:GetRow(self.selected);
 	end,
 
@@ -377,20 +381,20 @@ local methods = {
 
 	--- Sets the data for the scrolling table
 	--- @usage st:SetData(datatable)
-	SetData = function(self, data)
+	SetData           = function(self, data)
 		self.data = data;
 		self:SortData();
 	end,
 
 	--- Returns the data row of the table from the given data row index
 	--- @usage used internally.
-	GetRow = function(self, rowIndex)
+	GetRow            = function(self, rowIndex)
 		return self.data[rowIndex];
 	end,
 
 	--- Returns the cell data of the given row from the given row and column index
 	--- @usage used internally.
-	GetCell = function(self, row, col)
+	GetCell           = function(self, row, col)
 		local rowData = row;
 		if type(row) == 'number' then
 			rowData = self:GetRow(row);
@@ -402,7 +406,7 @@ local methods = {
 	--- Checks if a row is currently being shown
 	--- @usage st:IsRowVisible(realrow)
 	--- @thanks sapu94
-	IsRowVisible = function(self, rowIndex)
+	IsRowVisible      = function(self, rowIndex)
 		return (rowIndex > self.offset and rowIndex <= (self.numberOfRows + self.offset));
 	end,
 
@@ -412,7 +416,7 @@ local methods = {
 
 	--- Cell update function used to paint each cell.  Can be overridden in column data or table data.
 	--- @usage used internally.
-	DoCellUpdate = function(table, shouldShow, rowFrame, cellFrame, value, columnData, rowData, rowIndex)
+	DoCellUpdate      = function(table, shouldShow, rowFrame, cellFrame, value, columnData, rowData, rowIndex)
 		if shouldShow then
 			local format = columnData.format;
 
@@ -465,11 +469,10 @@ local methods = {
 		end
 	end,
 
-	Refresh = function(self)
-		local scrollFrame = self.scrollFrame;
-		self.stdUi.FauxScrollFrameMethods.Update(scrollFrame, #self.filtered, self.numberOfRows, self.rowHeight);
+	Refresh           = function(self)
+		self:Update(#self.filtered, self.numberOfRows, self.rowHeight);
 
-		local o = self.stdUi.FauxScrollFrameMethods.GetOffset(scrollFrame);
+		local o = self:GetOffset();
 		self.offset = o;
 
 		for i = 1, self.numberOfRows do
@@ -513,9 +516,9 @@ local methods = {
 	--- Private Methods
 	-------------------------------------------------------------
 
-	UpdateSortArrows = function(self, sortBy)
+	UpdateSortArrows  = function(self, sortBy)
 		if not self.head then
-			return ;
+			return
 		end
 
 		for i = 1, #self.columns do
@@ -538,7 +541,7 @@ local methods = {
 		end
 	end,
 
-	FireCellEvent = function(self, event, handler, ...)
+	FireCellEvent     = function(self, event, handler, ...)
 		if not handler(self, ...) then
 			if self.cellEvents[event] then
 				self.cellEvents[event](self, ...);
@@ -546,7 +549,7 @@ local methods = {
 		end
 	end,
 
-	FireHeaderEvent = function(self, event, handler, ...)
+	FireHeaderEvent   = function(self, event, handler, ...)
 		if not handler(self, ...) then
 			if self.headerEvents[event] then
 				self.headerEvents[event](self, ...);
@@ -556,7 +559,7 @@ local methods = {
 
 	--- Set the event handlers for various ui events for each cell.
 	--- @usage st:RegisterEvents(events, true)
-	RegisterEvents = function(self, cellEvents, headerEvents, removeOldEvents)
+	RegisterEvents    = function(self, cellEvents, headerEvents, removeOldEvents)
 		local table = self; -- save for closure later
 
 		if cellEvents then
@@ -579,7 +582,7 @@ local methods = {
 							local rowIndex = table.filtered[i + table.offset];
 							local rowData = table:GetRow(rowIndex);
 							table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
-									rowIndex, ...);
+								rowIndex, ...);
 						end);
 					end
 
@@ -591,7 +594,7 @@ local methods = {
 									local rowIndex = table.filtered[i + table.offset];
 									local rowData = table:GetRow(rowIndex);
 									table:FireCellEvent(event, handler, cellFrame, rowFrame, rowData, columnData,
-											rowIndex, ...);
+										rowIndex, ...);
 								end
 							end);
 						end
@@ -605,7 +608,7 @@ local methods = {
 			for columnIndex, columnFrame in ipairs(self.head.columns) do
 				-- unregister old events.
 				if removeOldEvents and self.headerEvents then
-					for event, handler in pairs(self.headerEvents) do
+					for event, _ in pairs(self.headerEvents) do
 						columnFrame:SetScript(event, nil);
 					end
 				end
@@ -654,9 +657,9 @@ local headerEvents = {
 
 			local columns = table.columns;
 			local column = columns[columnIndex];
-			
+
 			-- clear sort for other columns
-			for i, columnFrame in ipairs(columnHeadFrame.columns) do
+			for i, _ in ipairs(columnHeadFrame.columns) do
 				if i ~= columnIndex then
 					columns[i].sort = nil;
 				end
@@ -679,8 +682,20 @@ local headerEvents = {
 	end
 };
 
+local ScrollTableUpdateFn = function(self)
+	self:Refresh();
+end
+
+local ScrollTableOnVerticalScroll = function(self, offset)
+	local scrollTable = self.panel;
+	-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you
+	-- reference the st if you decide to hook the refresh
+	scrollTable:DoVerticalScroll(offset, scrollTable.rowHeight, ScrollTableUpdateFn);
+end
+
 function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
-	local scrollTable, scrollFrame, scrollChild, scrollBar = self:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
+	local scrollTable = self:FauxScrollFrame(parent, 100, 100, rowHeight or 15);
+	local scrollFrame = scrollTable.scrollFrame;
 
 	scrollTable.stdUi = self;
 	scrollTable.numberOfRows = numRows or 12;
@@ -695,16 +710,7 @@ function StdUi:ScrollTable(parent, columns, numRows, rowHeight)
 		scrollTable[methodName] = method;
 	end
 
-	scrollTable.scrollFrame = scrollFrame;
-
-	scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
-		-- LS: putting st:Refresh() in a function call passes the st as the 1st arg which lets you
-		-- reference the st if you decide to hook the refresh
-		scrollTable.stdUi.FauxScrollFrameMethods.OnVerticalScroll(self, offset, scrollTable.rowHeight, function()
-			scrollTable:Refresh();
-		end);
-	end);
-
+	scrollFrame:SetScript('OnVerticalScroll', ScrollTableOnVerticalScroll);
 	scrollTable:SortData();
 	scrollTable:SetColumns(scrollTable.columns);
 	scrollTable:UpdateSortArrows();

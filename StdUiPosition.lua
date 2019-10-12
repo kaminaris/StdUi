@@ -1,13 +1,15 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Position', 1;
+local module, version = 'Position', 2;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 -- Points
+local Center = 'CENTER';
+
 local Top = 'TOP';
 local Bottom = 'BOTTOM';
 local Left = 'LEFT';
@@ -17,6 +19,20 @@ local TopLeft = 'TOPLEFT';
 local TopRight = 'TOPRIGHT';
 local BottomLeft = 'BOTTOMLEFT';
 local BottomRight = 'BOTTOMRIGHT';
+
+StdUi.Anchors = {
+	Center = Center,
+
+	Top = Top,
+	Bottom = Bottom,
+	Left = Left,
+	Right = Right,
+
+	TopLeft = TopLeft,
+	TopRight = TopRight,
+	BottomLeft = BottomLeft,
+	BottomRight = BottomRight,
+}
 
 --- Glues object below referenced object
 function StdUi:GlueBelow(object, referencedObject, x, y, align)

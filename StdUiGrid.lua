@@ -1,10 +1,10 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Grid', 2;
+local module, version = 'Grid', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- Creates frame list that reuses frames and is based on array data
@@ -15,7 +15,8 @@ if not StdUi:UpgradeNeeded(module, version) then return end;
 --- @param padding number
 --- @param oX number
 --- @param oY number
-function StdUi:ObjectList(parent, itemsTable, create, update, data, padding, oX, oY)
+--- @param limitFn function
+function StdUi:ObjectList(parent, itemsTable, create, update, data, padding, oX, oY, limitFn)
 	local this = self;
 	oX = oX or 1;
 	oY = oY or -1;
@@ -58,6 +59,11 @@ function StdUi:ObjectList(parent, itemsTable, create, update, data, padding, oX,
 			this:GlueBelow(itemFrame, itemsTable[i - 1], 0, -padding);
 			totalHeight = totalHeight + padding;
 		end
+
+		if limitFn and limitFn(i, totalHeight, itemFrame:GetHeight()) then
+			break;
+		end
+
 		i = i + 1;
 	end
 
@@ -69,8 +75,8 @@ end
 --- @param create function
 --- @param update function
 --- @param data table
---- @param size number - size of each wi
---- @param padding number
+--- @param paddingX number
+--- @param paddingY number
 --- @param oX number
 --- @param oY number
 function StdUi:ObjectGrid(parent, itemsMatrix, create, update, data, paddingX, paddingY, oX, oY)

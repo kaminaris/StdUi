@@ -1,14 +1,14 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Window', 4;
+local module, version = 'Window', 5;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return Frame
-function StdUi:Window(parent, title, width, height)
+function StdUi:Window(parent, width, height, title)
 	parent = parent or UIParent;
 	local frame = self:PanelWithTitle(parent, width, height, title);
 	frame:SetClampedToScreen(true);
@@ -26,8 +26,8 @@ function StdUi:Window(parent, title, width, height)
 
 	frame.closeBtn = closeBtn;
 
-	function frame:SetWindowTitle(title)
-		self.titlePanel.label:SetText(title);
+	function frame:SetWindowTitle(t)
+		self.titlePanel.label:SetText(t);
 	end
 
 	return frame;
@@ -41,7 +41,7 @@ function StdUi:Dialog(title, message, dialogId)
 	if dialogId and self.dialogs[dialogId] then
 		window = self.dialogs[dialogId];
 	else
-		window = self:Window(nil, title, self.config.dialog.width, self.config.dialog.height);
+		window = self:Window(nil, self.config.dialog.width, self.config.dialog.height, title);
 		window:SetPoint('CENTER');
 		window:SetFrameStrata('DIALOG');
 	end
@@ -59,6 +59,7 @@ function StdUi:Dialog(title, message, dialogId)
 	if dialogId then
 		self.dialogs[dialogId] = window;
 	end
+
 	return window;
 end
 

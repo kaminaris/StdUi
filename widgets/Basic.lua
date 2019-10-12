@@ -1,10 +1,10 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Basic', 2;
+local module, version = 'Basic', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:Frame(parent, width, height, inherits)

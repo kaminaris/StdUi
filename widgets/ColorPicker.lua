@@ -1,11 +1,91 @@
 --- @type StdUi
 local StdUi = LibStub and LibStub('StdUi', true);
-if not StdUi or StdUi.ColorPickerFrame then
-	return ;
+if not StdUi then
+	return
 end
 
-local module, version = 'ColorPicker', 1;
-if not StdUi:UpgradeNeeded(module, version) then return end;
+local module, version = 'ColorPicker', 3;
+if not StdUi:UpgradeNeeded(module, version) then
+	return
+end
+
+local ColorPickerMethods = {
+	SetColorRGBA = function(self, r, g, b, a)
+		self:SetColorAlpha(a);
+		self:SetColorRGB(r, g, b);
+
+		self.newTexture:SetVertexColor(r, g, b, a);
+	end,
+
+	GetColorRGBA = function(self)
+		local r, g, b = self:GetColorRGB();
+		return r, g, b, self:GetColorAlpha();
+	end,
+
+	SetColor = function(self, c)
+		self:SetColorAlpha(c.a or 1);
+		self:SetColorRGB(c.r, c.g, c.b);
+
+		self.newTexture:SetVertexColor(c.r, c.g, c.b, c.a or 1);
+	end,
+
+	GetColor = function(self)
+		local r, g, b = self:GetColorRGB();
+		return { r = r, g = g, b = b, a = self:GetColorAlpha() };
+	end,
+
+	SetColorAlpha = function(self, a, fromSlider)
+		a = Clamp(a, 0, 1);
+
+		if not fromSlider then
+			self.alphaSlider:SetValue(100 - a * 100);
+		end
+
+		self.aEdit:SetValue(Round(a * 100));
+		self.aEdit:Validate();
+		self:SetColorRGB(self:GetColorRGB());
+	end,
+
+	GetColorAlpha = function(self)
+		local a = Clamp(tonumber(self.aEdit:GetValue()) or 100, 0, 100);
+		return a / 100;
+	end
+};
+
+local ColorPickerEvents = {
+	OnColorSelect = function(self)
+		-- Ensure custom fields are updated.
+		local r, g, b, a = self:GetColorRGBA();
+
+		if not self.skipTextUpdate then
+			self.rEdit:SetValue(r * 255);
+			self.gEdit:SetValue(g * 255);
+			self.bEdit:SetValue(b * 255);
+			self.aEdit:SetValue(100 * a);
+
+			self.rEdit:Validate();
+			self.gEdit:Validate();
+			self.bEdit:Validate();
+			self.aEdit:Validate();
+		end
+
+		self.newTexture:SetVertexColor(r, g, b, a);
+		self.alphaTexture:SetGradientAlpha('VERTICAL', 1, 1, 1, 0, r, g, b, 1);
+	end
+};
+
+local function OnColorPickerValueChanged(self)
+	local cpf = self:GetParent();
+	local r = tonumber(cpf.rEdit:GetValue() or 255) / 255;
+	local g = tonumber(cpf.gEdit:GetValue() or 255) / 255;
+	local b = tonumber(cpf.bEdit:GetValue() or 255) / 255;
+	local a = tonumber(cpf.aEdit:GetValue() or 100) / 100;
+
+	cpf.skipTextUpdate = true;
+	cpf:SetColorRGB(r, g, b);
+	cpf.alphaSlider:SetValue(100 - a * 100);
+	cpf.skipTextUpdate = false;
+end
 
 --- alphaSliderTexture = [[Interface\AddOns\YourAddon\Libs\StdUi\media\Checkers.tga]]
 function StdUi:ColorPicker(parent, alphaSliderTexture)
@@ -51,11 +131,10 @@ function StdUi:ColorPicker(parent, alphaSliderTexture)
 	--cpf.alphaTexture:SetGradientAlpha('VERTICAL', 0, 0, 0, 1, 1, 1, 1, 1);
 
 	cpf.alphaThumbTexture = self:Texture(cpf.alphaSlider, barWidth, thumbWidth,
-			[[Interface\Buttons\UI-ColorPicker-Buttons]]);
+		[[Interface\Buttons\UI-ColorPicker-Buttons]]);
 	cpf.alphaThumbTexture:SetTexCoord(0.275, 1, 0.875, 0);
 	cpf.alphaThumbTexture:SetDrawLayer('ARTWORK', 2);
 	cpf.alphaSlider:SetThumbTexture(cpf.alphaThumbTexture);
-
 
 	cpf.newTexture = self:Texture(cpf, 32, 32, [[Interface\Buttons\WHITE8X8]]);
 	cpf.oldTexture = self:Texture(cpf, 32, 32, [[Interface\Buttons\WHITE8X8]]);
@@ -98,33 +177,8 @@ function StdUi:ColorPicker(parent, alphaSliderTexture)
 	--- Methods
 	----------------------------------------------------
 
-	function cpf:SetColorRGBA(r, g, b, a)
-		self:SetColorAlpha(a);
-		self:SetColorRGB(r, g, b);
-
-		self.newTexture:SetVertexColor(r, g, b, a);
-	end
-
-	function cpf:GetColorRGBA()
-		local r, g, b = self:GetColorRGB();
-		return r, g, b, self:GetColorAlpha();
-	end
-
-	function cpf:SetColorAlpha(a, fromSlider)
-		a = Clamp(a, 0, 1);
-
-		if not fromSlider then
-			self.alphaSlider:SetValue(100 - a * 100);
-		end
-
-		self.aEdit:SetValue(Round(a * 100));
-		self.aEdit:Validate();
-		self:SetColorRGB(self:GetColorRGB());
-	end
-
-	function cpf:GetColorAlpha()
-		local a = Clamp(tonumber(self.aEdit:GetValue()) or 100, 0, 100);
-		return a / 100;
+	for k, v in pairs(ColorPickerMethods) do
+		cpf[k] = v;
 	end
 
 	----------------------------------------------------
@@ -135,49 +189,37 @@ function StdUi:ColorPicker(parent, alphaSliderTexture)
 		cpf:SetColorAlpha((100 - slider:GetValue()) / 100, true);
 	end);
 
-	cpf:SetScript('OnColorSelect', function(self)
-		-- Ensure custom fields are updated.
-		local r, g, b, a = self:GetColorRGBA();
-
-		if not self.skipTextUpdate then
-			self.rEdit:SetValue(r * 255);
-			self.gEdit:SetValue(g * 255);
-			self.bEdit:SetValue(b * 255);
-			self.aEdit:SetValue(100 * a);
-
-			self.rEdit:Validate();
-			self.gEdit:Validate();
-			self.bEdit:Validate();
-			self.aEdit:Validate();
-		end
-
-		self.newTexture:SetVertexColor(r, g, b, a);
-		self.alphaTexture:SetGradientAlpha('VERTICAL', 1, 1, 1, 0, r, g, b, 1);
-	end);
-
-	local function OnValueChanged()
-		local r = tonumber(cpf.rEdit:GetValue() or 255) / 255;
-		local g = tonumber(cpf.gEdit:GetValue() or 255) / 255;
-		local b = tonumber(cpf.bEdit:GetValue() or 255) / 255;
-		local a = tonumber(cpf.aEdit:GetValue() or 100) / 100;
-
-		cpf.skipTextUpdate = true;
-		cpf:SetColorRGB(r, g, b);
-		cpf.alphaSlider:SetValue(100 - a * 100);
-		cpf.skipTextUpdate = false;
+	for k, v in pairs(ColorPickerEvents) do
+		cpf:SetScript(k, v);
 	end
 
-
-	cpf.rEdit.OnValueChanged = OnValueChanged;
-	cpf.gEdit.OnValueChanged = OnValueChanged;
-	cpf.bEdit.OnValueChanged = OnValueChanged;
-	cpf.aEdit.OnValueChanged = OnValueChanged;
+	cpf.rEdit.OnValueChanged = OnColorPickerValueChanged;
+	cpf.gEdit.OnValueChanged = OnColorPickerValueChanged;
+	cpf.bEdit.OnValueChanged = OnColorPickerValueChanged;
+	cpf.aEdit.OnValueChanged = OnColorPickerValueChanged;
 
 	return cpf;
 end
 
+local ColorPickerFrameOkCallback = function(self)
+	local cpf = self:GetParent();
+	if cpf.okCallback then
+		cpf.okCallback(cpf);
+	end
+
+	cpf:Hide();
+end
+
+local ColorPickerFrameCancelCallback = function(self)
+	local cpf = self:GetParent();
+	if cpf.cancelCallback then
+		cpf.cancelCallback(cpf);
+	end
+
+	cpf:Hide();
+end
+
 -- placeholder
-StdUi.colorPickerFrame = nil;
 function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback, alphaSliderTexture)
 	local colorPickerFrame = self.colorPickerFrame;
 	if not colorPickerFrame then
@@ -186,19 +228,11 @@ function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback, alphaSli
 		self.colorPickerFrame = colorPickerFrame;
 	end
 
-	colorPickerFrame.okButton:SetScript('OnClick', function (self)
-		if okCallback then
-			okCallback(colorPickerFrame);
-		end
-		colorPickerFrame:Hide();
-	end);
+	colorPickerFrame.okCallback = okCallback;
+	colorPickerFrame.cancelCallback = cancelCallback;
 
-	colorPickerFrame.cancelButton:SetScript('OnClick', function (self)
-		if cancelCallback then
-			cancelCallback(colorPickerFrame);
-		end
-		colorPickerFrame:Hide();
-	end);
+	colorPickerFrame.okButton:SetScript('OnClick', ColorPickerFrameOkCallback);
+	colorPickerFrame.cancelButton:SetScript('OnClick', ColorPickerFrameCancelCallback);
 
 	colorPickerFrame:SetColorRGBA(r or 1, g or 1, b or 1, a or 1);
 	colorPickerFrame.oldTexture:SetVertexColor(r or 1, g or 1, b or 1, a or 1);
@@ -208,10 +242,51 @@ function StdUi:ColorPickerFrame(r, g, b, a, okCallback, cancelCallback, alphaSli
 	colorPickerFrame:Show();
 end
 
-function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
-	local this = self;
+local ColorInputMethods = {
+	SetColor = function(self, c)
+		if type(c) == 'table' then
+			self.color.r = c.r;
+			self.color.g = c.g;
+			self.color.b = c.b;
+			self.color.a = c.a or 1;
+		end
 
+		self.target:SetBackdropColor(c.r, c.g, c.b, c.a or 1);
+		if self.OnValueChanged then
+			self:OnValueChanged(c);
+		end
+	end,
+
+	GetColor = function (self, type)
+		if type == 'hex' then
+		elseif type == 'rgba' then
+			return self.color.r, self.color.g, self.color.b, self.color.a
+		else
+			-- object
+			return self.color;
+		end
+	end
+};
+
+local ColorInputOkCallback = function(cpf)
+	self:SetColor(cpf:GetColor());
+end
+
+local ColorInputEvents = {
+	OnClick = function(self)
+		self.stdUi:ColorPickerFrame(
+			self.color.r,
+			self.color.g,
+			self.color.b,
+			self.color.a,
+			ColorInputOkCallback
+		);
+	end
+};
+
+function StdUi:ColorInput(parent, label, width, height, color)
 	local button = CreateFrame('Button', nil, parent);
+	button.stdUi = self;
 	button:EnableMouse(true);
 	self:SetObjSize(button, width, height or 20);
 	self:InitWidget(button);
@@ -223,52 +298,18 @@ function StdUi:ColorInput(parent, label, width, height, r, g, b, a)
 	button.text:SetPoint('LEFT', button.target, 'RIGHT', 5, 0);
 	button.text:SetPoint('RIGHT', button, 'RIGHT', -5, 0);
 
-	button.color = {};
+	button.color = {r = 1, g = 1, b = 1, a = 1};
 
-	function button:SetColor(r, g, b, a)
-		if type(r) == 'table' then
-			self.color.r = r.r;
-			self.color.g = r.g;
-			self.color.b = r.b;
-			self.color.a = r.a;
-		elseif type(r) == 'string' then
-
-		else
-			self.color = {
-				r = r, g = g, b = b, a = a,
-			};
-		end
-
-		self.target:SetBackdropColor(r, g, b, a);
-		if self.OnValueChanged then
-			self:OnValueChanged(r, g, b, a);
-		end
+	for k, v in pairs(ColorInputMethods) do
+		button[k] = v;
 	end
 
-	function button:GetColor(type)
-		if type == 'hex' then
-		elseif type == 'rgba' then
-			return self.color.r, self.color.g, self.color.b, self.color.a
-		else
-			-- object
-			return self.color;
-		end
+	for k, v in pairs(ColorInputEvents) do
+		button:SetScript(k, v);
 	end
 
-	button:SetScript('OnClick', function(btn)
-		StdUi:ColorPickerFrame(
-			btn.color.r,
-			btn.color.g,
-			btn.color.b,
-			btn.color.a,
-			function(cpf)
-				btn:SetColor(cpf:GetColorRGBA());
-			end
-		);
-	end);
-
-	if r then
-		button:SetColor(r, g, b, a);
+	if color then
+		button:SetColor(color);
 	end
 
 	return button;

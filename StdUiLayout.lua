@@ -2,76 +2,87 @@
 local StdUi = LibStub and LibStub('StdUi', true);
 
 if not StdUi then
-	return;
+	return
 end
 
-local module, version = 'Layout', 2;
-if not StdUi:UpgradeNeeded(module, version) then return end;
+local module, version = 'Layout', 3;
+if not StdUi:UpgradeNeeded(module, version) then
+	return
+end
+
+local TableInsert = tinsert;
+local TableRemove = tremove;
+local pairs = pairs;
+local MathMax = math.max;
+local MathFloor = math.floor;
 
 local defaultLayoutConfig = {
-	gutter = 10,
+	gutter  = 10,
 	columns = 12,
 	padding = {
-		top = 0,
-		right = 10,
-		left = 10
+		top    = 0,
+		right  = 10,
+		left   = 10,
+		bottom = 10,
 	}
 };
 
 local defaultRowConfig = {
 	margin = {
-		top = 0,
-		right = 0,
+		top    = 0,
+		right  = 0,
 		bottom = 15,
-		left = 0
+		left   = 0
 	}
 };
 
 local defaultElementConfig = {
 	margin = {
-		top = 0,
-		right = 0,
+		top    = 0,
+		right  = 0,
 		bottom = 0,
-		left = 0
+		left   = 0
 	}
 };
 
-
----EasyLayoutRow
----@param parent Frame
----@param config table
-function StdUi:EasyLayoutRow(parent, config)
-	---@class EasyLayoutRow
-	local row = {
-		parent = parent,
-		config = self.Util.tableMerge(defaultRowConfig, config or {}),
-		elements = {}
-	};
-
-	function row:AddElement(frame, config)
+local EasyLayoutRow = {
+	AddElement      = function(self, frame, config)
 		if not frame.layoutConfig then
-			frame.layoutConfig = StdUi.Util.tableMerge(defaultElementConfig , config or {});
+			frame.layoutConfig = StdUi.Util.tableMerge(defaultElementConfig, config or {});
 		elseif config then
-			frame.layoutConfig = StdUi.Util.tableMerge(frame.layoutConfig , config or {});
+			frame.layoutConfig = StdUi.Util.tableMerge(frame.layoutConfig, config or {});
 		end
 
-		tinsert(row.elements, frame);
-	end
+		TableInsert(self.elements, frame);
+	end,
 
-	function row:AddElements(...)
-		local r = {...};
-		local cfg = tremove(r, #r);
+	AddElements     = function(self, ...)
+		local r = { ... };
+		local cfg = TableRemove(r, #r);
 
 		if cfg.column == 'even' then
-			cfg.column = math.floor(self.parent.layout.columns / #r);
+			cfg.column = MathFloor(self.parent.layout.columns / #r);
 		end
 
 		for i = 1, #r do
 			self:AddElement(r[i], StdUi.Util.tableMerge(defaultElementConfig, cfg));
 		end
-	end
+	end,
 
-	function row:DrawRow(parentWidth, yOffset)
+	GetColumnsTaken = function(self)
+		local columnsTaken = 0;
+		local l = self.parent.layout;
+
+		for i = 1, #self.elements do
+			local lc = self.elements[i].layoutConfig;
+			local col = lc.column or l.columns;
+			columnsTaken = columnsTaken + col;
+		end
+
+		return columnsTaken;
+	end,
+
+	DrawRow = function(self, parentWidth, yOffset)
 		yOffset = yOffset or 0;
 		local l = self.parent.layout;
 		local g = l.gutter;
@@ -89,8 +100,28 @@ function StdUi:EasyLayoutRow(parent, config)
 
 			frame:ClearAllPoints();
 
+			-- Frame layout config
 			local lc = frame.layoutConfig;
 			local m = lc.margin;
+
+			-- take full size
+			if lc.fullSize then
+				StdUi:GlueAcross(
+					frame,
+					self.parent,
+					l.padding.left,
+					-l.padding.top,
+					-l.padding.right,
+					l.padding.bottom
+				);
+
+				if frame.DoLayout then
+					frame:DoLayout();
+				end
+
+				totalHeight = MathMax(totalHeight, frame:GetHeight() + m.bottom + m.top + rowMargin.top + rowMargin.bottom);
+				return totalHeight;
+			end
 
 			local col = lc.column or l.columns;
 			local w = (parentWidth / (l.columns / col)) - 2 * g;
@@ -105,56 +136,75 @@ function StdUi:EasyLayoutRow(parent, config)
 			-- move it down by rowMargin and element margin
 			frame:SetPoint('TOPLEFT', self.parent, 'TOPLEFT', x, yOffset - m.top - rowMargin.top);
 
+			if lc.fullHeight then
+				frame:SetPoint('BOTTOMLEFT', self.parent, 'BOTTOMLEFT', x, m.bottom + rowMargin.bottom);
+			end
+
 			--each element takes 1 gutter plus column * colWidth, while gutter is inclusive
 			x = x + w + 2 * g; -- double the gutter because width subtracts gutter
 
-			totalHeight = math.max(totalHeight, frame:GetHeight() + m.bottom + m.top + rowMargin.top + rowMargin.bottom);
+			-- if that frame is container itself, do layout for it too
+			if frame.DoLayout then
+				frame:DoLayout();
+			end
+
+			totalHeight = MathMax(totalHeight, frame:GetHeight() + m.bottom + m.top + rowMargin.top + rowMargin.bottom);
 			columnsTaken = columnsTaken + col;
 		end
 
 		return totalHeight;
 	end
+}
 
-	function row:GetColumnsTaken()
-		local columnsTaken = 0;
-		local l = self.parent.layout;
+---EasyLayoutRow
+---@param parent Frame
+---@param config table
+function StdUi:EasyLayoutRow(parent, config)
+	---@class EasyLayoutRow
+	local row = {
+		parent   = parent,
+		config   = self.Util.tableMerge(defaultRowConfig, config or {}),
+		elements = {}
+	};
 
-		for i = 1, #self.elements do
-			local lc = self.elements[i].layoutConfig;
-			local col = lc.column or l.columns;
-			columnsTaken = columnsTaken + col;
-		end
-
-		return columnsTaken;
+	for k, v in pairs(EasyLayoutRow) do
+		row[k] = v;
 	end
 
 	return row;
 end
 
-function StdUi:EasyLayout(parent, config)
-	local stdUi = self;
-
-	parent.layout = self.Util.tableMerge(defaultLayoutConfig, config or {});
-
+local EasyLayout = {
 	---@return EasyLayoutRow
-	function parent:AddRow(config)
-		if not self.rows then self.rows = {}; end
+	AddRow = function(self, config)
+		if not self.rows then
+			self.rows = {};
+		end
 
-		local row = stdUi:EasyLayoutRow(self, config);
-		tinsert(self.rows, row);
+		local row = self.stdUi:EasyLayoutRow(self, config);
+		TableInsert(self.rows, row);
 
 		return row;
-	end
+	end,
 
-	function parent:DoLayout()
+	DoLayout = function(self)
 		local l = self.layout;
 		local width = self:GetWidth() - l.padding.left - l.padding.right;
 
 		local y = -l.padding.top;
 		for i = 1, #self.rows do
-			local r = self.rows[i];
-			y = y - r:DrawRow(width, y);
+			local row = self.rows[i];
+			y = y - row:DrawRow(width, y);
 		end
+	end
+};
+
+function StdUi:EasyLayout(parent, config)
+	parent.stdUi = self;
+	parent.layout = self.Util.tableMerge(defaultLayoutConfig, config or {});
+
+	for k, v in pairs(EasyLayout) do
+		parent[k] = v;
 	end
 end
 
