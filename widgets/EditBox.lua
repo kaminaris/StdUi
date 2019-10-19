@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'EditBox', 6;
+local module, version = 'EditBox', 7;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local pairs = pairs;
@@ -346,6 +346,7 @@ function StdUi:MultiLineBox(parent, width, height, text)
 	self:HookHoverBorder(editBox);
 
 	editBox:SetWidth(scrollFrame:GetWidth());
+	self:GlueAcross(scrollFrame, widget, 2, -2, -widget.scrollBarWidth - 2, 3);
 	--editBox:SetHeight(scrollFrame:GetHeight());
 
 	editBox:SetTextInsets(3, 3, 3, 3);
@@ -374,7 +375,6 @@ function StdUi:MultiLineBox(parent, width, height, text)
 
 	scrollFrame:HookScript('OnMouseDown', MultiLineBoxScrollOnMouseDown);
 	scrollFrame:HookScript('OnVerticalScroll', MultiLineBoxScrollOnVerticalScroll);
-
 
 	widget.SetText = widget.SetValue;
 	widget.GetText = widget.GetValue;
