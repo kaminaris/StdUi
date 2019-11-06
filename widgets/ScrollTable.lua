@@ -123,6 +123,9 @@ local methods = {
 			--- Set the width of a column
 			--- @usage st.columns[i]:SetWidth(width)
 			function column:SetWidth(width)
+				-- Update the column's width value
+				column.width = width;
+
 				-- Set the width of the column's head
 				column.head:SetWidth(width);
 
