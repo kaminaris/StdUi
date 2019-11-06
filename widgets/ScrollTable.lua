@@ -253,7 +253,7 @@ local methods = {
 	--- @usage st:SetColumnWidth(2, 65)
 	SetColumnWidth   = function(self, columnNumber, width)
 		self.columns[columnNumber]:SetWidth(width);
-	end
+	end,
 
 	-------------------------------------------------------------
 	--- Sorting Methods
