@@ -67,6 +67,7 @@ local methods = {
 		end
 
 		for i = 1, #columns do
+			local column = self.columns[i];
 			local columnFrame = columnHeadFrame.columns[i];
 			if not columnHeadFrame.columns[i] then
 				columnFrame = self.stdUi:HighlightButton(columnHeadFrame);
@@ -84,6 +85,12 @@ local methods = {
 				end
 
 				columnHeadFrame.columns[i] = columnFrame;
+
+				-- Add column head reference to it's column
+				column.head = columnFrame;
+
+				-- Create a table of empty column cell references
+				column.cells = {};
 			end
 
 			local align = columns[i].align or 'LEFT';
@@ -112,6 +119,18 @@ local methods = {
 
 			columnFrame:SetHeight(self.rowHeight);
 			columnFrame:SetWidth(columns[i].width);
+
+			--- Set the width of a column
+			--- @usage st.columns[i]:SetWidth(width)
+			function column:SetWidth(width)
+				-- Set the width of the column's head
+				column.head:SetWidth(width);
+
+				-- Set the width of each cell in the column
+				for j = 1, #column.cells do
+					column.cells[j]:SetWidth(width)
+				end
+			end
 		end
 
 		self:SetDisplayRows(self.numberOfRows, self.rowHeight);
@@ -161,6 +180,9 @@ local methods = {
 					cell.text = self.stdUi:FontString(cell, '');
 
 					rowFrame.columns[j] = cell;
+
+					-- Add cell reference to column
+					self.columns[j].cells[i] = cell;
 
 					local align = columnData.align or 'LEFT';
 
@@ -226,6 +248,12 @@ local methods = {
 
 		self:SetAutoHeight();
 	end,
+
+	--- Set the width of a column
+	--- @usage st:SetColumnWidth(2, 65)
+	SetColumnWidth   = function(self, columnNumber, width)
+		self.columns[columnNumber]:SetWidth(width);
+	end
 
 	-------------------------------------------------------------
 	--- Sorting Methods
