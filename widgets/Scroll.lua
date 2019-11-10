@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Scroll', 5;
+local module, version = 'Scroll', 6;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -243,6 +243,10 @@ StdUi.FauxScrollFrameMethods = {
 		local scrollBar, scrollChildFrame, scrollUpButton, scrollDownButton = self:GetChildFrames();
 
 		local showScrollBar;
+		if numItems == nil or numToDisplay == nil then
+			return;
+		end
+
 		if numItems > numToDisplay then
 			showScrollBar = 1;
 		else
