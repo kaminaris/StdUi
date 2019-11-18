@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ColorPicker', 3;
+local module, version = 'ColorPicker', 4;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
