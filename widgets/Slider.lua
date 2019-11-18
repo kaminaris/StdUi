@@ -7,11 +7,6 @@ end
 local module, version = 'Slider', 6;
 if not StdUi:UpgradeNeeded(module, version) then return end
 
-local function roundPrecision(value, precision)
-	local multiplier = 10 ^ (precision or 0);
-	return math.floor(value * multiplier + 0.5) / multiplier;
-end
-
 ----------------------------------------------------
 --- SliderButton
 ----------------------------------------------------
@@ -99,7 +94,7 @@ local SliderMethods = {
 
 	GetValue = function(self)
 		local minimum, maximum = self:GetMinMaxValues();
-		return Clamp(roundPrecision(self:OriginalGetValue(), self.precision), minimum, maximum);
+		return Clamp(StdUi.Util.roundPrecision(self:OriginalGetValue(), self.precision), minimum, maximum);
 	end
 };
 

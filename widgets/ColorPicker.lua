@@ -268,10 +268,6 @@ local ColorInputMethods = {
 	end
 };
 
-local ColorInputOkCallback = function(cpf)
-	self:SetColor(cpf:GetColor());
-end
-
 local ColorInputEvents = {
 	OnClick = function(self)
 		self.stdUi:ColorPickerFrame(
@@ -279,7 +275,9 @@ local ColorInputEvents = {
 			self.color.g,
 			self.color.b,
 			self.color.a,
-			ColorInputOkCallback
+			function(cpf)
+				self:SetColor(cpf:GetColor());
+			end
 		);
 	end
 };

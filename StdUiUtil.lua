@@ -267,6 +267,11 @@ StdUi.Util = {
 
 	orderedPairs        = function(t)
 		return StdUi.Util.orderedNext, t, nil;
+	end,
+
+	roundPrecision      = function(value, precision)
+		local multiplier = 10 ^ (precision or 0);
+		return math.floor(value * multiplier + 0.5) / multiplier;
 	end
 };
 
