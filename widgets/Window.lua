@@ -30,6 +30,12 @@ function StdUi:Window(parent, width, height, title)
 		self.titlePanel.label:SetText(t);
 	end
 
+	-- Resizable window shortcut
+	function frame:MakeResizable(direction)
+		StdUi:MakeResizable(frame, direction);
+		return frame;
+	end
+
 	return frame;
 end
 

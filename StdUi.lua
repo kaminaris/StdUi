@@ -224,3 +224,65 @@ function StdUi:MakeDraggable(frame, handle)
 		end);
 	end
 end
+
+-- Make a frame resizable
+function StdUi:MakeResizable(frame, direction)
+	-- Possible resize directions and handle rotation values
+	local anchorDirections = {
+		["TOP"] = 0,
+		["TOPRIGHT"] = 1.5708,
+		["RIGHT"] = 0,
+		["BOTTOMRIGHT"] = 0,
+		["BOTTOM"] = 0,
+		["BOTTOMLEFT"] = -1.5708,
+		["LEFT"] = 0,
+		["TOPLEFT"] = 3.1416,
+	}
+
+	direction = string.upper(direction);
+
+	-- Return if invalid direction
+	if not anchorDirections[direction] then return false end
+
+	frame:SetResizable(true);
+
+	-- Create the resize anchor
+	local anchor = CreateFrame("Button", nil, frame);
+	anchor:SetPoint(direction, frame, direction);
+
+	-- Attach side anchor to adjacent sides of frame
+	if direction == "TOP" or direction == "BOTTOM" then
+		anchor:SetHeight(self.config.resizeHandle.height);
+		anchor:SetPoint("LEFT", frame, "LEFT", self.config.resizeHandle.width, 0);
+		anchor:SetPoint("RIGHT", frame, "RIGHT", self.config.resizeHandle.width*-1, 0);
+	elseif direction == "LEFT" or direction == "RIGHT" then
+		anchor:SetWidth(self.config.resizeHandle.width);
+		anchor:SetPoint("TOP", frame, "TOP", 0, self.config.resizeHandle.height*-1);
+		anchor:SetPoint("BOTTOM", frame, "BOTTOM", 0, self.config.resizeHandle.height);
+	else
+		-- Set the corner anchor textures
+		anchor:SetNormalTexture(self.config.resizeHandle.texture.normal);
+		anchor:SetHighlightTexture(self.config.resizeHandle.texture.highlight);
+		anchor:SetPushedTexture(self.config.resizeHandle.texture.pushed);
+
+		-- Set size and rotate corner anchor
+		anchor:SetSize(self.config.resizeHandle.width, self.config.resizeHandle.height);
+		anchor:GetNormalTexture():SetRotation(anchorDirections[direction]);
+		anchor:GetHighlightTexture():SetRotation(anchorDirections[direction]);
+		anchor:GetPushedTexture():SetRotation(anchorDirections[direction]);
+	end
+
+	-- Resize anchor click handlers
+	anchor:SetScript("OnMouseDown", function(self, button)
+		if button == "LeftButton" then
+			frame:StartSizing(direction);
+			frame:SetUserPlaced(true);
+		end
+	end)
+	anchor:SetScript("OnMouseUp", function(self, button)
+		if button == "LeftButton" then
+			frame:StopMovingOrSizing();
+		end
+	end)
+end
+
