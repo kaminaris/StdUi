@@ -103,6 +103,7 @@ end
 --- @return Button
 function StdUi:Button(parent, width, height, text, inherit)
 	local button = self:HighlightButton(parent, width, height, text, inherit)
+	button.stdUi = self;
 	button:SetHighlightTexture(nil);
 
 	self:ApplyBackdrop(button);
