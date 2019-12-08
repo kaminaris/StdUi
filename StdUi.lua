@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'StdUi', 3;
+local MAJOR, MINOR = 'StdUi', 4;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
 
@@ -87,7 +87,7 @@ StdUi.SetHighlightBorder = function(self)
 		return
 	end
 
-	local hc = StdUi.config.highlight.color;
+	local hc = self.stdUi.config.highlight.color;
 	if not self.origBackdropBorderColor then
 		self.origBackdropBorderColor = {self:GetBackdropBorderColor()};
 	end

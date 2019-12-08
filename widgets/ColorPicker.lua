@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ColorPicker', 4;
+local module, version = 'ColorPicker', 5;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -290,6 +290,7 @@ function StdUi:ColorInput(parent, label, width, height, color)
 	self:InitWidget(button);
 
 	button.target = self:Panel(button, 16, 16);
+	button.target.stdUi = self;
 	button.target:SetPoint('LEFT', 0, 0);
 
 	button.text = self:Label(button, label);
@@ -297,6 +298,9 @@ function StdUi:ColorInput(parent, label, width, height, color)
 	button.text:SetPoint('RIGHT', button, 'RIGHT', -5, 0);
 
 	button.color = {r = 1, g = 1, b = 1, a = 1};
+
+	self:HookDisabledBackdrop(button); --ColorInput has no visual difference when disabled unlike Checkbox
+	self:HookHoverBorder(button);
 
 	for k, v in pairs(ColorInputMethods) do
 		button[k] = v;

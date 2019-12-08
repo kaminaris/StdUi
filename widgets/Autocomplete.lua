@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Autocomplete', 2;
+local module, version = 'Autocomplete', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local TableInsert = tinsert;
@@ -14,7 +14,7 @@ StdUi.Util.autocompleteTransformer = function(_, value)
 end
 
 StdUi.Util.autocompleteValidator = function(self)
-	StdUi:MarkAsValid(self, true);
+	self.stdUi:MarkAsValid(self, true);
 	return true;
 end
 
@@ -48,11 +48,11 @@ StdUi.Util.autocompleteItemValidator = function(ac)
 	if itemId then
 		ac.value = itemId;
 		ac:SetText(itemName);
-		StdUi:MarkAsValid(ac, true);
+		self.stdUi:MarkAsValid(ac, true);
 
 		return true;
 	else
-		StdUi:MarkAsValid(ac, false);
+		self.stdUi:MarkAsValid(ac, false);
 		return false;
 	end
 end

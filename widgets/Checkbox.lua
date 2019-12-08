@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Checkbox', 4;
+local module, version = 'Checkbox', 5;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -87,11 +87,13 @@ local CheckboxEvents = {
 function StdUi:Checkbox(parent, text, width, height)
 	local checkbox = CreateFrame('Button', nil, parent);
 	checkbox.stdUi = self;
+
 	checkbox:EnableMouse(true);
 	self:SetObjSize(checkbox, width, height or 20);
 	self:InitWidget(checkbox);
 
 	checkbox.target = self:Panel(checkbox, 16, 16);
+	checkbox.target.stdUi = self;
 	checkbox.target:SetPoint('LEFT', 0, 0);
 
 	checkbox.value = true;
