@@ -34,7 +34,7 @@ StdUi.Util = {
 	editBoxValidator    = function(self)
 		self.value = self:GetText();
 
-		StdUi:MarkAsValid(self, true);
+		self.stdUi:MarkAsValid(self, true);
 		return true;
 	end,
 
@@ -45,14 +45,14 @@ StdUi.Util = {
 		local total, gold, silver, copper, isValid = StdUi.Util.parseMoney(text);
 
 		if not isValid or total == 0 then
-			StdUi:MarkAsValid(self, false);
+			self.stdUi:MarkAsValid(self, false);
 			return false;
 		end
 
 		self:SetText(StdUi.Util.formatMoney(total));
 		self.value = total;
 
-		StdUi:MarkAsValid(self, true);
+		self.stdUi:MarkAsValid(self, true);
 		return true;
 	end,
 
@@ -64,23 +64,23 @@ StdUi.Util = {
 		local value = tonumber(text);
 
 		if value == nil then
-			StdUi:MarkAsValid(self, false);
+			self.stdUi:MarkAsValid(self, false);
 			return false;
 		end
 
 		if self.maxValue and self.maxValue < value then
-			StdUi:MarkAsValid(self, false);
+			self.stdUi:MarkAsValid(self, false);
 			return false;
 		end
 
 		if self.minValue and self.minValue > value then
-			StdUi:MarkAsValid(self, false);
+			self.stdUi:MarkAsValid(self, false);
 			return false;
 		end
 
 		self.value = value;
 
-		StdUi:MarkAsValid(self, true);
+		self.stdUi:MarkAsValid(self, true);
 
 		return true;
 	end,
@@ -92,7 +92,7 @@ StdUi.Util = {
 		local name, _, icon, _, _, _, spellId = GetSpellInfo(text);
 
 		if not name then
-			StdUi:MarkAsValid(self, false);
+			self.stdUi:MarkAsValid(self, false);
 			return false;
 		end
 
@@ -100,7 +100,7 @@ StdUi.Util = {
 		self.value = spellId;
 		self.icon:SetTexture(icon);
 
-		StdUi:MarkAsValid(self, true);
+		self.stdUi:MarkAsValid(self, true);
 		return true;
 	end,
 
