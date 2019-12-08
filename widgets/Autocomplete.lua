@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Autocomplete', 2;
+local module, version = 'Autocomplete', 3;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local TableInsert = tinsert;

@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Button', 4;
+local module, version = 'Button', 5;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local SquareButtonCoords = {
