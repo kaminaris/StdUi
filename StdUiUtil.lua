@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Util', 8;
+local module, version = 'Util', 9;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -50,6 +50,24 @@ StdUi.Util = {
 		end
 
 		self:SetText(StdUi.Util.formatMoney(total));
+		self.value = total;
+
+		self.stdUi:MarkAsValid(self, true);
+		return true;
+	end,
+
+	--- @param self EditBox
+	moneyBoxValidatorExC   = function(self)
+		local text = self:GetText();
+		text = text:trim();
+		local total, gold, silver, copper, isValid = StdUi.Util.parseMoney(text);
+
+		if not isValid or total == 0 or (copper and tonumber(copper) > 0) then
+			self.stdUi:MarkAsValid(self, false);
+			return false;
+		end
+
+		self:SetText(StdUi.Util.formatMoney(total, true));
 		self.value = total;
 
 		self.stdUi:MarkAsValid(self, true);
@@ -134,7 +152,7 @@ StdUi.Util = {
 		return total, gold, silver, copper, isValid;
 	end,
 
-	formatMoney         = function(money)
+	formatMoney         = function(money, excludeCopper)
 		if type(money) ~= 'number' then
 			return money;
 		end
@@ -151,14 +169,16 @@ StdUi.Util = {
 		local output = '';
 
 		if gold > 0 then
-			output = format('%s%i%s ', goldColor, gold, '|rg')
+			output = format('%s%i%s ', goldColor, gold, '|rg');
 		end
 
 		if gold > 0 or silver > 0 then
-			output = format('%s%s%02i%s ', output, silverColor, silver, '|rs')
+			output = format('%s%s%02i%s ', output, silverColor, silver, '|rs');
 		end
 
-		output = format('%s%s%02i%s ', output, copperColor, copper, '|rc')
+		if not excludeCopper then
+			output = format('%s%s%02i%s ', output, copperColor, copper, '|rc');
+		end
 
 		return output:trim();
 	end,

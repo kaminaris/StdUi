@@ -465,6 +465,9 @@ local methods = {
 			elseif format == 'money' then
 				value = table.stdUi.Util.formatMoney(value);
 				cellFrame.text:SetText(value);
+			elseif format == 'moneyShort' then
+				value = table.stdUi.Util.formatMoney(value, true);
+				cellFrame.text:SetText(value);
 			elseif format == 'number' then
 				value = tostring(value);
 				cellFrame.text:SetText(value);

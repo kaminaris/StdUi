@@ -248,8 +248,12 @@ local MoneyBoxMethods = {
 	end;
 };
 
-function StdUi:MoneyBox(parent, width, height, text, validator)
-	validator = validator or self.Util.moneyBoxValidator;
+function StdUi:MoneyBox(parent, width, height, text, validator, excludeCopper)
+	if excludeCopper then
+		validator = validator or self.Util.moneyBoxValidatorExC;
+	else
+		validator = validator or self.Util.moneyBoxValidator;
+	end
 
 	local editBox = self:EditBox(parent, width, height, text, validator);
 	editBox.stdUi = self;
