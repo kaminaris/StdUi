@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'EditBox', 7;
+local module, version = 'EditBox', 8;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local pairs = pairs;
@@ -339,6 +339,7 @@ end
 function StdUi:MultiLineBox(parent, width, height, text)
 	local editBox = CreateFrame('EditBox');
 	local widget = self:ScrollFrame(parent, width, height, editBox);
+	editBox.stdUi = self;
 
 	local scrollFrame = widget.scrollFrame;
 	scrollFrame.editBox = editBox;
