@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'EditBox', 8;
+local module, version = 'EditBox', 9;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local pairs = pairs;
@@ -106,9 +106,9 @@ end
 function StdUi:SearchEditBox(parent, width, height, placeholderText)
 	local editBox = self:SimpleEditBox(parent, width, height, '');
 
-	self:ApplyPlaceholder(editBox, placeholderText, [[Interface\Common\UI-Searchbox-Icon]]);
-
 	editBox:SetScript('OnTextChanged', SearchEditBoxOnTextChanged);
+	
+	self:ApplyPlaceholder(editBox, placeholderText, [[Interface\Common\UI-Searchbox-Icon]]);
 
 	return editBox;
 end
