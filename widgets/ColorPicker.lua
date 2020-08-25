@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ColorPicker', 5;
+local module, version = 'ColorPicker', 6;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -299,6 +299,9 @@ function StdUi:ColorInput(parent, label, width, height, color)
 
 	button.color = {r = 1, g = 1, b = 1, a = 1};
 
+	if not button.SetBackdrop then
+		Mixin(button, BackdropTemplateMixin)
+	end
 	self:HookDisabledBackdrop(button); --ColorInput has no visual difference when disabled unlike Checkbox
 	self:HookHoverBorder(button);
 

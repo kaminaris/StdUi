@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Util', 9;
+local module, version = 'Util', 10;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -15,6 +15,9 @@ local TableSort = table.sort;
 
 --- @param frame Frame
 function StdUi:MarkAsValid(frame, valid)
+	if not frame.SetBackdrop then
+		Mixin(frame, BackdropTemplateMixin)
+	end
 	if not valid then
 		frame:SetBackdropBorderColor(1, 0, 0, 1);
 		frame.origBackdropBorderColor = { frame:GetBackdropBorderColor() };
