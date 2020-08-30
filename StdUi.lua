@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'StdUi', 4;
+local MAJOR, MINOR = 'StdUi', 5;
 --- @class StdUi
 local StdUi = LibStub:NewLibrary(MAJOR, MINOR);
 
@@ -110,6 +110,9 @@ StdUi.ResetHighlightBorder = function(self)
 end
 
 function StdUi:HookHoverBorder(object)
+	if not object.SetBackdrop then
+		Mixin(object, BackdropTemplateMixin)
+	end
 	object:HookScript('OnEnter', self.SetHighlightBorder);
 	object:HookScript('OnLeave', self.ResetHighlightBorder);
 end
@@ -123,6 +126,9 @@ function StdUi:ApplyBackdrop(frame, type, border, insets)
 	};
 	if insets then
 		backdrop.insets = insets;
+	end
+	if not frame.SetBackdrop then
+		Mixin(frame, BackdropTemplateMixin)
 	end
 	frame:SetBackdrop(backdrop);
 
@@ -149,6 +155,9 @@ function StdUi:ApplyBackdrop(frame, type, border, insets)
 end
 
 function StdUi:ClearBackdrop(frame)
+	if not frame.SetBackdrop then
+		Mixin(frame, BackdropTemplateMixin)
+	end
 	frame:SetBackdrop(nil);
 end
 
