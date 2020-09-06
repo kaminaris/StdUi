@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Autocomplete', 3;
+local module, version = 'Autocomplete', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local TableInsert = tinsert;
@@ -63,6 +63,8 @@ local AutocompleteMethods = {
 		local optionButton;
 
 		optionButton = StdUi:HighlightButton(panel, panel:GetWidth(), 20, '');
+		optionButton.highlight = StdUi:HighlightButtonTexture(optionButton);
+		optionButton.highlight:Hide();
 		optionButton.text:SetJustifyH('LEFT');
 		optionButton.autocomplete = panel.autocomplete;
 		optionButton:SetFrameLevel(panel:GetFrameLevel() + 2);
@@ -73,8 +75,10 @@ local AutocompleteMethods = {
 				b.autocomplete.selectedItem = b.boundItem;
 			end
 
+			ac.indexChosen = 0;
 			ac:SetValue(b.value, b:GetText());
 			b.autocomplete.dropdown:Hide();
+			ac:SetFocus();
 		end);
 
 		return optionButton;
@@ -128,6 +132,24 @@ local AutocompleteMethods = {
 		);
 	end,
 
+	ToggleHighlightItems = function(self, flag)
+		for _, button in pairs(self.itemTable) do
+			if flag then
+				button.highlight:Show();
+			else
+				button.highlight:Hide();
+			end
+		end
+	end,
+
+	ToggleHighlight = function(self, index, flag)
+		if flag then
+			self.itemTable[index].highlight:Show();
+		else
+			self.itemTable[index].highlight:Hide();
+		end
+	end,
+
 	ValueToText = function(self, value)
 		return self.transformer(value)
 	end,
@@ -154,12 +176,24 @@ local AutocompleteMethods = {
 
 local AutocompleteEvents = {
 	OnEditFocusLost = function(s)
-		s.dropdown:Hide();
+		C_Timer.After(0.1, function() s.dropdown:Hide(); end);
 	end,
 
-	OnEnterPressed = function(s)
-		s.dropdown:Hide();
-		s:Validate();
+	OnEnterPressed = function(ac)
+		ac.dropdown:Hide();
+
+		-- User was using arrows to select item
+		if ac.indexChosen > 0 and ac.indexChosen <= #ac.filteredItems then
+			local item = ac.filteredItems[ac.indexChosen];
+			ac:SetValue(item.value, item.text);
+			ac.indexChosen = 0;
+			ac:ToggleHighlightItems(false);
+		end
+		ac:Validate();
+
+		if ac.CustomEnterPressed then
+			ac:CustomEnterPressed(ac);
+		end
 	end,
 
 	OnTextChanged = function(ac, isUserInput)
@@ -184,6 +218,30 @@ local AutocompleteEvents = {
 				ac.dropdown:Show();
 			end
 		end
+	end,
+
+	OnKeyUp = function(ac, key)
+		local arrowKeyPressed = false;
+		if key == 'UP' then
+			ac.indexChosen = ac.indexChosen - 1;
+			arrowKeyPressed = true;
+		elseif key == 'DOWN' then
+			ac.indexChosen = ac.indexChosen + 1;
+			arrowKeyPressed = true;
+		end
+
+		if arrowKeyPressed then
+			if ac.indexChosen < 1 then
+				ac.indexChosen = #ac.filteredItems;
+			end
+
+			if ac.indexChosen > #ac.filteredItems then
+				ac.indexChosen = 1;
+			end
+
+			ac:ToggleHighlightItems(false);
+			ac:ToggleHighlight(ac.indexChosen, true);
+		end
 	end
 }
 
@@ -202,6 +260,7 @@ function StdUi:Autocomplete(parent, width, height, text, validator, transformer,
 	autocomplete.selectedItem = nil;
 	autocomplete.itemLimit = 8;
 	autocomplete.itemTable = {};
+	autocomplete.indexChosen = 0;
 
 	autocomplete.dropdown = self:Panel(parent, width, 20);
 	autocomplete.dropdown:SetPoint('TOPLEFT', autocomplete, 'BOTTOMLEFT', 0, 0);
