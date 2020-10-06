@@ -66,7 +66,9 @@ StdUi.ContextMenuMethods = {
 	HookRightClick    = function(self)
 		local parent = self:GetParent();
 		if parent then
-			parent:HookScript('OnMouseUp', ContextMenuOnMouseUp);
+			-- ContextMenuOnMouseUp requires a reference to this menu (self)
+			local menu = self -- don't trust magic variable names
+			parent:HookScript('OnMouseUp', function (_, button) ContextMenuOnMouseUp(menu, button) end);
 		end
 	end,
 
