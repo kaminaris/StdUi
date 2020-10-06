@@ -217,6 +217,9 @@ function StdUi:ContextMenu(parent, options, stopHook, level)
 
 	panel:SetFrameStrata('FULLSCREEN_DIALOG');
 
+	-- force context menus to stay on the screen where they can be used
+	panel:SetClampedToScreen(true)
+
 	for k, v in pairs(self.ContextMenuMethods) do
 		panel[k] = v;
 	end
