@@ -9,22 +9,6 @@ if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
 
---- ContextMenuItem Events
-
-local ContextMenuItemOnEnter = function(itemFrame, button)
-	itemFrame.parentContext:CloseSubMenus();
-
-	itemFrame.childContext:ClearAllPoints();
-	itemFrame.childContext:SetPoint('TOPLEFT', itemFrame, 'TOPRIGHT', 0, 0);
-	itemFrame.childContext:Show();
-end
-
-local ContextMenuItemOnMouseUp = function(itemFrame, button)
-	if button == 'LeftButton' and itemFrame.contextMenuData.callback then
-		itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
-	end
-end
-
 --- ContextMenuEvents
 
 local ContextMenuOnMouseUp = function(self, button)
@@ -43,6 +27,24 @@ local ContextMenuOnMouseUp = function(self, button)
 			self:SetPoint('TOPLEFT', nil, 'BOTTOMLEFT', cursorX, cursorY);
 			self:Show();
 		end
+	end
+end
+
+--- ContextMenuItem Events
+
+local ContextMenuItemOnEnter = function(itemFrame, button)
+	itemFrame.parentContext:CloseSubMenus();
+
+	itemFrame.childContext:ClearAllPoints();
+	itemFrame.childContext:SetPoint('TOPLEFT', itemFrame, 'TOPRIGHT', 0, 0);
+	itemFrame.childContext:Show();
+end
+
+local ContextMenuItemOnMouseUp = function(itemFrame, button)
+	if button == 'LeftButton' and itemFrame.contextMenuData.callback then
+		itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
+	elseif button == 'RightButton' and itemFrame.mainContext then
+		ContextMenuOnMouseUp(itemFrame.mainContext, button)
 	end
 end
 
@@ -121,14 +123,13 @@ StdUi.ContextMenuMethods = {
 			itemFrame:HookScript('OnEnter', ContextMenuItemOnEnter);
 		end
 
+		-- Always need Right click capability in item frames to close the menu
+		itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
+
 		if data.events then
 			for eventName, eventHandler in pairs(data.events) do
 				itemFrame:SetScript(eventName, eventHandler);
 			end
-		end
-
-		if data.callback then
-			itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
 		end
 
 		if data.custom then
