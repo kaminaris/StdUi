@@ -20,8 +20,14 @@ local ContextMenuItemOnEnter = function(itemFrame, button)
 end
 
 local ContextMenuItemOnMouseUp = function(itemFrame, button)
+	local hide
 	if button == 'LeftButton' and itemFrame.contextMenuData.callback then
-		itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
+		hide = itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
+	elseif button == 'RightButton' then
+		hide = true
+	end
+	if hide == true and itemFrame.mainContext then
+		itemFrame.mainContext:Hide()
 	end
 end
 
