@@ -98,6 +98,12 @@ StdUi.ContextMenuMethods = {
 
 		itemFrame.contextMenuData = data;
 
+		-- Need mainContext on all items for right click compatibility.
+		-- This will also keep propagating mainContext thru all children.
+		-- Note: In the top-most level of items frames, the parent does NOT have a
+		-- mainContext, and in that case the parent itself IS the mainContext.
+		itemFrame.mainContext = parent.mainContext or parent
+
 		if not data.isSeparator then
 			itemFrame.text:SetJustifyH('LEFT');
 		end
@@ -109,8 +115,6 @@ StdUi.ContextMenuMethods = {
 
 			itemFrame.childContext = parent.stdUi:ContextMenu(parent, data.children, true, parent.level + 1);
 			itemFrame.parentContext = parent;
-			-- this will keep propagating mainContext thru all children
-			itemFrame.mainContext = parent.mainContext;
 
 			itemFrame:HookScript('OnEnter', ContextMenuItemOnEnter);
 		end
