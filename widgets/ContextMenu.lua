@@ -20,8 +20,14 @@ local ContextMenuItemOnEnter = function(itemFrame, button)
 end
 
 local ContextMenuItemOnMouseUp = function(itemFrame, button)
+	local hide
 	if button == 'LeftButton' and itemFrame.contextMenuData.callback then
-		itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
+		hide = itemFrame.contextMenuData.callback(itemFrame, itemFrame.parentContext)
+	elseif button == 'RightButton' then
+		hide = true
+	end
+	if hide == true and itemFrame.mainContext then
+		itemFrame.mainContext:Hide()
 	end
 end
 
@@ -66,7 +72,9 @@ StdUi.ContextMenuMethods = {
 	HookRightClick    = function(self)
 		local parent = self:GetParent();
 		if parent then
-			parent:HookScript('OnMouseUp', ContextMenuOnMouseUp);
+			-- ContextMenuOnMouseUp requires a reference to this menu (self)
+			local menu = self -- don't trust magic variable names
+			parent:HookScript('OnMouseUp', function (_, button) ContextMenuOnMouseUp(menu, button) end);
 		end
 	end,
 
@@ -98,6 +106,12 @@ StdUi.ContextMenuMethods = {
 
 		itemFrame.contextMenuData = data;
 
+		-- Need mainContext on all items for right click compatibility.
+		-- This will also keep propagating mainContext thru all children.
+		-- Note: In the top-most level of items frames, the parent does NOT have a
+		-- mainContext, and in that case the parent itself IS the mainContext.
+		itemFrame.mainContext = parent.mainContext or parent
+
 		if not data.isSeparator then
 			itemFrame.text:SetJustifyH('LEFT');
 		end
@@ -109,8 +123,6 @@ StdUi.ContextMenuMethods = {
 
 			itemFrame.childContext = parent.stdUi:ContextMenu(parent, data.children, true, parent.level + 1);
 			itemFrame.parentContext = parent;
-			-- this will keep propagating mainContext thru all children
-			itemFrame.mainContext = parent.mainContext;
 
 			itemFrame:HookScript('OnEnter', ContextMenuItemOnEnter);
 		end
@@ -121,9 +133,8 @@ StdUi.ContextMenuMethods = {
 			end
 		end
 
-		if data.callback then
-			itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
-		end
+		-- Always need Right click capability in item frames to close the menu
+		itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
 
 		if data.custom then
 			for key, value in pairs(data.custom) do
@@ -216,6 +227,9 @@ function StdUi:ContextMenu(parent, options, stopHook, level)
 	panel.padding = 16;
 
 	panel:SetFrameStrata('FULLSCREEN_DIALOG');
+
+	-- force context menus to stay on the screen where they can be used
+	panel:SetClampedToScreen(true)
 
 	for k, v in pairs(self.ContextMenuMethods) do
 		panel[k] = v;
