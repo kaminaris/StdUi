@@ -295,3 +295,55 @@ function StdUi:MakeResizable(frame, direction)
 	end)
 end
 
+--- Get a StdUi font object.
+--- This method generates font objects on demand at runtime and caches them for reuse.
+--- Each font is classified by a class and a color code.
+--- Classes are defined by the application via StdUi.config.fontClasses{}. The default class is 'default'.
+--- Color codes are defined by the application via StdUi.config.font.color{}. The default color is 'normal'.
+--- @usage font = StdUi:GetFontObject('scrollingMessage', 'normal')
+--- @usage font = StdUi:GetFontObject('default', 'highlight')
+--- @usage font = StdUi:GetFontObject('default', 'disabled')
+--- @param class string A key of StdUi.config.fontClasses, or 'default'
+--- @param colorCode string A key of StdUi.config.font.color ('normal' by default)
+function StdUi:GetFontObject(class, colorCode)
+	class = class or 'default'
+	colorCode = colorCode or 'normal'
+
+	-- initialize self._RUNTIME_FONTS
+	self._RUNTIME_FONTS = self._RUNTIME_FONTS or {}
+
+	local cacheKey = class ..'/'.. colorCode
+	if self._RUNTIME_FONTS[cacheKey] == nil then
+
+		local defaultFontConfig = self.config.font
+
+		local fontConfig = self.config.font
+		if class ~= 'default' and self.config.fontClasses[class] ~= nil then
+			fontConfig = self.config.fontClasses[class]
+		end
+
+		local family = fontConfig.family or defaultFontConfig.family
+		local size = fontConfig.size or defaultFontConfig.size or 12
+		local flags = fontConfig.effect or defaultFontConfig.effect or ''
+		local color = (fontConfig.color or {})[colorCode] or defaultFontConfig.color[colorCode] or defaultFontConfig.color.normal
+		local justifyH = fontConfig.justifyH or defaultFontConfig.justifyH or 'CENTER'
+		local justifyV = fontConfig.justifyV or defaultFontConfig.justifyV or 'MIDDLE'
+
+		-- CreateFont *requires* a globally unique name for this font
+		-- We won't ever refer to this by its name but we still need to generate a unique name
+
+		local fontFullName = "StdUi Runtime Font "..
+				family .." ".. size .." ".. flags ..";"..
+				color.r ..",".. color.g ..",".. color.b ..":".. color.a ..";"..
+				justifyH .."-".. justifyV
+
+		local font = CreateFont(fontFullName)
+		font:SetFont(family, size, flags)
+		font:SetTextColor(color.r, color.g, color.b, color.a)
+		font:SetJustifyH(justifyH)
+		font:SetJustifyV(justifyV)
+
+		self._RUNTIME_FONTS[cacheKey] = font
+	end
+	return self._RUNTIME_FONTS[cacheKey]
+end
