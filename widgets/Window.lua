@@ -11,6 +11,8 @@ if not StdUi:UpgradeNeeded(module, version) then return end;
 function StdUi:Window(parent, width, height, title)
 	parent = parent or UIParent;
 	local frame = self:PanelWithTitle(parent, width, height, title);
+	frame:SetFrameStrata('DIALOG')
+	frame:SetPoint('CENTER');
 	frame:SetClampedToScreen(true);
 	frame.titlePanel.isWidget = false;
 	self:MakeDraggable(frame); -- , frame.titlePanel
@@ -48,8 +50,6 @@ function StdUi:Dialog(title, message, dialogId)
 		window = self.dialogs[dialogId];
 	else
 		window = self:Window(nil, self.config.dialog.width, self.config.dialog.height, title);
-		window:SetPoint('CENTER');
-		window:SetFrameStrata('DIALOG');
 	end
 
 	if window.messageLabel then
