@@ -498,6 +498,9 @@ local methods = {
 
 			if color then
 				cellFrame.text:SetTextColor(color.r, color.g, color.b, color.a);
+				if (format == 'icon') then
+					cellFrame.texture:SetVertexColor(color.r, color.g, color.b, color.a) 
+				end
 			else
 				table.stdUi:SetTextColor(cellFrame.text, 'normal');
 			end
