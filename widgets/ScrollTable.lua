@@ -468,7 +468,7 @@ local methods = {
 			elseif format == 'moneyShort' then
 				value = table.stdUi.Util.formatMoney(value, true);
 				cellFrame.text:SetText(value);
-			elseif format == 'formatTime' then
+			elseif format == 'time' then
 				value = table.stdUi.Util.formatTime(value);
 				cellFrame.text:SetText(value);
 			elseif format == 'number' then
