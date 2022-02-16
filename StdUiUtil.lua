@@ -193,11 +193,11 @@ StdUi.Util = {
 		local seconds = floor(mod(totalTime,60))
 
 		if (days > 0) then
-			return format("%dd%02dh%02dm%02ds",days,hours,minutes,seconds)
+			return format("%dd %02dh %02dm %02ds",days,hours,minutes,seconds)
 		elseif (hours > 0) then
-			return format("%02dh%02dm%02ds",hours,minutes,seconds)
+			return format("%02dh %02dm %02ds",hours,minutes,seconds)
 		elseif (minutes > 0) then
-			return format("%02dm%02ds",minutes,seconds)
+			return format("%02dm %02ds",minutes,seconds)
 		elseif (seconds > 0) then
 			return format("%02ds", seconds)
 		end 
