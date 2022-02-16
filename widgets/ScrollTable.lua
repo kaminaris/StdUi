@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ScrollTable', 6;
+local module, version = 'ScrollTable', 7;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -467,6 +467,9 @@ local methods = {
 				cellFrame.text:SetText(value);
 			elseif format == 'moneyShort' then
 				value = table.stdUi.Util.formatMoney(value, true);
+				cellFrame.text:SetText(value);
+			elseif format == 'time' then
+				value = table.stdUi.Util.formatTime(value);
 				cellFrame.text:SetText(value);
 			elseif format == 'number' then
 				value = tostring(value);

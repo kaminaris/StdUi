@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Util', 10;
+local module, version = 'Util', 11;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -184,6 +184,23 @@ StdUi.Util = {
 		end
 
 		return output:trim();
+	end,
+	
+	formatTime         = function(totalTime)
+		local days = floor(totalTime/86400)
+		local hours = floor(mod(totalTime, 86400)/3600)
+		local minutes = floor(mod(totalTime,3600)/60)
+		local seconds = floor(mod(totalTime,60))
+
+		if (days > 0) then
+			return format("%dd %02dh %02dm %02ds",days,hours,minutes,seconds)
+		elseif (hours > 0) then
+			return format("%02dh %02dm %02ds",hours,minutes,seconds)
+		elseif (minutes > 0) then
+			return format("%02dm %02ds",minutes,seconds)
+		elseif (seconds > 0) then
+			return format("%02ds", seconds)
+		end 
 	end,
 
 	stripColors         = function(text)
