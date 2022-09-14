@@ -22,7 +22,7 @@ function StdUi:ResetConfig()
 			family    = font,
 			size      = fontSize,
 			titleSize = largeFontSize,
-			effect    = 'NONE',
+			effect    = '',
 			strata    = 'OVERLAY',
 			color     = {
 				normal   = { r = 1, g = 1, b = 1, a = 1 },
