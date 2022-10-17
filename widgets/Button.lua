@@ -36,8 +36,8 @@ local SquareButtonMethods = {
 	end
 };
 
-function StdUi:SquareButton(parent, width, height, icon)
-	local button = CreateFrame('Button', nil, parent);
+function StdUi:SquareButton(parent, width, height, icon, name)
+	local button = CreateFrame('Button', name, parent);
 	button.stdUi = self;
 
 	self:InitWidget(button);
@@ -85,8 +85,8 @@ end
 
 --- Creates a button with only a highlight
 --- @return Button
-function StdUi:HighlightButton(parent, width, height, text, inherit)
-	local button = CreateFrame('Button', nil, parent, inherit);
+function StdUi:HighlightButton(parent, width, height, text, inherit, name)
+	local button = CreateFrame('Button', name, parent, inherit);
 	self:InitWidget(button);
 	self:SetObjSize(button, width, height);
 	button.text = self:ButtonLabel(button, text);
@@ -105,8 +105,8 @@ function StdUi:HighlightButton(parent, width, height, text, inherit)
 end
 
 --- @return Button
-function StdUi:Button(parent, width, height, text, inherit)
-	local button = self:HighlightButton(parent, width, height, text, inherit)
+function StdUi:Button(parent, width, height, text, inherit, name)
+	local button = self:HighlightButton(parent, width, height, text, inherit, name)
 	button.stdUi = self;
 
 	button:SetHighlightTexture('');

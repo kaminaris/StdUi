@@ -85,7 +85,9 @@ StdUi.ContextMenuMethods = {
 	CreateItem        = function(parent, data, i)
 		local itemFrame;
 
-		if data.title then
+		if data.constructor and type(data.constructor) == 'function' then
+			itemFrame = data.constructor(parent, data, i);
+		elseif data.title then
 			itemFrame = parent.stdUi:Frame(parent, nil, 20);
 			itemFrame.text = parent.stdUi:Label(itemFrame);
 			parent.stdUi:GlueLeft(itemFrame.text, itemFrame, 0, 0, true);
@@ -148,7 +150,9 @@ StdUi.ContextMenuMethods = {
 	UpdateItem        = function(parent, itemFrame, data, i)
 		local padding = parent.padding;
 
-		if data.title then
+		if data.renderer and type(data.renderer) == 'function' then
+			data.renderer(parent, itemFrame, data, i);
+		elseif data.title then
 			itemFrame.text:SetText(data.title);
 			parent.stdUi:ButtonAutoWidth(itemFrame);
 		elseif data.checkbox or data.radio then
