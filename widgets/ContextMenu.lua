@@ -136,7 +136,11 @@ StdUi.ContextMenuMethods = {
 		end
 
 		-- Always need Right click capability in item frames to close the menu
-		itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
+		if data.hookOnClickIndicator then
+			itemFrame:HookScript('OnClick', ContextMenuItemOnMouseUp)
+		else
+			itemFrame:SetScript('OnMouseUp', ContextMenuItemOnMouseUp)
+		end
 
 		if data.custom then
 			for key, value in pairs(data.custom) do
