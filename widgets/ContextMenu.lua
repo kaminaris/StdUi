@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ContextMenu', 3;
+local module, version = 'ContextMenu', 4;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -210,7 +210,7 @@ StdUi.ContextMenuMethods = {
 		if self.timer then
 			self.timer:Cancel();
 		end
-		self.timer = C_Timer:NewTimer(3, self.TimerCallback);
+		self.timer = C_Timer.NewTimer(3, self.TimerCallback);
 	end,
 
 	StopHideCounter   = function()

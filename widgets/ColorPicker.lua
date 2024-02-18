@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ColorPicker', 6;
+local module, version = 'ColorPicker', 7;
 if not StdUi:UpgradeNeeded(module, version) then
 	return
 end
@@ -70,7 +70,7 @@ local ColorPickerEvents = {
 		end
 
 		self.newTexture:SetVertexColor(r, g, b, a);
-		self.alphaTexture:SetGradientAlpha('VERTICAL', 1, 1, 1, 0, r, g, b, 1);
+		self.alphaTexture:SetGradient('VERTICAL', CreateColor(1, 1, 1, 0), CreateColor(r, g, b, 1));
 	end
 };
 
