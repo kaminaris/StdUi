@@ -27,7 +27,7 @@ function StdUi:PanelWithLabel(parent, width, height, inherits, text)
 
 	frame.label = self:Header(frame, text);
 	frame.label:SetAllPoints();
-	frame.label:SetJustifyH('MIDDLE');
+	frame.label:SetJustifyH('CENTER');
 
 	return frame;
 end

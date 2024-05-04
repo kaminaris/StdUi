@@ -58,7 +58,7 @@ function StdUi:ProgressBar(parent, width, height, vertical)
 	end
 
 	progressBar.text = self:Label(progressBar, '');
-	progressBar.text:SetJustifyH('MIDDLE');
+	progressBar.text:SetJustifyH('CENTER');
 	progressBar.text:SetAllPoints();
 
 	self:ApplyBackdrop(progressBar);
