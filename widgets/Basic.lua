@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Basic', 3;
+local module, version = 'Basic', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:Frame(parent, width, height, inherits)
