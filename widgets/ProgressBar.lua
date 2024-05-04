@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'ProgressBar', 3;
+local module, version = 'ProgressBar', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 ----------------------------------------------------
@@ -58,7 +58,7 @@ function StdUi:ProgressBar(parent, width, height, vertical)
 	end
 
 	progressBar.text = self:Label(progressBar, '');
-	progressBar.text:SetJustifyH('MIDDLE');
+	progressBar.text:SetJustifyH('CENTER');
 	progressBar.text:SetAllPoints();
 
 	self:ApplyBackdrop(progressBar);

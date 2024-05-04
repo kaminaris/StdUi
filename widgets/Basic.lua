@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Basic', 3;
+local module, version = 'Basic', 4;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 function StdUi:Frame(parent, width, height, inherits)
@@ -27,7 +27,7 @@ function StdUi:PanelWithLabel(parent, width, height, inherits, text)
 
 	frame.label = self:Header(frame, text);
 	frame.label:SetAllPoints();
-	frame.label:SetJustifyH('MIDDLE');
+	frame.label:SetJustifyH('CENTER');
 
 	return frame;
 end

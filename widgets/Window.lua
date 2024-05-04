@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Window', 5;
+local module, version = 'Window', 6;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 --- @return Frame
@@ -56,7 +56,7 @@ function StdUi:Dialog(title, message, dialogId)
 		window.messageLabel:SetText(message);
 	else
 		window.messageLabel = self:Label(window, message);
-		window.messageLabel:SetJustifyH('MIDDLE');
+		window.messageLabel:SetJustifyH('CENTER');
 		self:GlueAcross(window.messageLabel, window, 5, -10, -5, 5);
 	end
 
