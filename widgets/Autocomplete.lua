@@ -4,7 +4,7 @@ if not StdUi then
 	return
 end
 
-local module, version = 'Autocomplete', 4;
+local module, version = 'Autocomplete', 5;
 if not StdUi:UpgradeNeeded(module, version) then return end;
 
 local TableInsert = tinsert;
@@ -23,7 +23,7 @@ StdUi.Util.autocompleteItemTransformer = function(_, value)
 		return value;
 	end
 
-	local itemName = GetItemInfo(value);
+	local itemName = C_Item.GetItemInfo(value);
 	return itemName;
 end
 
@@ -34,12 +34,12 @@ StdUi.Util.autocompleteItemValidator = function(ac)
 
 	if tonumber(t) ~= nil then
 		-- it's a number
-		itemName = GetItemInfo(tonumber(t));
+		itemName = C_Item.GetItemInfo(tonumber(t));
 		if itemName then
 			itemId = tonumber(t);
 		end
 	elseif v then
-		itemName = GetItemInfo(v);
+		itemName = C_Item.GetItemInfo(v);
 		if itemName == t then
 			itemId = v;
 		end
