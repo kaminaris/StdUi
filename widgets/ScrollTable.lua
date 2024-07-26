@@ -229,7 +229,6 @@ local methods = {
 				end
 
 				cell:SetHeight(rowHeight);
-				cell:SetWidth(self.columns[j].width);
 
 				cell.text:SetPoint('TOP', cell, 'TOP', 0, 0);
 				cell.text:SetPoint('BOTTOM', cell, 'BOTTOM', 0, 0);
@@ -675,6 +674,26 @@ local methods = {
 				end
 			end
 		end
+
+		-- When SortTable changes size, resize columns proportionally to their initial width
+		self:SetScript("OnSizeChanged", function(self, width, height)
+			local tableWidth = self:GetWidth();
+			local tableHeight = self:GetHeight();
+
+			-- Determine total width of columns
+			local total = 0;
+			for i=1, #self.columns do
+				total = total + self.columns[i].width;
+			end
+
+			-- Adjust all column widths proportionally
+			for i=1, #self.columns do
+				self.columns[i]:SetWidth(self.columns[i].width/total*tableWidth);
+			end
+
+			-- Set the number of displayed rows according to the new height
+			self:SetDisplayRows(math.floor(tableHeight/self.rowHeight), self.rowHeight);
+		end);
 	end,
 };
 
